@@ -51,6 +51,12 @@
                             FontSize="11"
                             Background="#404040"
                             Foreground="#E0E0E0"/>
+                    <Button Content="About"
+                            Click="AboutButton_Click"
+                            Padding="12,5"
+                            FontSize="11"
+                            Background="#404040"
+                            Foreground="#E0E0E0"/>
                 </StackPanel>
                 
                 <!-- Environment Selector -->
