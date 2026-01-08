@@ -1,11 +1,14 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using PostmanClone.Core.Interfaces;
 using PostmanClone.Core.Models;
 
 namespace PostmanClone.App.ViewModels;
 
 public partial class main_view_model : ObservableObject
 {
+    private readonly i_collection_repository _collection_repository;
+
     [ObservableProperty]
     private request_editor_view_model _requestEditor;
 
@@ -19,6 +22,12 @@ public partial class main_view_model : ObservableObject
     private environment_selector_view_model _environmentSelector;
 
     [ObservableProperty]
+    private script_editor_view_model _scriptEditor;
+
+    [ObservableProperty]
+    private test_results_view_model _testResults;
+
+    [ObservableProperty]
     private string _title = "PostmanClone";
 
     [ObservableProperty]
@@ -28,12 +37,18 @@ public partial class main_view_model : ObservableObject
         request_editor_view_model request_editor,
         response_viewer_view_model response_viewer,
         sidebar_view_model sidebar,
-        environment_selector_view_model environment_selector)
+        environment_selector_view_model environment_selector,
+        script_editor_view_model script_editor,
+        test_results_view_model test_results,
+        i_collection_repository collection_repository)
     {
         _requestEditor = request_editor;
         _responseViewer = response_viewer;
         _sidebar = sidebar;
         _environmentSelector = environment_selector;
+        _scriptEditor = script_editor;
+        _testResults = test_results;
+        _collection_repository = collection_repository;
 
         // Wire up events
         _requestEditor.response_received += on_response_received;
@@ -53,6 +68,18 @@ public partial class main_view_model : ObservableObject
         IsSidebarVisible = !IsSidebarVisible;
     }
 
+    [RelayCommand]
+    private async Task OpenImportDialog()
+    {
+        // Dialog will be shown from the view
+    }
+
+    [RelayCommand]
+    private async Task OpenExportDialog()
+    {
+        // Dialog will be shown from the view
+    }
+
     private void on_response_received(object? sender, http_response_model response)
     {
         ResponseViewer.load_response(response);
@@ -62,6 +89,13 @@ public partial class main_view_model : ObservableObject
     private void on_request_selected(object? sender, http_request_model request)
     {
         RequestEditor.load_request(request);
+        ScriptEditor.LoadScriptsFromRequest(request);
         ResponseViewer.clear();
+        TestResults.ClearResultsCommand.Execute(null);
+    }
+
+    public import_export_view_model CreateImportExportViewModel()
+    {
+        return new import_export_view_model(_collection_repository);
     }
 }

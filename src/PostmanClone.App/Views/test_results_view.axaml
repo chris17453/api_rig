@@ -1,0 +1,122 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:PostmanClone.App.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="300"
+             x:Class="PostmanClone.App.Views.test_results_view"
+             x:DataType="vm:test_results_view_model">
+
+    <Grid RowDefinitions="Auto,Auto,*">
+        <!-- Header with Summary -->
+        <Border Grid.Row="0" Background="#252526" Padding="10">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="15">
+                    <TextBlock Text="Test Results" 
+                               FontWeight="Bold" 
+                               FontSize="14"
+                               Foreground="#CCCCCC"/>
+                    
+                    <TextBlock Text="{Binding Summary}"
+                               Foreground="{Binding SummaryColor}"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+                
+                <Button Grid.Column="1" 
+                        Command="{Binding ClearResultsCommand}"
+                        Content="Clear"
+                        Padding="8,3"
+                        FontSize="11"/>
+            </Grid>
+        </Border>
+
+        <!-- Stats Bar -->
+        <Border Grid.Row="1" Background="#1E1E1E" Padding="10,5" IsVisible="{Binding HasResults}">
+            <StackPanel Orientation="Horizontal" Spacing="20">
+                <StackPanel Orientation="Horizontal" Spacing="5">
+                    <TextBlock Text="Total:" Foreground="#888"/>
+                    <TextBlock Text="{Binding TotalTests}" Foreground="#CCCCCC" FontWeight="SemiBold"/>
+                </StackPanel>
+                
+                <StackPanel Orientation="Horizontal" Spacing="5">
+                    <TextBlock Text="✓ Passed:" Foreground="#4CAF50"/>
+                    <TextBlock Text="{Binding PassedTests}" Foreground="#4CAF50" FontWeight="SemiBold"/>
+                </StackPanel>
+                
+                <StackPanel Orientation="Horizontal" Spacing="5">
+                    <TextBlock Text="✗ Failed:" Foreground="#F44336"/>
+                    <TextBlock Text="{Binding FailedTests}" Foreground="#F44336" FontWeight="SemiBold"/>
+                </StackPanel>
+                
+                <StackPanel Orientation="Horizontal" Spacing="5">
+                    <TextBlock Text="Duration:" Foreground="#888"/>
+                    <TextBlock Text="{Binding TotalDuration.TotalMilliseconds, StringFormat={}{0:F0}ms}" 
+                               Foreground="#CCCCCC"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Test Results List -->
+        <ScrollViewer Grid.Row="2" Background="#2D2D2D">
+            <ItemsControl ItemsSource="{Binding TestResults}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:test_result_view_model">
+                        <Border Padding="10,8" 
+                                BorderBrush="#3C3C3C" 
+                                BorderThickness="0,0,0,1"
+                                Background="#2D2D2D">
+                            <Grid ColumnDefinitions="Auto,*,Auto">
+                                <!-- Status Icon -->
+                                <TextBlock Grid.Column="0"
+                                           Text="{Binding StatusIcon}"
+                                           Foreground="{Binding StatusColor}"
+                                           FontWeight="Bold"
+                                           FontSize="14"
+                                           Margin="0,0,10,0"
+                                           VerticalAlignment="Center"/>
+                                
+                                <!-- Test Name and Error -->
+                                <StackPanel Grid.Column="1" Spacing="2">
+                                    <TextBlock Text="{Binding TestName}"
+                                               Foreground="#E0E0E0"
+                                               FontSize="13"/>
+                                    
+                                    <TextBlock Text="{Binding ErrorMessage}"
+                                               Foreground="#F48771"
+                                               FontSize="11"
+                                               TextWrapping="Wrap"
+                                               IsVisible="{Binding !Passed}"/>
+                                </StackPanel>
+                                
+                                <!-- Duration -->
+                                <TextBlock Grid.Column="2"
+                                           Text="{Binding Duration.TotalMilliseconds, StringFormat={}{0:F0}ms}"
+                                           Foreground="#888"
+                                           FontSize="11"
+                                           VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <!-- Empty State -->
+        <Border Grid.Row="2" 
+                Background="#2D2D2D" 
+                IsVisible="{Binding !HasResults}">
+            <StackPanel HorizontalAlignment="Center" 
+                        VerticalAlignment="Center" 
+                        Spacing="10">
+                <TextBlock Text="No test results yet"
+                           Foreground="#888"
+                           FontSize="14"
+                           HorizontalAlignment="Center"/>
+                <TextBlock Text="Run a request with pm.test() scripts to see results"
+                           Foreground="#666"
+                           FontSize="12"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
