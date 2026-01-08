@@ -12,7 +12,11 @@ public partial class request_editor_view_model : ObservableObject
 {
     private readonly request_orchestrator _request_orchestrator;
     private readonly i_history_repository _history_repository;
+    private readonly i_collection_repository _collection_repository;
     private readonly ILogger<request_editor_view_model> _logger;
+
+    [ObservableProperty]
+    private string _requestName = "New Request";
 
     [ObservableProperty]
     private string _url = string.Empty;
@@ -25,6 +29,15 @@ public partial class request_editor_view_model : ObservableObject
 
     [ObservableProperty]
     private bool _isSending;
+
+    [ObservableProperty]
+    private bool _isSaving;
+
+    [ObservableProperty]
+    private string? _currentRequestId;
+
+    [ObservableProperty]
+    private string? _currentCollectionId;
 
     [ObservableProperty]
     private ObservableCollection<key_value_pair_view_model> _headers = new();
@@ -44,10 +57,12 @@ public partial class request_editor_view_model : ObservableObject
     public request_editor_view_model(
         request_orchestrator request_orchestrator,
         i_history_repository history_repository,
+        i_collection_repository collection_repository,
         ILogger<request_editor_view_model> logger)
     {
         _request_orchestrator = request_orchestrator;
         _history_repository = history_repository;
+        _collection_repository = collection_repository;
         _logger = logger;
         
         // Add default empty header row
@@ -55,6 +70,7 @@ public partial class request_editor_view_model : ObservableObject
     }
 
     public event EventHandler<request_execution_result>? execution_completed;
+    public event EventHandler? request_saved;
 
     [RelayCommand(CanExecute = nameof(CanSendRequest))]
     private async Task SendRequest(CancellationToken cancellation_token)
@@ -120,8 +136,112 @@ public partial class request_editor_view_model : ObservableObject
 
     private bool CanSendRequest() => !IsSending && !string.IsNullOrWhiteSpace(Url);
 
-    partial void OnUrlChanged(string value) => SendRequestCommand.NotifyCanExecuteChanged();
     partial void OnIsSendingChanged(bool value) => SendRequestCommand.NotifyCanExecuteChanged();
+
+    [RelayCommand(CanExecute = nameof(CanSaveRequest))]
+    private async Task SaveRequest(CancellationToken cancellation_token)
+    {
+        if (string.IsNullOrWhiteSpace(Url) || string.IsNullOrWhiteSpace(RequestName))
+            return;
+
+        IsSaving = true;
+
+        try
+        {
+            var request = new http_request_model
+            {
+                id = CurrentRequestId ?? Guid.NewGuid().ToString(),
+                name = RequestName,
+                method = SelectedMethod,
+                url = Url,
+                headers = Headers.Where(h => !string.IsNullOrWhiteSpace(h.Key))
+                    .Select(h => new key_value_pair_model { key = h.Key, value = h.Value, enabled = h.IsEnabled }).ToList(),
+                query_params = QueryParams.Where(q => !string.IsNullOrWhiteSpace(q.Key))
+                    .Select(q => new key_value_pair_model { key = q.Key, value = q.Value, enabled = q.IsEnabled }).ToList(),
+                body = string.IsNullOrWhiteSpace(RequestBody) ? null : new request_body_model
+                {
+                    body_type = request_body_type.raw,
+                    raw_content = RequestBody
+                },
+                pre_request_script = PreRequestScript,
+                post_response_script = PostResponseScript
+            };
+
+            // Get the target collection
+            var targetCollectionId = CurrentCollectionId;
+            
+            if (string.IsNullOrWhiteSpace(targetCollectionId))
+            {
+                // Create default collection if none exists
+                var collections = await _collection_repository.list_all_async(cancellation_token);
+                var defaultCollection = collections.FirstOrDefault();
+                
+                if (defaultCollection == null)
+                {
+                    defaultCollection = new postman_collection_model
+                    {
+                        id = Guid.NewGuid().ToString(),
+                        name = "My Requests",
+                        description = "Default collection",
+                        items = new List<collection_item_model>()
+                    };
+                    await _collection_repository.save_async(defaultCollection, cancellation_token);
+                }
+                
+                targetCollectionId = defaultCollection.id;
+            }
+
+            var collection = await _collection_repository.get_by_id_async(targetCollectionId, cancellation_token);
+            if (collection != null)
+            {
+                var items = collection.items.ToList();
+                
+                // Check if we're updating an existing request
+                var existingItemIndex = items.FindIndex(i => i.id == CurrentRequestId || i.request?.id == request.id);
+                
+                var collectionItem = new collection_item_model
+                {
+                    id = existingItemIndex >= 0 ? items[existingItemIndex].id : Guid.NewGuid().ToString(),
+                    name = request.name,
+                    is_folder = false,
+                    request = request
+                };
+
+                if (existingItemIndex >= 0)
+                    items[existingItemIndex] = collectionItem;
+                else
+                    items.Add(collectionItem);
+
+                collection = collection with { items = items };
+                await _collection_repository.save_async(collection, cancellation_token);
+
+                CurrentRequestId = collectionItem.id;
+                CurrentCollectionId = collection.id;
+
+                _logger.LogInformation("Request '{RequestName}' saved successfully", RequestName);
+                request_saved?.Invoke(this, EventArgs.Empty);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error saving request");
+        }
+        finally
+        {
+            IsSaving = false;
+        }
+    }
+
+    private bool CanSaveRequest() => !IsSaving && !string.IsNullOrWhiteSpace(Url) && !string.IsNullOrWhiteSpace(RequestName);
+
+    partial void OnRequestNameChanged(string value) => SaveRequestCommand.NotifyCanExecuteChanged();
+    partial void OnIsSavingChanged(bool value) => SaveRequestCommand.NotifyCanExecuteChanged();
+
+    partial void OnUrlChanged(string value)
+    {
+        SendRequestCommand.NotifyCanExecuteChanged();
+        SaveRequestCommand.NotifyCanExecuteChanged();
+    }
 
     [RelayCommand]
     private void AddHeader()
@@ -135,8 +255,11 @@ public partial class request_editor_view_model : ObservableObject
         Headers.Remove(header);
     }
 
-    public void load_request(http_request_model request)
+    public void load_request(http_request_model request, string? collectionId = null)
     {
+        RequestName = request.name;
+        CurrentRequestId = request.id;
+        CurrentCollectionId = collectionId;
         Url = request.url;
         SelectedMethod = request.method;
         RequestBody = request.body?.raw_content ?? string.Empty;

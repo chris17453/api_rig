@@ -8,13 +8,37 @@
              x:DataType="vm:sidebar_view_model">
 
     <Grid RowDefinitions="Auto,*,Auto,*" Background="#2D2D2D">
-        <!-- Collections Header -->
-        <TextBlock Grid.Row="0" 
-                   Text="Collections" 
-                   FontWeight="Bold" 
-                   FontSize="14"
-                   Foreground="#E0E0E0"
-                   Margin="10,10,10,5"/>
+        <!-- Collections Header with + Button -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="10,10,10,5">
+            <TextBlock Grid.Column="0"
+                       Text="Collections" 
+                       FontWeight="Bold" 
+                       FontSize="14"
+                       Foreground="#E0E0E0"
+                       VerticalAlignment="Center"/>
+            <Button Grid.Column="1"
+                    Command="{Binding CreateCollectionCommand}"
+                    Content="+"
+                    Width="30"
+                    Height="30"
+                    FontSize="16"
+                    FontWeight="Bold"
+                    Padding="0"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    ToolTip.Tip="Create new collection">
+                <Button.Styles>
+                    <Style Selector="Button">
+                        <Setter Property="Background" Value="#28A745"/>
+                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="CornerRadius" Value="4"/>
+                    </Style>
+                    <Style Selector="Button:pointerover /template/ ContentPresenter">
+                        <Setter Property="Background" Value="#218838"/>
+                    </Style>
+                </Button.Styles>
+            </Button>
+        </Grid>
         
         <!-- Collections Tree -->
         <TreeView Grid.Row="1" 
@@ -24,17 +48,71 @@
                   Margin="5">
             <TreeView.ItemTemplate>
                 <TreeDataTemplate ItemsSource="{Binding Children}">
-                    <StackPanel Orientation="Horizontal" Spacing="5">
-                        <TextBlock Text="📁" IsVisible="{Binding IsFolder}" Foreground="#FFA500"/>
-                        <TextBlock Text="📄" IsVisible="{Binding !IsFolder}" Foreground="#4FC3F7"/>
-                        <TextBlock Text="{Binding Method}" 
-                                   FontWeight="Bold"
-                                   FontSize="10"
-                                   Foreground="#4CAF50"
-                                   IsVisible="{Binding Method, Converter={x:Static ObjectConverters.IsNotNull}}"
-                                   Margin="0,0,5,0"/>
-                        <TextBlock Text="{Binding Name}" Foreground="#E0E0E0"/>
-                    </StackPanel>
+                    <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                        <!-- Icon and Name -->
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                            <TextBlock Text="📦" IsVisible="{Binding IsCollectionRoot}" FontSize="14" Foreground="#FFA500"/>
+                            <TextBlock Text="📁" IsVisible="{Binding IsFolder}" FontSize="12" Foreground="#FFA500"/>
+                            <TextBlock Text="📄" IsVisible="{Binding !IsFolder, FallbackValue=false}" FontSize="12" Foreground="#4FC3F7"/>
+                        </StackPanel>
+                        
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5" Margin="5,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Method}" 
+                                       FontWeight="Bold"
+                                       FontSize="10"
+                                       Foreground="#4CAF50"
+                                       IsVisible="{Binding Method, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                       Margin="0,0,5,0"/>
+                            <TextBlock Text="{Binding Name}" Foreground="#E0E0E0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        
+                        <!-- Action Buttons -->
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="3" Margin="5,0,0,0">
+                            <!-- Add Request Button (only for collections/folders) -->
+                            <Button Command="{Binding $parent[TreeView].((vm:sidebar_view_model)DataContext).AddRequestToCollectionCommand}"
+                                    CommandParameter="{Binding}"
+                                    Width="20"
+                                    Height="20"
+                                    Padding="0"
+                                    ToolTip.Tip="Add request to this collection"
+                                    IsVisible="{Binding IsCollectionRoot}">
+                                <Button.Content>
+                                    <TextBlock Text="+" FontSize="12" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                </Button.Content>
+                                <Button.Styles>
+                                    <Style Selector="Button">
+                                        <Setter Property="Background" Value="#007BFF"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter Property="CornerRadius" Value="3"/>
+                                    </Style>
+                                    <Style Selector="Button:pointerover /template/ ContentPresenter">
+                                        <Setter Property="Background" Value="#0056B3"/>
+                                    </Style>
+                                </Button.Styles>
+                            </Button>
+                            
+                            <!-- Delete Button -->
+                            <Button Width="20"
+                                    Height="20"
+                                    Padding="0"
+                                    Command="{Binding $parent[TreeView].((vm:sidebar_view_model)DataContext).DeleteItemCommand}"
+                                    CommandParameter="{Binding}">
+                                <Button.Content>
+                                    <TextBlock Text="×" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                </Button.Content>
+                                <Button.Styles>
+                                    <Style Selector="Button">
+                                        <Setter Property="Background" Value="#DC3545"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter Property="CornerRadius" Value="3"/>
+                                    </Style>
+                                    <Style Selector="Button:pointerover /template/ ContentPresenter">
+                                        <Setter Property="Background" Value="#C82333"/>
+                                    </Style>
+                                </Button.Styles>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
                 </TreeDataTemplate>
             </TreeView.ItemTemplate>
         </TreeView>
