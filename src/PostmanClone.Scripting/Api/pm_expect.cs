@@ -12,9 +12,31 @@ public class pm_expect
     public pm_expect to => this;
     public pm_expect be => this;
     public pm_expect have => this;
-    public pm_expect a => this;
-    public pm_expect an => this;
     public pm_expect_negated not => new pm_expect_negated(_actual);
+
+    public void a(string type_name)
+    {
+        var actual_type = _actual?.GetType();
+        var type_lower = type_name.ToLowerInvariant();
+
+        bool matches = type_lower switch
+        {
+            "string" => _actual is string,
+            "number" => _actual is int or long or float or double or decimal,
+            "boolean" or "bool" => _actual is bool,
+            "object" => _actual is not null && _actual is not string && _actual is not ValueType,
+            "array" => _actual is System.Collections.IEnumerable && _actual is not string,
+            "null" or "undefined" => _actual is null,
+            _ => actual_type?.Name.Equals(type_name, StringComparison.OrdinalIgnoreCase) == true
+        };
+
+        if (!matches)
+        {
+            throw new Exception($"Expected '{_actual}' to be a {type_name} but got {actual_type?.Name ?? "null"}");
+        }
+    }
+
+    public void an(string type_name) => a(type_name);
 
     public void equal(object? expected)
     {

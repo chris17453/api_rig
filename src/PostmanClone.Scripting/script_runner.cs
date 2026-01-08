@@ -58,13 +58,8 @@ public class script_runner : i_script_runner
 
             engine.SetValue("pm", pm);
 
-            engine.SetValue("console", new
-            {
-                log = new Action<object[]>(args => test_collector.log(args)),
-                info = new Action<object[]>(args => test_collector.log(args)),
-                warn = new Action<object[]>(args => test_collector.log(args)),
-                error = new Action<object[]>(args => test_collector.log(args))
-            });
+            var console = new ConsoleInterop(test_collector);
+            engine.SetValue("console", console);
 
             engine.Execute(script);
 
@@ -133,5 +128,20 @@ public class script_runner : i_script_runner
                 execution_time_ms = stopwatch.ElapsedMilliseconds
             };
         }
+    }
+
+    private class ConsoleInterop
+    {
+        private readonly pm_test_collector _collector;
+
+        public ConsoleInterop(pm_test_collector collector)
+        {
+            _collector = collector;
+        }
+
+        public void log(params object[] args) => _collector.log(args);
+        public void info(params object[] args) => _collector.log(args);
+        public void warn(params object[] args) => _collector.log(args);
+        public void error(params object[] args) => _collector.log(args);
     }
 }

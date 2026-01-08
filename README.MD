@@ -311,6 +311,317 @@ console.log("message");
 
 ---
 
+## Data Module
+
+The Data module handles persistence and Postman collection parsing.
+
+### Components
+
+| Component | Description |
+|-----------|-------------|
+| `postman_clone_db_context` | EF Core DbContext for SQLite |
+| `environment_store` | CRUD operations for environments and variables |
+| `history_repository` | Request/response history persistence |
+| `collection_repository` | Collection storage and retrieval |
+| `postman_collection_parser` | Parses Postman v2.0/v2.1 JSON files |
+| `variable_resolver` | Resolves `{{variable}}` tokens in requests |
+| `request_orchestrator` | Orchestrates full request flow with scripts |
+
+### Database Schema
+
+```
+environments
+├── id (PK)
+├── name
+├── is_active
+├── created_at
+└── updated_at
+
+environment_variables
+├── id (PK)
+├── environment_id (FK)
+├── key
+└── value
+
+collections
+├── id (PK)
+├── name
+├── description
+├── version
+├── auth_json
+├── variables_json
+└── created_at
+
+collection_items
+├── id (PK)
+├── collection_id (FK)
+├── parent_item_id (FK, nullable)
+├── name
+├── is_folder
+├── request_method
+├── request_url
+├── request_headers_json
+├── request_body_json
+├── pre_request_script
+├── post_response_script
+└── sort_order
+
+history_entries
+├── id (PK)
+├── request_name
+├── method
+├── url
+├── status_code
+├── status_description
+├── elapsed_ms
+├── request_snapshot_json
+├── response_snapshot_json
+├── executed_at
+└── environment_id
+```
+
+### Usage Example
+
+```csharp
+// Environment store
+var env_store = services.GetRequiredService<i_environment_store>();
+var env = await env_store.get_active_async(cancellation_token);
+await env_store.set_variable_async("token", "abc123", cancellation_token);
+
+// Variable resolver
+var resolver = new variable_resolver();
+var resolved_url = resolver.resolve("{{base_url}}/users", variables);
+```
+
+---
+
+## Http Module
+
+The Http module handles HTTP request execution with authentication support.
+
+### Components
+
+| Component | Description |
+|-----------|-------------|
+| `http_request_executor` | Executes HTTP requests via HttpClient |
+| `basic_auth_handler` | HTTP Basic authentication |
+| `bearer_auth_handler` | Bearer token authentication |
+| `api_key_auth_handler` | API Key authentication (header/query) |
+
+### Supported Features
+
+- **HTTP Methods**: GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS
+- **Body Types**: None, Raw, JSON, Form-Data, URL-Encoded
+- **Authentication**: Basic, Bearer, API Key
+- **Timeout**: Configurable per-request timeout
+- **Cancellation**: Full CancellationToken support
+
+### Usage Example
+
+```csharp
+var executor = services.GetRequiredService<i_request_executor>();
+var request = new http_request_model
+{
+    name = "Get Users",
+    method = http_method.get,
+    url = "https://api.example.com/users",
+    auth = new auth_model
+    {
+        auth_type = auth_type.bearer,
+        bearer_token = "your-token"
+    }
+};
+var response = await executor.execute_async(request, cancellation_token);
+```
+
+---
+
+## Scripting Module
+
+The Scripting module provides Postman-compatible JavaScript execution using Jint.
+
+### Components
+
+| Component | Description |
+|-----------|-------------|
+| `script_runner` | Executes pre-request and post-response scripts |
+| `jint_engine_factory` | Creates sandboxed Jint engine instances |
+| `pm_api` | Main `pm.*` API exposed to scripts |
+| `pm_expect` | Chai-style assertion library |
+| `pm_environment_api` | Environment variable access |
+| `pm_request_api` | Read-only request information |
+| `pm_response_api` | Read-only response information |
+
+### pm.* API Reference
+
+```javascript
+// Testing
+pm.test("test name", function() {
+    // assertions
+});
+
+// Assertions (Chai-style)
+pm.expect(value).to.equal(expected);
+pm.expect(value).to.eql(expected);        // deep equal
+pm.expect(value).to.be.ok();              // truthy
+pm.expect(value).to.be.true();
+pm.expect(value).to.be.false();
+pm.expect(value).to.be.null();
+pm.expect(value).to.be.undefined();
+pm.expect(value).to.be.empty();
+pm.expect(value).to.be.a("string");       // type check
+pm.expect(value).to.be.an("object");
+pm.expect(string).to.include(substring);
+pm.expect(string).to.contain(substring);
+pm.expect(number).to.be.above(n);
+pm.expect(number).to.be.below(n);
+pm.expect(number).to.be.at.least(n);
+pm.expect(number).to.be.at.most(n);
+pm.expect(value).to.have.length(n);
+pm.expect(value).to.have.property("name");
+pm.expect(value).to.be.oneOf([a, b, c]);
+pm.expect(value).not.to.equal(other);     // negation
+
+// Environment
+pm.environment.get("key");
+pm.environment.set("key", "value");
+pm.environment.has("key");
+pm.environment.unset("key");
+pm.environment.clear();
+pm.environment.toObject();
+
+// Request (read-only)
+pm.request.url;
+pm.request.method;
+pm.request.headers;
+pm.request.body;
+
+// Response (post-response only)
+pm.response.code;
+pm.response.status;
+pm.response.responseTime;
+pm.response.responseSize;
+pm.response.text();
+pm.response.json();
+pm.response.headers;
+pm.response.to.have.status(200);
+pm.response.to.be.ok();
+pm.response.to.have.header("Content-Type");
+pm.response.to.have.body("text");
+
+// Console
+console.log("message", arg1, arg2);
+console.info("info");
+console.warn("warning");
+console.error("error");
+```
+
+### Sandbox Constraints
+
+| Constraint | Value | Purpose |
+|------------|-------|---------|
+| Timeout | 5000ms (default) | Prevent infinite loops |
+| Max Statements | 100,000 | CPU exhaustion protection |
+| Max Recursion | 100 levels | Stack overflow protection |
+| CLR Access | Restricted | Security (no System.* access) |
+
+---
+
+## Playground
+
+The Playground is a console application for testing the full integration without UI.
+
+### Location
+
+`src/PostmanClone.Playground/`
+
+### Run the Playground
+
+```bash
+dotnet run --project src/PostmanClone.Playground/PostmanClone.Playground.csproj -c Release
+```
+
+### What It Does
+
+1. **Sets up DI container** with all services
+2. **Creates SQLite database** (`playground.db`)
+3. **Creates test environment** with variables (`base_url`, `user_id`)
+4. **Defines a request** with pre-request and post-response scripts
+5. **Executes the full flow**:
+   - Pre-request script runs
+   - Variables are resolved (`{{base_url}}` → actual URL)
+   - HTTP request executes
+   - Post-response script runs with assertions
+6. **Displays results**: status, logs, test results, errors
+
+### Example Output
+
+```
+🚀 Starting PostmanClone Playground...
+✅ Database initialized.
+✅ Environment 'Dev Environment' created and activated.
+
+📡 Executing Request Orchestrator...
+   Original URL: {{base_url}}/todos/{{user_id}}
+
+📊 EXECUTION RESULTS
+====================
+
+🔹 Final Request:
+   Status: 200 OK
+   Time: 372ms
+   Body Size: 83 bytes
+
+📝 Console Logs:
+   🔄 [Pre-Request] Starting script...
+      Current ID: 1
+   ✅ [Pre-Request] Completed.
+   🔄 [Post-Response] Starting validations...
+      Title received: delectus aut autem
+   ✅ [Post-Response] Completed.
+
+🧪 Test Results:
+   ✅ Status code is 200
+   ✅ Response time is acceptable
+   ✅ Title exists and is a string
+
+🏁 Test completed.
+```
+
+---
+
+## Request Orchestrator Flow
+
+The `request_orchestrator` integrates all modules for the complete request lifecycle:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                   request_orchestrator                       │
+├─────────────────────────────────────────────────────────────┤
+│ 1. Get active environment (i_environment_store)            │
+│ 2. Execute pre-request script (i_script_runner)            │
+│ 3. Apply environment_updates to store                       │
+│ 4. Resolve variables in request (i_variable_resolver)       │
+│ 5. Execute HTTP request (i_request_executor)                │
+│ 6. Execute post-response script (i_script_runner)           │
+│ 7. Return aggregated result with tests/logs/errors          │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Usage
+
+```csharp
+var orchestrator = services.GetRequiredService<request_orchestrator>();
+var result = await orchestrator.execute_request_async(request, cancellation_token);
+
+// Access results
+Console.WriteLine($"Status: {result.response?.status_code}");
+Console.WriteLine($"Tests passed: {result.all_test_results.Count(t => t.passed)}");
+Console.WriteLine($"Errors: {result.all_errors.Count}");
+```
+
+---
+
 ## Notes
 
 - Postman JSON has quirks — use Newtonsoft, not System.Text.Json

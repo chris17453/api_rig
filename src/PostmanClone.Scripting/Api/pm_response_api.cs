@@ -1,4 +1,4 @@
-using System.Text.Json;
+using Newtonsoft.Json.Linq;
 using PostmanClone.Core.Models;
 
 namespace PostmanClone.Scripting.Api;
@@ -6,6 +6,7 @@ namespace PostmanClone.Scripting.Api;
 public class pm_response_api
 {
     private readonly http_response_model _response;
+    private JToken? _parsed_json;
 
     public pm_response_api(http_response_model response)
     {
@@ -25,14 +26,15 @@ public class pm_response_api
         return _response.body_string ?? string.Empty;
     }
 
-    public object? json()
+    public dynamic? json()
     {
         var body = _response.body_string;
         if (string.IsNullOrEmpty(body)) return null;
 
         try
         {
-            return JsonSerializer.Deserialize<object>(body);
+            _parsed_json = JToken.Parse(body);
+            return _parsed_json;
         }
         catch
         {
