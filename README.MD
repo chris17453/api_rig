@@ -234,15 +234,24 @@ dotnet test tests/PostmanClone.Scripting.Tests -c Release
 | Module | Status | Tests |
 |--------|--------|-------|
 | PostmanClone.Core | ✅ Complete | 30 tests passing |
-| PostmanClone.Scripting | ✅ Complete (Phase 1 - Mock) | 41 tests passing |
+| PostmanClone.Data | ✅ Complete | 139 tests passing |
+| PostmanClone.Http | ✅ Complete | 33 tests passing |
+| PostmanClone.Scripting | ✅ Complete (Phase 1 + 2 Integration) | 41 tests passing |
+
+**Total: 243 tests passing**
 
 ### Pending Modules
 
 | Module | Status |
 |--------|--------|
-| PostmanClone.Data | 🔄 In Progress (another team member) |
-| PostmanClone.Http | 🔄 In Progress (another team member) |
-| PostmanClone.App | 🔄 In Progress (another team member) |
+| PostmanClone.App | 🔄 Pending (UI layer) |
+
+### Integration Components
+
+| Component | Location | Description |
+|-----------|----------|-------------|
+| `request_orchestrator` | `PostmanClone.Data/Services` | Orchestrates full request flow with scripts |
+| `variable_resolver` | `PostmanClone.Data/Services` | Resolves `{{variable}}` tokens in requests |
 
 ---
 

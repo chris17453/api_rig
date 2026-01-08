@@ -1,10 +1,14 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/PostmanClone.Core/PostmanClone.Core.csproj" />
+    <Project Path="src/PostmanClone.Data/PostmanClone.Data.csproj" />
+    <Project Path="src/PostmanClone.Http/PostmanClone.Http.csproj" />
     <Project Path="src/PostmanClone.Scripting/PostmanClone.Scripting.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/PostmanClone.Core.Tests/PostmanClone.Core.Tests.csproj" />
+    <Project Path="tests/PostmanClone.Data.Tests/PostmanClone.Data.Tests.csproj" />
+    <Project Path="tests/PostmanClone.Http.Tests/PostmanClone.Http.Tests.csproj" />
     <Project Path="tests/PostmanClone.Scripting.Tests/PostmanClone.Scripting.Tests.csproj" />
   </Folder>
 </Solution>
