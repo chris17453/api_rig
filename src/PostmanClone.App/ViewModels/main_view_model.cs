@@ -122,8 +122,8 @@ public partial class main_view_model : ObservableObject
                 ScriptEditor.AppendConsoleOutput($"  [ERROR] {error}");
             }
             
-            var preStatus = result.pre_script_result.success ? "✓ completed" : "✗ failed";
-            ScriptEditor.AppendConsoleOutput($"  Script {preStatus} ({result.pre_script_result.execution_time_ms}ms)");
+            var pre_status = result.pre_script_result.success ? "✓ completed" : "✗ failed";
+            ScriptEditor.AppendConsoleOutput($"  Script {pre_status} ({result.pre_script_result.execution_time_ms}ms)");
         }
         
         // Show HTTP request result
@@ -160,8 +160,8 @@ public partial class main_view_model : ObservableObject
                 ScriptEditor.AppendConsoleOutput($"  [ERROR] {error}");
             }
             
-            var postStatus = result.post_script_result.success ? "✓ completed" : "✗ failed";
-            ScriptEditor.AppendConsoleOutput($"  Script {postStatus} ({result.post_script_result.execution_time_ms}ms)");
+            var post_status = result.post_script_result.success ? "✓ completed" : "✗ failed";
+            ScriptEditor.AppendConsoleOutput($"  Script {post_status} ({result.post_script_result.execution_time_ms}ms)");
         }
         
         // Show test results summary
