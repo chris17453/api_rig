@@ -100,7 +100,7 @@ public partial class sidebar_view_model : ObservableObject
     }
 
     public event EventHandler<http_request_model>? request_selected;
-    public event EventHandler<(http_request_model request, string collectionId)>? request_with_collection_selected;
+    public event EventHandler<(http_request_model request, string collectionId, string collectionItemId)>? request_with_collection_selected;
     public event EventHandler? collection_changed;
 
     [RelayCommand]
@@ -110,12 +110,20 @@ public partial class sidebar_view_model : ObservableObject
 
         try
         {
+            // Store expanded state before reloading
+            var expandedCollectionIds = Collections
+                .Where(c => c.IsExpanded)
+                .Select(c => c.Id)
+                .ToHashSet();
+
             // Load collections
             var collections = await _collection_repository.list_all_async(cancellation_token);
             Collections.Clear();
             foreach (var col in collections)
             {
                 var tree_item = map_collection_to_tree_item(col);
+                // Restore expanded state - set to true if it was expanded, false otherwise
+                tree_item.IsExpanded = expandedCollectionIds.Count == 0 || expandedCollectionIds.Contains(tree_item.Id);
                 Collections.Add(tree_item);
             }
 
@@ -166,7 +174,8 @@ public partial class sidebar_view_model : ObservableObject
             var parentCollection = find_parent_collection(value);
             if (parentCollection != null)
             {
-                request_with_collection_selected?.Invoke(this, (value.request, parentCollection.Id));
+                // Pass the collection item ID (value.Id) not the request ID
+                request_with_collection_selected?.Invoke(this, (value.request, parentCollection.Id, value.Id));
             }
             
             request_selected?.Invoke(this, value.request);
@@ -237,20 +246,21 @@ public partial class sidebar_view_model : ObservableObject
         if (collection != null)
         {
             var items = collection.items.ToList();
-            items.Add(new collection_item_model
+            var newCollectionItem = new collection_item_model
             {
                 id = Guid.NewGuid().ToString(),
                 name = newRequest.name,
                 is_folder = false,
                 request = newRequest
-            });
+            };
+            items.Add(newCollectionItem);
 
             collection = collection with { items = items };
             await _collection_repository.save_async(collection, cancellation_token);
             await load_data_async(cancellation_token);
             
-            // Trigger request selection to load it in the editor with collection ID
-            request_with_collection_selected?.Invoke(this, (newRequest, collection.id));
+            // Trigger request selection to load it in the editor with collection ID and collection item ID
+            request_with_collection_selected?.Invoke(this, (newRequest, collection.id, newCollectionItem.id));
             request_selected?.Invoke(this, newRequest);
             collection_changed?.Invoke(this, EventArgs.Empty);
         }

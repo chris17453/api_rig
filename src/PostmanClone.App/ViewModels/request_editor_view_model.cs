@@ -34,6 +34,9 @@ public partial class request_editor_view_model : ObservableObject
     private bool _isSaving;
 
     [ObservableProperty]
+    private string _statusMessage = string.Empty;
+
+    [ObservableProperty]
     private string? _currentRequestId;
 
     [ObservableProperty]
@@ -196,35 +199,87 @@ public partial class request_editor_view_model : ObservableObject
             {
                 var items = collection.items.ToList();
                 
-                // Check if we're updating an existing request
-                var existingItemIndex = items.FindIndex(i => i.id == CurrentRequestId || i.request?.id == request.id);
+                // Check if a request with this name already exists in the collection
+                var duplicateNameIndex = items.FindIndex(i => 
+                    i.name.Equals(request.name, StringComparison.OrdinalIgnoreCase));
+                
+                // Check if we're updating an existing request by ID (different from the one with same name)
+                var currentItemIndex = -1;
+                if (!string.IsNullOrWhiteSpace(CurrentRequestId))
+                {
+                    currentItemIndex = items.FindIndex(i => i.id == CurrentRequestId);
+                }
+                
+                string itemId;
+                
+                if (duplicateNameIndex >= 0)
+                {
+                    // A request with this name exists - overwrite it
+                    itemId = items[duplicateNameIndex].id;
+                    _logger.LogInformation("Overwriting existing request '{RequestName}'", RequestName);
+                    
+                    // If we were editing a different request (currentItemIndex is different), remove the old one
+                    if (currentItemIndex >= 0 && currentItemIndex != duplicateNameIndex)
+                    {
+                        items.RemoveAt(currentItemIndex);
+                        // Adjust duplicate index if needed
+                        if (currentItemIndex < duplicateNameIndex)
+                        {
+                            duplicateNameIndex--;
+                        }
+                    }
+                }
+                else if (currentItemIndex >= 0)
+                {
+                    // Updating existing request by ID, no name conflict
+                    itemId = items[currentItemIndex].id;
+                }
+                else
+                {
+                    // New request
+                    itemId = Guid.NewGuid().ToString();
+                }
                 
                 var collectionItem = new collection_item_model
                 {
-                    id = existingItemIndex >= 0 ? items[existingItemIndex].id : Guid.NewGuid().ToString(),
+                    id = itemId,
                     name = request.name,
                     is_folder = false,
                     request = request
                 };
 
-                if (existingItemIndex >= 0)
-                    items[existingItemIndex] = collectionItem;
+                if (duplicateNameIndex >= 0)
+                {
+                    // Replace the item with duplicate name
+                    items[duplicateNameIndex] = collectionItem;
+                }
+                else if (currentItemIndex >= 0)
+                {
+                    // Replace the current item
+                    items[currentItemIndex] = collectionItem;
+                }
                 else
+                {
+                    // Add as new request
                     items.Add(collectionItem);
+                }
 
                 collection = collection with { items = items };
                 await _collection_repository.save_async(collection, cancellation_token);
 
-                CurrentRequestId = collectionItem.id;
+                // Update tracking - use collection item ID for tracking
+                CurrentRequestId = itemId;
                 CurrentCollectionId = collection.id;
 
                 _logger.LogInformation("Request '{RequestName}' saved successfully", RequestName);
+                StatusMessage = $"✓ Request '{RequestName}' saved successfully";
                 request_saved?.Invoke(this, EventArgs.Empty);
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error saving request");
+            StatusMessage = $"❌ Error saving request: {ex.Message}";
         }
         finally
         {
@@ -234,7 +289,11 @@ public partial class request_editor_view_model : ObservableObject
 
     private bool CanSaveRequest() => !IsSaving && !string.IsNullOrWhiteSpace(Url) && !string.IsNullOrWhiteSpace(RequestName);
 
-    partial void OnRequestNameChanged(string value) => SaveRequestCommand.NotifyCanExecuteChanged();
+    partial void OnRequestNameChanged(string value)
+    {
+        StatusMessage = string.Empty;
+        SaveRequestCommand.NotifyCanExecuteChanged();
+    }
     partial void OnIsSavingChanged(bool value) => SaveRequestCommand.NotifyCanExecuteChanged();
 
     partial void OnUrlChanged(string value)
@@ -255,10 +314,11 @@ public partial class request_editor_view_model : ObservableObject
         Headers.Remove(header);
     }
 
-    public void load_request(http_request_model request, string? collectionId = null)
+    public void load_request(http_request_model request, string? collectionId = null, string? collectionItemId = null)
     {
         RequestName = request.name;
-        CurrentRequestId = request.id;
+        // Use the collection item ID for tracking, not the request ID
+        CurrentRequestId = collectionItemId ?? request.id;
         CurrentCollectionId = collectionId;
         Url = request.url;
         SelectedMethod = request.method;

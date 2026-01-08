@@ -129,9 +129,9 @@ public partial class main_view_model : ObservableObject
         TestResults.ClearResultsCommand.Execute(null);
     }
 
-    private void on_request_with_collection_selected(object? sender, (http_request_model request, string collectionId) data)
+    private void on_request_with_collection_selected(object? sender, (http_request_model request, string collectionId, string collectionItemId) data)
     {
-        RequestEditor.load_request(data.request, data.collectionId);
+        RequestEditor.load_request(data.request, data.collectionId, data.collectionItemId);
         ScriptEditor.LoadScriptsFromRequest(data.request);
         ResponseViewer.clear();
         TestResults.ClearResultsCommand.Execute(null);
