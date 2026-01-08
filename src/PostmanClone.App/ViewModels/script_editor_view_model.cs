@@ -10,7 +10,7 @@ namespace PostmanClone.App.ViewModels;
 /// </summary>
 public partial class script_editor_view_model : ObservableObject
 {
-    private readonly i_script_runner? _script_runner;
+    private readonly i_script_runner _script_runner;
 
     [ObservableProperty]
     private string _preRequestScript = string.Empty;
@@ -27,7 +27,7 @@ public partial class script_editor_view_model : ObservableObject
     [ObservableProperty]
     private string _selectedTab = "Pre-request";
 
-    public script_editor_view_model(i_script_runner? script_runner = null)
+    public script_editor_view_model(i_script_runner script_runner)
     {
         _script_runner = script_runner;
         
@@ -74,10 +74,56 @@ pm.test(""Response time is acceptable"", function () {
         {
             var script = SelectedTab == "Pre-request" ? PreRequestScript : PostResponseScript;
             
-            // Mock execution for now - will be wired to real script engine later
             ConsoleOutput += $"[{DateTime.Now:HH:mm:ss}] Executing {SelectedTab} script...\n";
-            await Task.Delay(100); // Simulate execution
-            ConsoleOutput += $"[{DateTime.Now:HH:mm:ss}] Script completed successfully.\n";
+            
+            // Create a mock context for testing scripts
+            var context = new script_context_model
+            {
+                phase = SelectedTab == "Pre-request" ? script_phase.pre_request : script_phase.post_response,
+                request = new http_request_model { name = "Test Request", url = "https://example.com", method = http_method.get },
+                response = SelectedTab == "Post-response" ? new http_response_model 
+                { 
+                    status_code = 200, 
+                    status_description = "OK",
+                    body_string = "{\"test\": \"data\"}" 
+                } : null,
+                environment = new environment_model { name = "test", variables = new Dictionary<string, string>() }
+            };
+
+            script_execution_result_model result;
+            if (SelectedTab == "Pre-request")
+            {
+                result = await _script_runner.run_pre_request_async(script, context, CancellationToken.None);
+            }
+            else
+            {
+                result = await _script_runner.run_post_response_async(script, context, CancellationToken.None);
+            }
+
+            // Show logs from script execution
+            foreach (var log in result.logs)
+            {
+                ConsoleOutput += $"[{DateTime.Now:HH:mm:ss}] {log}\n";
+            }
+
+            // Show test results
+            foreach (var test in result.test_results)
+            {
+                var status = test.passed ? "PASS" : "FAIL";
+                ConsoleOutput += $"[{DateTime.Now:HH:mm:ss}] [{status}] {test.name}\n";
+                if (!test.passed && !string.IsNullOrEmpty(test.error_message))
+                {
+                    ConsoleOutput += $"[{DateTime.Now:HH:mm:ss}]   Error: {test.error_message}\n";
+                }
+            }
+
+            // Show errors
+            foreach (var error in result.errors)
+            {
+                ConsoleOutput += $"[{DateTime.Now:HH:mm:ss}] [ERROR] {error}\n";
+            }
+
+            ConsoleOutput += $"[{DateTime.Now:HH:mm:ss}] Script completed {(result.success ? "successfully" : "with errors")}.\n";
         }
         catch (Exception ex)
         {
