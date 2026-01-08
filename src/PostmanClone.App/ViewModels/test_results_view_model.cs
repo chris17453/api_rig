@@ -35,42 +35,7 @@ public partial class test_results_view_model : ObservableObject
 
     public test_results_view_model()
     {
-        // Load mock test results for UI development
-        LoadMockResults();
-    }
-
-    private void LoadMockResults()
-    {
-        TestResults = new ObservableCollection<test_result_view_model>
-        {
-            new test_result_view_model
-            {
-                TestName = "Status code is 200",
-                Passed = true,
-                Duration = TimeSpan.FromMilliseconds(2)
-            },
-            new test_result_view_model
-            {
-                TestName = "Response time is acceptable",
-                Passed = true,
-                Duration = TimeSpan.FromMilliseconds(1)
-            },
-            new test_result_view_model
-            {
-                TestName = "Response contains user data",
-                Passed = true,
-                Duration = TimeSpan.FromMilliseconds(3)
-            },
-            new test_result_view_model
-            {
-                TestName = "Content-Type is application/json",
-                Passed = false,
-                ErrorMessage = "Expected 'application/json' but got 'text/plain'",
-                Duration = TimeSpan.FromMilliseconds(1)
-            }
-        };
-
-        UpdateSummary();
+        // Start with empty results - will be populated from actual test execution
     }
 
     public void AddTestResult(string name, bool passed, string? errorMessage = null)
