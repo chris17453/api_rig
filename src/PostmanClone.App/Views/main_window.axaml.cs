@@ -60,4 +60,11 @@ public partial class main_window : Window
 
         await dialog.ShowDialog(this);
     }
+
+    private async void AboutButton_Click(object? sender, RoutedEventArgs e)
+    {
+        var aboutVm = new about_view_model();
+        var dialog = new about_dialog { DataContext = aboutVm };
+        await dialog.ShowDialog(this);
+    }
 }
