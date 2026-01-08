@@ -1,11 +1,19 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using PostmanClone.App.Services;
 using PostmanClone.App.ViewModels;
 using PostmanClone.App.Views;
 using PostmanClone.Core.Interfaces;
+using PostmanClone.Data.Context;
+using PostmanClone.Data.Repositories;
+using PostmanClone.Data.Services;
+using PostmanClone.Data.Stores;
+using PostmanClone.Http.Services;
+using PostmanClone.Scripting;
 using System;
 
 namespace PostmanClone.App;
@@ -25,6 +33,10 @@ public partial class App : Application
         configure_services(service_collection);
         services = service_collection.BuildServiceProvider();
 
+        // Initialize DB
+        var db = services.GetRequiredService<postman_clone_db_context>();
+        db.Database.EnsureCreated();
+
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.MainWindow = new main_window
@@ -38,11 +50,22 @@ public partial class App : Application
 
     private void configure_services(IServiceCollection services)
     {
-        // Mock services (will be replaced with real implementations later)
-        services.AddSingleton<i_request_executor, mock_request_executor>();
-        services.AddSingleton<i_collection_repository, mock_collection_repository>();
-        services.AddSingleton<i_environment_store, mock_environment_store>();
-        services.AddSingleton<i_history_repository, mock_history_repository>();
+        // Core Infrastructure
+        services.AddDbContext<postman_clone_db_context>(options =>
+            options.UseSqlite("Data Source=postman_clone.db"));
+        
+        services.AddHttpClient();
+
+        // Services
+        services.AddSingleton<i_request_executor, http_request_executor>();
+        services.AddSingleton<i_script_runner>(sp => new script_runner(timeout_ms: 5000));
+        services.AddSingleton<i_variable_resolver, variable_resolver>();
+        services.AddScoped<request_orchestrator>();
+
+        // Repositories & Stores
+        services.AddScoped<i_environment_store, environment_store>();
+        services.AddScoped<i_history_repository, history_repository>();
+        services.AddScoped<i_collection_repository, collection_repository>();
 
         // ViewModels
         services.AddTransient<main_view_model>();

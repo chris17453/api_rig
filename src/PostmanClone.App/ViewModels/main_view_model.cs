@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PostmanClone.Core.Interfaces;
 using PostmanClone.Core.Models;
+using PostmanClone.Data.Services;
 
 namespace PostmanClone.App.ViewModels;
 
@@ -51,7 +52,7 @@ public partial class main_view_model : ObservableObject
         _collection_repository = collection_repository;
 
         // Wire up events
-        _requestEditor.response_received += on_response_received;
+        _requestEditor.execution_completed += on_execution_completed;
         _sidebar.request_selected += on_request_selected;
     }
 
@@ -80,9 +81,20 @@ public partial class main_view_model : ObservableObject
         // Dialog will be shown from the view
     }
 
-    private void on_response_received(object? sender, http_response_model response)
+    private void on_execution_completed(object? sender, request_execution_result result)
     {
-        ResponseViewer.load_response(response);
+        if (result.response != null)
+        {
+            ResponseViewer.load_response(result.response);
+        }
+        
+        // Update Test Results
+        TestResults.ClearResultsCommand.Execute(null);
+        foreach (var test in result.all_test_results)
+        {
+            TestResults.AddTestResult(test.name, test.passed, test.error_message);
+        }
+        
         _ = Sidebar.refresh_history_async(CancellationToken.None);
     }
 
