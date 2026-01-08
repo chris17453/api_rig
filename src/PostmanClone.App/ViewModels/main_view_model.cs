@@ -55,6 +55,15 @@ public partial class main_view_model : ObservableObject
         _requestEditor.execution_completed += on_execution_completed;
         _requestEditor.request_saved += on_request_saved;
         _sidebar.request_selected += on_request_selected;
+        
+        // Sync scripts from ScriptEditor to RequestEditor when they change
+        _scriptEditor.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(script_editor_view_model.PreRequestScript))
+                _requestEditor.PreRequestScript = _scriptEditor.PreRequestScript;
+            else if (e.PropertyName == nameof(script_editor_view_model.PostResponseScript))
+                _requestEditor.PostResponseScript = _scriptEditor.PostResponseScript;
+        };
         _sidebar.request_with_collection_selected += on_request_with_collection_selected;
     }
 
@@ -95,6 +104,18 @@ public partial class main_view_model : ObservableObject
         foreach (var test in result.all_test_results)
         {
             TestResults.AddTestResult(test.name, test.passed, test.error_message);
+        }
+        
+        // Update Console Output in ScriptEditor
+        foreach (var log in result.all_logs)
+        {
+            ScriptEditor.AppendConsoleOutput(log);
+        }
+        
+        // Add script errors to console as well
+        foreach (var error in result.all_errors)
+        {
+            ScriptEditor.AppendConsoleOutput($"[ERROR] {error}");
         }
         
         _ = Sidebar.refresh_history_async(CancellationToken.None);
