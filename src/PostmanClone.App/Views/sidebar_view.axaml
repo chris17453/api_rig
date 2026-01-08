@@ -1,0 +1,80 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:PostmanClone.App.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="250" d:DesignHeight="600"
+             x:Class="PostmanClone.App.Views.sidebar_view"
+             x:DataType="vm:sidebar_view_model">
+
+    <Grid RowDefinitions="Auto,*,Auto,*" Background="#2D2D2D">
+        <!-- Collections Header -->
+        <TextBlock Grid.Row="0" 
+                   Text="Collections" 
+                   FontWeight="Bold" 
+                   FontSize="14"
+                   Foreground="#E0E0E0"
+                   Margin="10,10,10,5"/>
+        
+        <!-- Collections Tree -->
+        <TreeView Grid.Row="1" 
+                  ItemsSource="{Binding Collections}"
+                  SelectedItem="{Binding SelectedCollectionItem}"
+                  Background="Transparent"
+                  Margin="5">
+            <TreeView.ItemTemplate>
+                <TreeDataTemplate ItemsSource="{Binding Children}">
+                    <StackPanel Orientation="Horizontal" Spacing="5">
+                        <TextBlock Text="📁" IsVisible="{Binding IsFolder}" Foreground="#FFA500"/>
+                        <TextBlock Text="📄" IsVisible="{Binding !IsFolder}" Foreground="#4FC3F7"/>
+                        <TextBlock Text="{Binding Method}" 
+                                   FontWeight="Bold"
+                                   FontSize="10"
+                                   Foreground="#4CAF50"
+                                   IsVisible="{Binding Method, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                   Margin="0,0,5,0"/>
+                        <TextBlock Text="{Binding Name}" Foreground="#E0E0E0"/>
+                    </StackPanel>
+                </TreeDataTemplate>
+            </TreeView.ItemTemplate>
+        </TreeView>
+
+        <!-- History Header -->
+        <TextBlock Grid.Row="2" 
+                   Text="History" 
+                   FontWeight="Bold" 
+                   FontSize="14"
+                   Foreground="#E0E0E0"
+                   Margin="10,10,10,5"/>
+        
+        <!-- History List -->
+        <ListBox Grid.Row="3" 
+                 ItemsSource="{Binding History}"
+                 SelectedItem="{Binding SelectedHistoryItem}"
+                 Background="Transparent"
+                 Margin="5">
+            <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="vm:history_item_view_model">
+                    <StackPanel Margin="5">
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                            <TextBlock Text="{Binding Method}" 
+                                       FontWeight="Bold"
+                                       FontSize="10"
+                                       Foreground="#4CAF50"/>
+                            <TextBlock Text="{Binding StatusCode}" 
+                                       FontSize="10"
+                                       Foreground="#81D4FA"/>
+                        </StackPanel>
+                        <TextBlock Text="{Binding Url}" 
+                                   FontSize="11"
+                                   TextTrimming="CharacterEllipsis"
+                                   Foreground="#BDBDBD"/>
+                        <TextBlock Text="{Binding ExecutedAt, StringFormat={}{0:g}}" 
+                                   FontSize="10"
+                                   Foreground="#757575"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
+</UserControl>

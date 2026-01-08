@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/PostmanClone.Core/PostmanClone.Core.csproj" />
+    <Project Path="src/PostmanClone.App/PostmanClone.App.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/PostmanClone.Core.Tests/PostmanClone.Core.Tests.csproj" />
