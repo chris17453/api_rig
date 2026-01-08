@@ -81,13 +81,19 @@ public partial class main_view_model : ObservableObject
         // Dialog will be shown from the view
     }
 
-    private void on_response_received(object? sender, http_response_model response)
+    private void on_execution_completed(object? sender, request_execution_result result)
     {
         if (result.response != null)
         {
             ResponseViewer.load_response(result.response);
         }
-        // TODO: Pass logs and test results to a "Test Results" view model if we implement one
+        
+        // Update Test Results
+        TestResults.ClearResultsCommand.Execute(null);
+        foreach (var test in result.all_test_results)
+        {
+            TestResults.AddTestResult(test.name, test.passed, test.error_message);
+        }
         
         _ = Sidebar.refresh_history_async(CancellationToken.None);
     }
