@@ -1,0 +1,61 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:PostmanClone.App.ViewModels"
+        xmlns:views="using:PostmanClone.App.Views"
+        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
+        x:Class="PostmanClone.App.Views.main_window"
+        x:DataType="vm:main_view_model"
+        Title="{Binding Title}"
+        Width="1200" Height="800"
+        WindowStartupLocation="CenterScreen"
+        Icon="avares://PostmanClone.App/Assets/logo.webp">
+
+    <Grid ColumnDefinitions="250,*">
+        <!-- Sidebar -->
+        <Border Grid.Column="0" 
+                IsVisible="{Binding IsSidebarVisible}"
+                Background="#2D2D2D"
+                BorderBrush="#404040" 
+                BorderThickness="0,0,1,0">
+            <Grid RowDefinitions="Auto,Auto,*">
+                <!-- Logo and App Title -->
+                <StackPanel Grid.Row="0" 
+                            Orientation="Horizontal" 
+                            Margin="10,15,10,10"
+                            Spacing="10">
+                    <Image Source="avares://PostmanClone.App/Assets/logo.webp" 
+                           Width="40" Height="40"/>
+                    <TextBlock Text="API Rig" 
+                               FontSize="20" 
+                               FontWeight="Bold"
+                               VerticalAlignment="Center"
+                               Foreground="#FFFFFF"/>
+                </StackPanel>
+                
+                <!-- Environment Selector -->
+                <views:environment_selector_view Grid.Row="1" 
+                                                  DataContext="{Binding EnvironmentSelector}"
+                                                  Margin="10,0,10,10"/>
+                
+                <!-- Collections and History -->
+                <views:sidebar_view Grid.Row="2" 
+                                    DataContext="{Binding Sidebar}"/>
+            </Grid>
+        </Border>
+        
+        <!-- Main Content -->
+        <Grid Grid.Column="1" RowDefinitions="Auto,*">
+            <!-- Request Editor -->
+            <views:request_editor_view Grid.Row="0" 
+                                       DataContext="{Binding RequestEditor}"
+                                       Margin="10"/>
+            
+            <!-- Response Viewer -->
+            <views:response_viewer_view Grid.Row="1" 
+                                        DataContext="{Binding ResponseViewer}"
+                                        Margin="10"/>
+        </Grid>
+    </Grid>
+</Window>
