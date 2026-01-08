@@ -177,8 +177,6 @@ public partial class sidebar_view_model : ObservableObject
                 // Pass the collection item ID (value.Id) not the request ID
                 request_with_collection_selected?.Invoke(this, (value.request, parentCollection.Id, value.Id));
             }
-            
-            request_selected?.Invoke(this, value.request);
         }
     }
 
@@ -261,7 +259,6 @@ public partial class sidebar_view_model : ObservableObject
             
             // Trigger request selection to load it in the editor with collection ID and collection item ID
             request_with_collection_selected?.Invoke(this, (newRequest, collection.id, newCollectionItem.id));
-            request_selected?.Invoke(this, newRequest);
             collection_changed?.Invoke(this, EventArgs.Empty);
         }
     }

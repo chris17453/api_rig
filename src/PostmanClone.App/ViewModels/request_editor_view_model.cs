@@ -173,6 +173,8 @@ public partial class request_editor_view_model : ObservableObject
             // Get the target collection
             var targetCollectionId = CurrentCollectionId;
             
+            _logger.LogInformation("SaveRequest: CurrentCollectionId='{CurrentCollectionId}'", CurrentCollectionId ?? "null");
+            
             if (string.IsNullOrWhiteSpace(targetCollectionId))
             {
                 // Create default collection if none exists
@@ -316,10 +318,16 @@ public partial class request_editor_view_model : ObservableObject
 
     public void load_request(http_request_model request, string? collectionId = null, string? collectionItemId = null)
     {
+        _logger.LogInformation("Loading request '{RequestName}' with CollectionId='{CollectionId}', CollectionItemId='{CollectionItemId}'", 
+            request.name, collectionId ?? "null", collectionItemId ?? "null");
+        
         RequestName = request.name;
         // Use the collection item ID for tracking, not the request ID
         CurrentRequestId = collectionItemId ?? request.id;
         CurrentCollectionId = collectionId;
+        
+        _logger.LogInformation("Set CurrentCollectionId to '{CurrentCollectionId}'", CurrentCollectionId ?? "null");
+        
         Url = request.url;
         SelectedMethod = request.method;
         RequestBody = request.body?.raw_content ?? string.Empty;

@@ -10,59 +10,102 @@
         Title="{Binding Title}"
         Width="1400" Height="900"
         WindowStartupLocation="CenterScreen"
+        Background="#0D1117"
         Icon="avares://PostmanClone.App/Assets/logo.webp">
 
-    <Grid ColumnDefinitions="280,*,350">
+    <Window.Styles>
+        <!-- Modern Button Style -->
+        <Style Selector="Button.modern">
+            <Setter Property="Background" Value="#21262D"/>
+            <Setter Property="Foreground" Value="#C9D1D9"/>
+            <Setter Property="BorderBrush" Value="#30363D"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+        <Style Selector="Button.modern:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#30363D"/>
+        </Style>
+        <Style Selector="Button.primary">
+            <Setter Property="Background" Value="#238636"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#2EA043"/>
+        </Style>
+        <Style Selector="Button.accent">
+            <Setter Property="Background" Value="#1F6FEB"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="14,8"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style Selector="Button.accent:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#388BFD"/>
+        </Style>
+    </Window.Styles>
+
+    <Grid ColumnDefinitions="280,*,320" Margin="0">
         <!-- Sidebar -->
         <Border Grid.Column="0" 
                 IsVisible="{Binding IsSidebarVisible}"
-                Background="#2D2D2D"
-                BorderBrush="#404040" 
+                Background="#161B22"
+                BorderBrush="#21262D" 
                 BorderThickness="0,0,1,0">
             <Grid RowDefinitions="Auto,Auto,Auto,*">
                 <!-- Logo and App Title -->
-                <StackPanel Grid.Row="0" 
-                            Orientation="Horizontal" 
-                            Margin="10,15,10,10"
-                            Spacing="10">
-                    <Image Source="avares://PostmanClone.App/Assets/logo.webp" 
-                           Width="40" Height="40"/>
-                    <TextBlock Text="API Rig" 
-                               FontSize="20" 
-                               FontWeight="Bold"
-                               VerticalAlignment="Center"
-                               Foreground="#FFFFFF"/>
-                </StackPanel>
+                <Border Grid.Row="0" 
+                        Background="#0D1117"
+                        Padding="16,20,16,16">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Border CornerRadius="10" 
+                                ClipToBounds="True"
+                                Width="44" Height="44">
+                            <Image Source="avares://PostmanClone.App/Assets/logo.webp"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="API Rig" 
+                                       FontSize="18" 
+                                       FontWeight="Bold"
+                                       Foreground="#F0F6FC"/>
+                            <TextBlock Text="REST Client"
+                                       FontSize="11"
+                                       Foreground="#8B949E"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
                 
                 <!-- Import/Export Buttons -->
                 <StackPanel Grid.Row="1" 
                             Orientation="Horizontal" 
-                            Margin="10,0,10,10"
-                            Spacing="5">
-                    <Button Content="Import"
-                            Click="ImportButton_Click"
-                            Padding="12,5"
-                            FontSize="11"
-                            Background="#404040"
-                            Foreground="#E0E0E0"/>
-                    <Button Content="Export"
-                            Click="ExportButton_Click"
-                            Padding="12,5"
-                            FontSize="11"
-                            Background="#404040"
-                            Foreground="#E0E0E0"/>
-                    <Button Content="About"
-                            Click="AboutButton_Click"
-                            Padding="12,5"
-                            FontSize="11"
-                            Background="#404040"
-                            Foreground="#E0E0E0"/>
+                            Margin="16,0,16,16"
+                            Spacing="8">
+                    <Button Classes="modern"
+                            Click="ImportButton_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="↓" FontSize="12"/>
+                            <TextBlock Text="Import"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="modern"
+                            Click="ExportButton_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="↑" FontSize="12"/>
+                            <TextBlock Text="Export"/>
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
                 
                 <!-- Environment Selector -->
                 <views:environment_selector_view Grid.Row="2" 
                                                   DataContext="{Binding EnvironmentSelector}"
-                                                  Margin="10,0,10,10"/>
+                                                  Margin="16,0,16,16"/>
                 
                 <!-- Collections and History -->
                 <views:sidebar_view Grid.Row="3" 
@@ -71,27 +114,38 @@
         </Border>
         
         <!-- Main Content Area -->
-        <Grid Grid.Column="1" RowDefinitions="Auto,Auto,*">
-            <!-- Request Editor -->
-            <views:request_editor_view Grid.Row="0" 
-                                       DataContext="{Binding RequestEditor}"
-                                       Margin="10"/>
-            
-            <!-- Script Editor -->
-            <Border Grid.Row="1" Margin="10,0,10,10" MinHeight="250">
-                <views:script_editor_view DataContext="{Binding ScriptEditor}"/>
-            </Border>
-            
-            <!-- Response Viewer -->
-            <views:response_viewer_view Grid.Row="2" 
-                                        DataContext="{Binding ResponseViewer}"
-                                        Margin="10,0,10,10"/>
-        </Grid>
+        <Border Grid.Column="1" Background="#0D1117">
+            <Grid RowDefinitions="Auto,Auto,*" Margin="20,16,20,16">
+                <!-- Request Editor -->
+                <views:request_editor_view Grid.Row="0" 
+                                           DataContext="{Binding RequestEditor}"/>
+                
+                <!-- Script Editor -->
+                <Border Grid.Row="1" 
+                        Margin="0,16,0,16" 
+                        MinHeight="220"
+                        Background="#161B22"
+                        CornerRadius="12"
+                        BorderBrush="#21262D"
+                        BorderThickness="1">
+                    <views:script_editor_view DataContext="{Binding ScriptEditor}"/>
+                </Border>
+                
+                <!-- Response Viewer -->
+                <Border Grid.Row="2"
+                        Background="#161B22"
+                        CornerRadius="12"
+                        BorderBrush="#21262D"
+                        BorderThickness="1">
+                    <views:response_viewer_view DataContext="{Binding ResponseViewer}"/>
+                </Border>
+            </Grid>
+        </Border>
         
         <!-- Right Panel - Test Results -->
         <Border Grid.Column="2" 
-                Background="#252526"
-                BorderBrush="#404040"
+                Background="#161B22"
+                BorderBrush="#21262D"
                 BorderThickness="1,0,0,0">
             <views:test_results_view DataContext="{Binding TestResults}"/>
         </Border>

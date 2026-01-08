@@ -7,44 +7,80 @@
              x:Class="PostmanClone.App.Views.environment_selector_view"
              x:DataType="vm:environment_selector_view_model">
 
-    <StackPanel Spacing="5">
+    <StackPanel Spacing="8">
         <!-- Environment Header with Add Button -->
         <Grid ColumnDefinitions="*,Auto">
-            <TextBlock Grid.Column="0"
-                       Text="Environment" 
-                       FontWeight="Bold" 
-                       FontSize="12"
-                       Foreground="#E0E0E0"
-                       VerticalAlignment="Center"/>
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="🌍" FontSize="14"/>
+                <TextBlock Text="Environment" 
+                           FontWeight="SemiBold" 
+                           FontSize="13"
+                           Foreground="#F0F6FC"
+                           VerticalAlignment="Center"/>
+            </StackPanel>
             <Button Grid.Column="1"
                     Command="{Binding StartCreateEnvironmentCommand}"
-                    Content="+"
-                    FontSize="14"
-                    Padding="8,2"
-                    Background="#0E639C"
-                    ToolTip.Tip="Create new environment"/>
+                    ToolTip.Tip="Create new environment">
+                <Button.Styles>
+                    <Style Selector="Button">
+                        <Setter Property="Background" Value="#238636"/>
+                        <Setter Property="Foreground" Value="#FFFFFF"/>
+                        <Setter Property="CornerRadius" Value="6"/>
+                        <Setter Property="Padding" Value="10,4"/>
+                        <Setter Property="FontSize" Value="12"/>
+                    </Style>
+                    <Style Selector="Button:pointerover /template/ ContentPresenter">
+                        <Setter Property="Background" Value="#2EA043"/>
+                    </Style>
+                </Button.Styles>
+                <TextBlock Text="+" FontWeight="Bold"/>
+            </Button>
         </Grid>
 
         <!-- Create Environment Panel -->
         <Border IsVisible="{Binding IsCreatingEnvironment}"
-                Background="#333333"
-                CornerRadius="3"
-                Padding="8">
-            <StackPanel Spacing="5">
-                <TextBlock Text="New Environment Name:" FontSize="11" Foreground="#CCC"/>
+                Background="#21262D"
+                CornerRadius="8"
+                Padding="12"
+                BorderBrush="#30363D"
+                BorderThickness="1">
+            <StackPanel Spacing="10">
+                <TextBlock Text="New Environment" FontSize="12" Foreground="#F0F6FC" FontWeight="SemiBold"/>
                 <TextBox Text="{Binding NewEnvironmentName}"
                          Watermark="Environment name"
-                         FontSize="11"/>
-                <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Right">
-                    <Button Command="{Binding CancelCreateEnvironmentCommand}"
-                            Content="Cancel"
-                            Padding="10,3"
-                            FontSize="11"/>
-                    <Button Command="{Binding CreateEnvironmentCommand}"
-                            Content="Create"
-                            Padding="10,3"
-                            FontSize="11"
-                            Background="#0E639C"/>
+                         Background="#0D1117"
+                         Foreground="#C9D1D9"
+                         BorderBrush="#30363D"
+                         CornerRadius="6"
+                         Padding="10,8"
+                         FontSize="12"/>
+                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                    <Button Command="{Binding CancelCreateEnvironmentCommand}">
+                        <Button.Styles>
+                            <Style Selector="Button">
+                                <Setter Property="Background" Value="#21262D"/>
+                                <Setter Property="Foreground" Value="#C9D1D9"/>
+                                <Setter Property="CornerRadius" Value="6"/>
+                                <Setter Property="Padding" Value="12,6"/>
+                                <Setter Property="FontSize" Value="11"/>
+                                <Setter Property="BorderBrush" Value="#30363D"/>
+                                <Setter Property="BorderThickness" Value="1"/>
+                            </Style>
+                        </Button.Styles>
+                        <TextBlock Text="Cancel"/>
+                    </Button>
+                    <Button Command="{Binding CreateEnvironmentCommand}">
+                        <Button.Styles>
+                            <Style Selector="Button">
+                                <Setter Property="Background" Value="#238636"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                                <Setter Property="CornerRadius" Value="6"/>
+                                <Setter Property="Padding" Value="12,6"/>
+                                <Setter Property="FontSize" Value="11"/>
+                            </Style>
+                        </Button.Styles>
+                        <TextBlock Text="Create" FontWeight="SemiBold"/>
+                    </Button>
                 </StackPanel>
             </StackPanel>
         </Border>
@@ -52,55 +88,106 @@
         <!-- Environment Selector -->
         <ComboBox ItemsSource="{Binding Environments}"
                   SelectedItem="{Binding SelectedEnvironment}"
-                  HorizontalAlignment="Stretch">
+                  HorizontalAlignment="Stretch"
+                  Background="#21262D"
+                  Foreground="#C9D1D9"
+                  BorderBrush="#30363D"
+                  CornerRadius="6"
+                  Padding="4">
             <ComboBox.ItemTemplate>
                 <DataTemplate x:DataType="vm:environment_item_view_model">
-                    <StackPanel Orientation="Horizontal" Spacing="5">
-                        <TextBlock Text="{Binding Name}"/>
-                        <TextBlock Text="{Binding VariableCount, StringFormat=({0} vars)}"
-                                   Foreground="#888"
-                                   FontSize="11"
-                                   IsVisible="{Binding VariableCount}"/>
+                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="4">
+                        <TextBlock Text="{Binding Name}" Foreground="#C9D1D9" FontSize="12"/>
+                        <Border Background="#30363D" 
+                                CornerRadius="4" 
+                                Padding="6,2"
+                                IsVisible="{Binding VariableCount}">
+                            <TextBlock Text="{Binding VariableCount, StringFormat={}{0} vars}"
+                                       Foreground="#8B949E"
+                                       FontSize="10"/>
+                        </Border>
                     </StackPanel>
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
 
-        <!-- Environment Actions (Rename/Delete) - Only show when an environment is selected -->
+        <!-- Environment Actions (Rename/Delete) -->
         <StackPanel Orientation="Horizontal" 
-                    Spacing="5" 
+                    Spacing="8" 
                     IsVisible="{Binding SelectedEnvironment.Id, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-            <Button Command="{Binding StartRenameEnvironmentCommand}"
-                    Content="Rename"
-                    Padding="8,3"
-                    FontSize="10"
-                    Background="#3C3C3C"/>
-            <Button Command="{Binding DeleteEnvironmentCommand}"
-                    Content="Delete"
-                    Padding="8,3"
-                    FontSize="10"
-                    Background="#8B0000"/>
+            <Button Command="{Binding StartRenameEnvironmentCommand}">
+                <Button.Styles>
+                    <Style Selector="Button">
+                        <Setter Property="Background" Value="#21262D"/>
+                        <Setter Property="Foreground" Value="#58A6FF"/>
+                        <Setter Property="CornerRadius" Value="6"/>
+                        <Setter Property="Padding" Value="10,5"/>
+                        <Setter Property="FontSize" Value="11"/>
+                        <Setter Property="BorderBrush" Value="#30363D"/>
+                        <Setter Property="BorderThickness" Value="1"/>
+                    </Style>
+                </Button.Styles>
+                <TextBlock Text="Rename"/>
+            </Button>
+            <Button Command="{Binding DeleteEnvironmentCommand}">
+                <Button.Styles>
+                    <Style Selector="Button">
+                        <Setter Property="Background" Value="#21262D"/>
+                        <Setter Property="Foreground" Value="#F85149"/>
+                        <Setter Property="CornerRadius" Value="6"/>
+                        <Setter Property="Padding" Value="10,5"/>
+                        <Setter Property="FontSize" Value="11"/>
+                        <Setter Property="BorderBrush" Value="#30363D"/>
+                        <Setter Property="BorderThickness" Value="1"/>
+                    </Style>
+                </Button.Styles>
+                <TextBlock Text="Delete"/>
+            </Button>
         </StackPanel>
 
         <!-- Rename Environment Panel -->
         <Border IsVisible="{Binding IsEditingName}"
-                Background="#333333"
-                CornerRadius="3"
-                Padding="8">
-            <StackPanel Spacing="5">
-                <TextBlock Text="Rename Environment:" FontSize="11" Foreground="#CCC"/>
+                Background="#21262D"
+                CornerRadius="8"
+                Padding="12"
+                BorderBrush="#30363D"
+                BorderThickness="1">
+            <StackPanel Spacing="10">
+                <TextBlock Text="Rename Environment" FontSize="12" Foreground="#F0F6FC" FontWeight="SemiBold"/>
                 <TextBox Text="{Binding EditingEnvironmentName}"
-                         FontSize="11"/>
-                <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Right">
-                    <Button Command="{Binding CancelRenameEnvironmentCommand}"
-                            Content="Cancel"
-                            Padding="10,3"
-                            FontSize="11"/>
-                    <Button Command="{Binding RenameEnvironmentCommand}"
-                            Content="Save"
-                            Padding="10,3"
-                            FontSize="11"
-                            Background="#0E639C"/>
+                         Background="#0D1117"
+                         Foreground="#C9D1D9"
+                         BorderBrush="#30363D"
+                         CornerRadius="6"
+                         Padding="10,8"
+                         FontSize="12"/>
+                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                    <Button Command="{Binding CancelRenameEnvironmentCommand}">
+                        <Button.Styles>
+                            <Style Selector="Button">
+                                <Setter Property="Background" Value="#21262D"/>
+                                <Setter Property="Foreground" Value="#C9D1D9"/>
+                                <Setter Property="CornerRadius" Value="6"/>
+                                <Setter Property="Padding" Value="12,6"/>
+                                <Setter Property="FontSize" Value="11"/>
+                                <Setter Property="BorderBrush" Value="#30363D"/>
+                                <Setter Property="BorderThickness" Value="1"/>
+                            </Style>
+                        </Button.Styles>
+                        <TextBlock Text="Cancel"/>
+                    </Button>
+                    <Button Command="{Binding RenameEnvironmentCommand}">
+                        <Button.Styles>
+                            <Style Selector="Button">
+                                <Setter Property="Background" Value="#238636"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                                <Setter Property="CornerRadius" Value="6"/>
+                                <Setter Property="Padding" Value="12,6"/>
+                                <Setter Property="FontSize" Value="11"/>
+                            </Style>
+                        </Button.Styles>
+                        <TextBlock Text="Save" FontWeight="SemiBold"/>
+                    </Button>
                 </StackPanel>
             </StackPanel>
         </Border>
@@ -108,58 +195,92 @@
         <!-- Variables Toggle Button -->
         <Button Command="{Binding ToggleVariablesCommand}"
                 HorizontalAlignment="Stretch"
-                Padding="5,3"
-                Background="#3C3C3C"
-                Margin="0,5,0,0"
                 IsVisible="{Binding SelectedEnvironment.Id, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-            <StackPanel Orientation="Horizontal" Spacing="5">
-                <TextBlock Text="▼" FontSize="10" IsVisible="{Binding IsVariablesExpanded}"/>
-                <TextBlock Text="▶" FontSize="10" IsVisible="{Binding !IsVariablesExpanded}"/>
-                <TextBlock Text="Variables" FontSize="11"/>
-                <TextBlock Text="{Binding Variables.Count, StringFormat=({0})}" FontSize="10" Foreground="#888"/>
+            <Button.Styles>
+                <Style Selector="Button">
+                    <Setter Property="Background" Value="#21262D"/>
+                    <Setter Property="Foreground" Value="#C9D1D9"/>
+                    <Setter Property="CornerRadius" Value="6"/>
+                    <Setter Property="Padding" Value="10,8"/>
+                    <Setter Property="BorderBrush" Value="#30363D"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                </Style>
+                <Style Selector="Button:pointerover /template/ ContentPresenter">
+                    <Setter Property="Background" Value="#30363D"/>
+                </Style>
+            </Button.Styles>
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="▼" FontSize="10" IsVisible="{Binding IsVariablesExpanded}" Foreground="#8B949E"/>
+                <TextBlock Text="▶" FontSize="10" IsVisible="{Binding !IsVariablesExpanded}" Foreground="#8B949E"/>
+                <TextBlock Text="Variables" FontSize="12"/>
+                <Border Background="#30363D" CornerRadius="4" Padding="6,2">
+                    <TextBlock Text="{Binding Variables.Count}" FontSize="10" Foreground="#8B949E"/>
+                </Border>
             </StackPanel>
         </Button>
 
         <!-- Variables Panel (Expandable) -->
         <Border IsVisible="{Binding IsVariablesExpanded}"
-                Background="#252526"
-                CornerRadius="3"
-                Padding="8"
-                MaxHeight="250">
+                Background="#0D1117"
+                CornerRadius="8"
+                Padding="12"
+                BorderBrush="#21262D"
+                BorderThickness="1"
+                MaxHeight="280">
             <Grid RowDefinitions="Auto,*,Auto">
                 <!-- Variables Header -->
-                <Grid Grid.Row="0" ColumnDefinitions="*,*,Auto" Margin="0,0,0,5">
-                    <TextBlock Grid.Column="0" Text="Variable Name" FontSize="10" Foreground="#888" FontWeight="Bold"/>
-                    <TextBlock Grid.Column="1" Text="Value" FontSize="10" Foreground="#888" FontWeight="Bold" Margin="3,0,0,0"/>
+                <Grid Grid.Row="0" ColumnDefinitions="*,*,Auto" Margin="0,0,0,8">
+                    <TextBlock Grid.Column="0" Text="NAME" FontSize="10" Foreground="#8B949E" FontWeight="Bold"/>
+                    <TextBlock Grid.Column="1" Text="VALUE" FontSize="10" Foreground="#8B949E" FontWeight="Bold" Margin="8,0,0,0"/>
                 </Grid>
                 
                 <!-- Variables List -->
-                <ScrollViewer Grid.Row="1" MaxHeight="150">
+                <ScrollViewer Grid.Row="1" MaxHeight="160">
                     <ItemsControl ItemsSource="{Binding Variables}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="vm:environment_variable_view_model">
-                                <Grid ColumnDefinitions="*,*,Auto" Margin="0,2">
-                                    <TextBox Grid.Column="0"
-                                             Text="{Binding Key}"
-                                             Watermark="variable_name"
-                                             FontSize="11"
-                                             Padding="5,3"
-                                             Margin="0,0,3,0"/>
-                                    <TextBox Grid.Column="1"
-                                             Text="{Binding Value}"
-                                             Watermark="value"
-                                             FontSize="11"
-                                             Padding="5,3"
-                                             Margin="0,0,3,0"/>
-                                    <Button Grid.Column="2"
-                                            Command="{Binding $parent[ItemsControl].((vm:environment_selector_view_model)DataContext).RemoveVariableCommand}"
-                                            CommandParameter="{Binding}"
-                                            Content="✕"
-                                            FontSize="10"
-                                            Padding="5,2"
-                                            Background="Transparent"
-                                            Foreground="#888"/>
-                                </Grid>
+                                <Border Background="#161B22" 
+                                        CornerRadius="6" 
+                                        Padding="8"
+                                        Margin="0,0,0,6">
+                                    <Grid ColumnDefinitions="*,*,Auto">
+                                        <TextBox Grid.Column="0"
+                                                 Text="{Binding Key}"
+                                                 Watermark="variable_name"
+                                                 Background="#21262D"
+                                                 Foreground="#C9D1D9"
+                                                 BorderBrush="#30363D"
+                                                 CornerRadius="4"
+                                                 FontSize="11"
+                                                 Padding="8,6"
+                                                 Margin="0,0,6,0"/>
+                                        <TextBox Grid.Column="1"
+                                                 Text="{Binding Value}"
+                                                 Watermark="value"
+                                                 Background="#21262D"
+                                                 Foreground="#C9D1D9"
+                                                 BorderBrush="#30363D"
+                                                 CornerRadius="4"
+                                                 FontSize="11"
+                                                 Padding="8,6"
+                                                 Margin="0,0,6,0"/>
+                                        <Button Grid.Column="2"
+                                                Command="{Binding $parent[ItemsControl].((vm:environment_selector_view_model)DataContext).RemoveVariableCommand}"
+                                                CommandParameter="{Binding}">
+                                            <Button.Styles>
+                                                <Style Selector="Button">
+                                                    <Setter Property="Background" Value="Transparent"/>
+                                                    <Setter Property="Foreground" Value="#484F58"/>
+                                                    <Setter Property="Padding" Value="6,4"/>
+                                                </Style>
+                                                <Style Selector="Button:pointerover /template/ ContentPresenter">
+                                                    <Setter Property="Foreground" Value="#F85149"/>
+                                                </Style>
+                                            </Button.Styles>
+                                            <TextBlock Text="✕" FontSize="12"/>
+                                        </Button>
+                                    </Grid>
+                                </Border>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
@@ -168,11 +289,22 @@
                 <!-- Save Button -->
                 <Button Grid.Row="2"
                         Command="{Binding SaveVariablesCommand}"
-                        Content="Save Variables"
                         HorizontalAlignment="Stretch"
-                        Padding="5,5"
-                        Margin="0,8,0,0"
-                        Background="#0E639C"/>
+                        Margin="0,10,0,0">
+                    <Button.Styles>
+                        <Style Selector="Button">
+                            <Setter Property="Background" Value="#238636"/>
+                            <Setter Property="Foreground" Value="#FFFFFF"/>
+                            <Setter Property="CornerRadius" Value="6"/>
+                            <Setter Property="Padding" Value="12,8"/>
+                            <Setter Property="FontSize" Value="12"/>
+                        </Style>
+                        <Style Selector="Button:pointerover /template/ ContentPresenter">
+                            <Setter Property="Background" Value="#2EA043"/>
+                        </Style>
+                    </Button.Styles>
+                    <TextBlock Text="Save Variables" FontWeight="SemiBold"/>
+                </Button>
             </Grid>
         </Border>
     </StackPanel>

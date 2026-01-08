@@ -7,95 +7,148 @@
              x:Class="PostmanClone.App.Views.request_editor_view"
              x:DataType="vm:request_editor_view_model">
 
+    <UserControl.Styles>
+        <Style Selector="TextBox.url-input">
+            <Setter Property="Background" Value="#0D1117"/>
+            <Setter Property="Foreground" Value="#C9D1D9"/>
+            <Setter Property="BorderBrush" Value="#30363D"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="FontFamily" Value="JetBrains Mono, Consolas, monospace"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+        <Style Selector="TextBox.url-input:focus">
+            <Setter Property="BorderBrush" Value="#58A6FF"/>
+        </Style>
+        <Style Selector="ComboBox.method-selector">
+            <Setter Property="Background" Value="#21262D"/>
+            <Setter Property="Foreground" Value="#7EE787"/>
+            <Setter Property="BorderBrush" Value="#30363D"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+    </UserControl.Styles>
+
     <Grid RowDefinitions="Auto,Auto,Auto,Auto,*">
-        <!-- Request Name -->
-        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,10">
-            <TextBlock Grid.Column="0" 
-                       Text="Name:" 
-                       VerticalAlignment="Center"
-                       Margin="0,0,10,0"
-                       Foreground="#CCCCCC"/>
-            <TextBox Grid.Column="1" 
-                     Text="{Binding RequestName, Mode=TwoWay}"
-                     Watermark="Enter request name"
-                     Margin="0,0,10,0"/>
-            <Button Grid.Column="2"
-                    Command="{Binding SaveRequestCommand}"
-                    MinWidth="80"
-                    HorizontalContentAlignment="Center">
-                <Button.Content>
-                    <Panel>
-                        <TextBlock Text="Save" IsVisible="{Binding !IsSaving}"/>
-                        <TextBlock Text="Saving..." IsVisible="{Binding IsSaving}"/>
-                    </Panel>
-                </Button.Content>
-                <Button.Styles>
-                    <Style Selector="Button">
-                        <Setter Property="Background" Value="#28A745"/>
-                        <Setter Property="Foreground" Value="White"/>
-                    </Style>
-                    <Style Selector="Button:pointerover /template/ ContentPresenter">
-                        <Setter Property="Background" Value="#218838"/>
-                    </Style>
-                    <Style Selector="Button:disabled">
-                        <Setter Property="Opacity" Value="0.5"/>
-                    </Style>
-                </Button.Styles>
-            </Button>
-        </Grid>
+        <!-- Request Name and Save Button -->
+        <Border Grid.Row="0" 
+                Background="#161B22" 
+                CornerRadius="12" 
+                Padding="16"
+                BorderBrush="#21262D"
+                BorderThickness="1"
+                Margin="0,0,0,12">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <TextBlock Grid.Column="0" 
+                           Text="Name:" 
+                           VerticalAlignment="Center"
+                           Margin="0,0,12,0"
+                           Foreground="#8B949E"
+                           FontSize="13"/>
+                <TextBox Grid.Column="1" 
+                         Classes="url-input"
+                         Text="{Binding RequestName, Mode=TwoWay}"
+                         Watermark="Enter request name"
+                         Margin="0,0,12,0"/>
+                <Button Grid.Column="2"
+                        Command="{Binding SaveRequestCommand}"
+                        MinWidth="100"
+                        HorizontalContentAlignment="Center">
+                    <Button.Content>
+                        <Panel>
+                            <TextBlock Text="💾 Save" IsVisible="{Binding !IsSaving}"/>
+                            <TextBlock Text="Saving..." IsVisible="{Binding IsSaving}"/>
+                        </Panel>
+                    </Button.Content>
+                    <Button.Styles>
+                        <Style Selector="Button">
+                            <Setter Property="Background" Value="#238636"/>
+                            <Setter Property="Foreground" Value="White"/>
+                            <Setter Property="CornerRadius" Value="6"/>
+                            <Setter Property="Padding" Value="12,8"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                        </Style>
+                        <Style Selector="Button:pointerover /template/ ContentPresenter">
+                            <Setter Property="Background" Value="#2EA043"/>
+                        </Style>
+                        <Style Selector="Button:disabled">
+                            <Setter Property="Opacity" Value="0.5"/>
+                        </Style>
+                    </Button.Styles>
+                </Button>
+            </Grid>
+        </Border>
         
         <!-- Status Message -->
         <TextBlock Grid.Row="1" 
                    Text="{Binding StatusMessage}"
                    IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
-                   Margin="0,0,0,10"
-                   FontSize="12"/>
+                   Margin="0,0,0,12"
+                   FontSize="12"
+                   Foreground="#8B949E"/>
         
         <!-- URL Bar -->
-        <Grid Grid.Row="2" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,10">
-            <!-- Method Selector -->
-            <ComboBox Grid.Column="0" 
-                      ItemsSource="{Binding available_methods}"
-                      SelectedItem="{Binding SelectedMethod}"
-                      MinWidth="100"
-                      Margin="0,0,10,0">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding}" 
-                                   FontWeight="Bold"/>
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
-            
-            <!-- URL Input -->
-            <TextBox Grid.Column="1" 
-                     Text="{Binding Url, Mode=TwoWay}"
-                     Watermark="Enter request URL"
-                     FontFamily="Consolas"
-                     Margin="0,0,10,0"/>
-            
-            <!-- Send Button -->
-            <Button Grid.Column="2" 
-                    Command="{Binding SendRequestCommand}"
-                    MinWidth="80"
-                    HorizontalContentAlignment="Center">
-                <Button.Content>
-                    <Panel>
-                        <TextBlock Text="Send" IsVisible="{Binding !IsSending}"/>
-                        <TextBlock Text="Sending..." IsVisible="{Binding IsSending}"/>
-                    </Panel>
-                </Button.Content>
-                <Button.Styles>
-                    <Style Selector="Button">
-                        <Setter Property="Background" Value="#0078D4"/>
-                        <Setter Property="Foreground" Value="White"/>
-                    </Style>
-                    <Style Selector="Button:pointerover /template/ ContentPresenter">
-                        <Setter Property="Background" Value="#106EBE"/>
-                    </Style>
-                </Button.Styles>
-            </Button>
-        </Grid>
+        <Border Grid.Row="2" 
+                Background="#161B22" 
+                CornerRadius="12" 
+                Padding="16"
+                BorderBrush="#21262D"
+                BorderThickness="1"
+                Margin="0,0,0,12">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <!-- Method Selector -->
+                <ComboBox Grid.Column="0" 
+                          Classes="method-selector"
+                          ItemsSource="{Binding available_methods}"
+                          SelectedItem="{Binding SelectedMethod}"
+                          MinWidth="110"
+                          Margin="0,0,12,0">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}" 
+                                       FontWeight="Bold"
+                                       Foreground="#7EE787"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                
+                <!-- URL Input -->
+                <TextBox Grid.Column="1" 
+                         Classes="url-input"
+                         Text="{Binding Url, Mode=TwoWay}"
+                         Watermark="Enter request URL (e.g., https://api.example.com/users)"
+                         Margin="0,0,12,0"/>
+                
+                <!-- Send Button -->
+                <Button Grid.Column="2" 
+                        Command="{Binding SendRequestCommand}"
+                        MinWidth="100"
+                        HorizontalContentAlignment="Center">
+                    <Button.Content>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="🚀" IsVisible="{Binding !IsSending}"/>
+                            <TextBlock Text="Send" IsVisible="{Binding !IsSending}"/>
+                            <TextBlock Text="⏳ Sending..." IsVisible="{Binding IsSending}"/>
+                        </StackPanel>
+                    </Button.Content>
+                    <Button.Styles>
+                        <Style Selector="Button">
+                            <Setter Property="Background" Value="#1F6FEB"/>
+                            <Setter Property="Foreground" Value="White"/>
+                            <Setter Property="CornerRadius" Value="6"/>
+                            <Setter Property="Padding" Value="12,8"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                        </Style>
+                        <Style Selector="Button:pointerover /template/ ContentPresenter">
+                            <Setter Property="Background" Value="#388BFD"/>
+                        </Style>
+                    </Button.Styles>
+                </Button>
+            </Grid>
+        </Border>
 
         <!-- Tabs for Headers/Body -->
         <TabControl Grid.Row="3" Grid.RowSpan="2" MinHeight="150">
@@ -131,24 +184,35 @@
                     </ScrollViewer>
                 </Grid>
             </TabItem>
-
+            
             <!-- Body Tab -->
             <TabItem Header="Body">
-                <Grid RowDefinitions="Auto,*">
-                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,5">
-                        <TextBlock Text="Content-Type: application/json" 
-                                   FontSize="12" 
-                                   Foreground="#888"/>
-                    </StackPanel>
+                <Grid RowDefinitions="Auto,*" Margin="12">
+                    <Border Grid.Row="0" 
+                            Background="#21262D" 
+                            CornerRadius="6" 
+                            Padding="10,6"
+                            Margin="0,0,0,12"
+                            HorizontalAlignment="Left">
+                        <TextBlock Text="application/json" 
+                                   FontSize="11" 
+                                   Foreground="#8B949E"
+                                   FontFamily="JetBrains Mono, Consolas, monospace"/>
+                    </Border>
                     
                     <TextBox Grid.Row="1" 
                              Text="{Binding RequestBody, Mode=TwoWay}"
                              AcceptsReturn="True"
                              AcceptsTab="True"
-                             TextWrapping="Wrap"
-                             FontFamily="Consolas"
-                             Watermark="Enter JSON body here..."
-                             Margin="0,5"/>
+                             TextWrapping="NoWrap"
+                             FontFamily="JetBrains Mono, Consolas, monospace"
+                             FontSize="13"
+                             Watermark="Enter JSON body..."
+                             Background="#0D1117"
+                             Foreground="#C9D1D9"
+                             BorderBrush="#30363D"
+                             CornerRadius="8"
+                             Padding="12"/>
                 </Grid>
             </TabItem>
         </TabControl>

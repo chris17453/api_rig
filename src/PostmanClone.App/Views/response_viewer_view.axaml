@@ -10,85 +10,154 @@
     <Grid RowDefinitions="Auto,*">
         <!-- Status Bar -->
         <Border Grid.Row="0" 
-                Padding="10"
+                Padding="16,12"
+                Background="#21262D"
+                CornerRadius="8,8,0,0"
+                Margin="12,12,12,0"
                 IsVisible="{Binding HasResponse}">
-            <StackPanel Orientation="Horizontal" Spacing="20">
-                <StackPanel Orientation="Horizontal" Spacing="5">
-                    <TextBlock Text="Status:" FontWeight="Bold"/>
-                    <TextBlock Text="{Binding StatusCode}">
-                        <TextBlock.Styles>
-                            <Style Selector="TextBlock">
-                                <Setter Property="Foreground" Value="#28A745"/>
-                            </Style>
-                            <Style Selector="TextBlock[Tag=error]">
-                                <Setter Property="Foreground" Value="#DC3545"/>
-                            </Style>
-                        </TextBlock.Styles>
-                    </TextBlock>
-                    <TextBlock Text="{Binding StatusDescription}" Foreground="#666"/>
-                </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="16">
+                <!-- Status Badge -->
+                <Border Background="#238636" 
+                        CornerRadius="6" 
+                        Padding="12,6">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="{Binding StatusCode}"
+                                   FontWeight="Bold"
+                                   FontSize="14"
+                                   Foreground="#FFFFFF"/>
+                        <TextBlock Text="{Binding StatusDescription}" 
+                                   Foreground="#FFFFFF"
+                                   Opacity="0.8"
+                                   FontSize="12"/>
+                    </StackPanel>
+                </Border>
                 
-                <StackPanel Orientation="Horizontal" Spacing="5">
-                    <TextBlock Text="Time:" FontWeight="Bold"/>
-                    <TextBlock Text="{Binding ElapsedMs, StringFormat={}{0} ms}"/>
-                </StackPanel>
+                <!-- Time -->
+                <Border Background="#0D1117" 
+                        CornerRadius="6" 
+                        Padding="10,6">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="⏱" FontSize="12" Foreground="#8B949E"/>
+                        <TextBlock Text="{Binding ElapsedMs, StringFormat={}{0} ms}"
+                                   Foreground="#C9D1D9"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"/>
+                    </StackPanel>
+                </Border>
                 
-                <StackPanel Orientation="Horizontal" Spacing="5">
-                    <TextBlock Text="Size:" FontWeight="Bold"/>
-                    <TextBlock Text="{Binding SizeBytes, StringFormat={}{0} B}"/>
-                </StackPanel>
+                <!-- Size -->
+                <Border Background="#0D1117" 
+                        CornerRadius="6" 
+                        Padding="10,6">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="📦" FontSize="12" Foreground="#8B949E"/>
+                        <TextBlock Text="{Binding SizeBytes, StringFormat={}{0} B}"
+                                   Foreground="#C9D1D9"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"/>
+                    </StackPanel>
+                </Border>
             </StackPanel>
         </Border>
 
         <!-- Error Message -->
         <Border Grid.Row="0" 
-                Padding="10"
-                Background="#FFF3CD"
+                Padding="16,12"
+                Background="#3D1D1D"
+                CornerRadius="8"
+                Margin="12"
+                BorderBrush="#F85149"
+                BorderThickness="1"
                 IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-            <TextBlock Text="{Binding ErrorMessage}" 
-                       Foreground="#856404"
-                       TextWrapping="Wrap"/>
+            <StackPanel Orientation="Horizontal" Spacing="10">
+                <TextBlock Text="⚠" FontSize="16" Foreground="#F85149"/>
+                <TextBlock Text="{Binding ErrorMessage}" 
+                           Foreground="#F85149"
+                           TextWrapping="Wrap"
+                           VerticalAlignment="Center"/>
+            </StackPanel>
         </Border>
 
         <!-- Response Content -->
-        <TabControl Grid.Row="1" IsVisible="{Binding HasResponse}">
-            <!-- Body Tab -->
-            <TabItem Header="Body">
-                <ScrollViewer>
-                    <TextBox Text="{Binding FormattedBody, Mode=OneWay}"
-                             IsReadOnly="True"
-                             FontFamily="Consolas"
-                             TextWrapping="Wrap"
-                             AcceptsReturn="True"
-                             BorderThickness="0"/>
-                </ScrollViewer>
-            </TabItem>
+        <Border Grid.Row="1" 
+                IsVisible="{Binding HasResponse}"
+                Background="#0D1117"
+                CornerRadius="0,0,8,8"
+                BorderBrush="#30363D"
+                BorderThickness="1,0,1,1"
+                Margin="12,0,12,12">
+            <TabControl Background="Transparent" Padding="8">
+                <TabControl.Styles>
+                    <Style Selector="TabItem">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="Foreground" Value="#8B949E"/>
+                        <Setter Property="Padding" Value="16,10"/>
+                        <Setter Property="FontSize" Value="13"/>
+                    </Style>
+                    <Style Selector="TabItem:selected">
+                        <Setter Property="Foreground" Value="#F0F6FC"/>
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                    </Style>
+                </TabControl.Styles>
+                
+                <!-- Body Tab -->
+                <TabItem Header="Body">
+                    <ScrollViewer Margin="8">
+                        <TextBox Text="{Binding FormattedBody, Mode=OneWay}"
+                                 IsReadOnly="True"
+                                 FontFamily="JetBrains Mono, Consolas, monospace"
+                                 FontSize="12"
+                                 TextWrapping="NoWrap"
+                                 AcceptsReturn="True"
+                                 Background="Transparent"
+                                 Foreground="#C9D1D9"
+                                 BorderThickness="0"
+                                 Padding="8"/>
+                    </ScrollViewer>
+                </TabItem>
 
-            <!-- Headers Tab -->
-            <TabItem Header="Headers">
-                <ScrollViewer>
-                    <TextBox Text="{Binding HeadersText, Mode=OneWay}"
-                             IsReadOnly="True"
-                             FontFamily="Consolas"
-                             TextWrapping="Wrap"
-                             AcceptsReturn="True"
-                             BorderThickness="0"/>
-                </ScrollViewer>
-            </TabItem>
-        </TabControl>
+                <!-- Headers Tab -->
+                <TabItem Header="Headers">
+                    <ScrollViewer Margin="8">
+                        <TextBox Text="{Binding HeadersText, Mode=OneWay}"
+                                 IsReadOnly="True"
+                                 FontFamily="JetBrains Mono, Consolas, monospace"
+                                 FontSize="12"
+                                 TextWrapping="NoWrap"
+                                 AcceptsReturn="True"
+                                 Background="Transparent"
+                                 Foreground="#C9D1D9"
+                                 BorderThickness="0"
+                                 Padding="8"/>
+                    </ScrollViewer>
+                </TabItem>
+            </TabControl>
+        </Border>
 
         <!-- No Response Placeholder -->
         <Border Grid.Row="1" 
                 IsVisible="{Binding !HasResponse}"
                 HorizontalAlignment="Center"
-                VerticalAlignment="Center">
-            <StackPanel HorizontalAlignment="Center" Spacing="10">
+                VerticalAlignment="Center"
+                Margin="12">
+            <StackPanel HorizontalAlignment="Center" Spacing="16">
+                <Border Background="#21262D" 
+                        CornerRadius="50" 
+                        Width="80" Height="80"
+                        HorizontalAlignment="Center">
+                    <TextBlock Text="📡" 
+                               FontSize="32" 
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Border>
                 <TextBlock Text="No Response Yet" 
                            FontSize="18" 
-                           Foreground="#999"
+                           FontWeight="SemiBold"
+                           Foreground="#8B949E"
                            HorizontalAlignment="Center"/>
                 <TextBlock Text="Send a request to see the response here" 
-                           Foreground="#BBB"
+                           Foreground="#484F58"
+                           FontSize="13"
                            HorizontalAlignment="Center"/>
             </StackPanel>
         </Border>
