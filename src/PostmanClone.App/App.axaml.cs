@@ -4,7 +4,6 @@ using Avalonia.Markup.Xaml;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using PostmanClone.App.Services;
 using PostmanClone.App.ViewModels;
 using PostmanClone.App.Views;
 using PostmanClone.Core.Interfaces;
