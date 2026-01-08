@@ -1,0 +1,33 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:PostmanClone.App.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="250" d:DesignHeight="50"
+             x:Class="PostmanClone.App.Views.environment_selector_view"
+             x:DataType="vm:environment_selector_view_model">
+
+    <StackPanel>
+        <TextBlock Text="Environment" 
+                   FontWeight="Bold" 
+                   FontSize="12"
+                   Foreground="#E0E0E0"
+                   Margin="0,0,0,5"/>
+        
+        <ComboBox ItemsSource="{Binding Environments}"
+                  SelectedItem="{Binding SelectedEnvironment}"
+                  HorizontalAlignment="Stretch">
+            <ComboBox.ItemTemplate>
+                <DataTemplate x:DataType="vm:environment_item_view_model">
+                    <StackPanel Orientation="Horizontal" Spacing="5">
+                        <TextBlock Text="{Binding Name}"/>
+                        <TextBlock Text="{Binding VariableCount, StringFormat=({0} vars)}"
+                                   Foreground="#888"
+                                   FontSize="11"
+                                   IsVisible="{Binding VariableCount}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+    </StackPanel>
+</UserControl>

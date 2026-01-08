@@ -5,6 +5,7 @@
     <Project Path="src/PostmanClone.Http/PostmanClone.Http.csproj" />
     <Project Path="src/PostmanClone.Playground/PostmanClone.Playground.csproj" />
     <Project Path="src/PostmanClone.Scripting/PostmanClone.Scripting.csproj" />
+    <Project Path="src/PostmanClone.App/PostmanClone.App.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/PostmanClone.Core.Tests/PostmanClone.Core.Tests.csproj" />

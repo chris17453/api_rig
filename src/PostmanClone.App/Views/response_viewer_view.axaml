@@ -1,0 +1,96 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:PostmanClone.App.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="400"
+             x:Class="PostmanClone.App.Views.response_viewer_view"
+             x:DataType="vm:response_viewer_view_model">
+
+    <Grid RowDefinitions="Auto,*">
+        <!-- Status Bar -->
+        <Border Grid.Row="0" 
+                Padding="10"
+                IsVisible="{Binding HasResponse}">
+            <StackPanel Orientation="Horizontal" Spacing="20">
+                <StackPanel Orientation="Horizontal" Spacing="5">
+                    <TextBlock Text="Status:" FontWeight="Bold"/>
+                    <TextBlock Text="{Binding StatusCode}">
+                        <TextBlock.Styles>
+                            <Style Selector="TextBlock">
+                                <Setter Property="Foreground" Value="#28A745"/>
+                            </Style>
+                            <Style Selector="TextBlock[Tag=error]">
+                                <Setter Property="Foreground" Value="#DC3545"/>
+                            </Style>
+                        </TextBlock.Styles>
+                    </TextBlock>
+                    <TextBlock Text="{Binding StatusDescription}" Foreground="#666"/>
+                </StackPanel>
+                
+                <StackPanel Orientation="Horizontal" Spacing="5">
+                    <TextBlock Text="Time:" FontWeight="Bold"/>
+                    <TextBlock Text="{Binding ElapsedMs, StringFormat={}{0} ms}"/>
+                </StackPanel>
+                
+                <StackPanel Orientation="Horizontal" Spacing="5">
+                    <TextBlock Text="Size:" FontWeight="Bold"/>
+                    <TextBlock Text="{Binding SizeBytes, StringFormat={}{0} B}"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Error Message -->
+        <Border Grid.Row="0" 
+                Padding="10"
+                Background="#FFF3CD"
+                IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+            <TextBlock Text="{Binding ErrorMessage}" 
+                       Foreground="#856404"
+                       TextWrapping="Wrap"/>
+        </Border>
+
+        <!-- Response Content -->
+        <TabControl Grid.Row="1" IsVisible="{Binding HasResponse}">
+            <!-- Body Tab -->
+            <TabItem Header="Body">
+                <ScrollViewer>
+                    <TextBox Text="{Binding FormattedBody, Mode=OneWay}"
+                             IsReadOnly="True"
+                             FontFamily="Consolas"
+                             TextWrapping="Wrap"
+                             AcceptsReturn="True"
+                             BorderThickness="0"/>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- Headers Tab -->
+            <TabItem Header="Headers">
+                <ScrollViewer>
+                    <TextBox Text="{Binding HeadersText, Mode=OneWay}"
+                             IsReadOnly="True"
+                             FontFamily="Consolas"
+                             TextWrapping="Wrap"
+                             AcceptsReturn="True"
+                             BorderThickness="0"/>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+
+        <!-- No Response Placeholder -->
+        <Border Grid.Row="1" 
+                IsVisible="{Binding !HasResponse}"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+            <StackPanel HorizontalAlignment="Center" Spacing="10">
+                <TextBlock Text="No Response Yet" 
+                           FontSize="18" 
+                           Foreground="#999"
+                           HorizontalAlignment="Center"/>
+                <TextBlock Text="Send a request to see the response here" 
+                           Foreground="#BBB"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
