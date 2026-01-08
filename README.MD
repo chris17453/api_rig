@@ -181,6 +181,127 @@ Each project has a matching test project.
 
 ---
 
+## How to Build and Run
+
+### Prerequisites
+
+- .NET SDK 10.x installed
+- Git
+
+### Verify Installation
+
+```bash
+dotnet --version  # Should return 10.*
+```
+
+### Clone and Build
+
+```bash
+git clone <repository-url>
+cd api_rig
+dotnet restore
+dotnet build -c Release
+```
+
+### Run Tests
+
+```bash
+dotnet test -c Release
+```
+
+### Run All Tests with Verbose Output
+
+```bash
+dotnet test -c Release --logger "console;verbosity=detailed"
+```
+
+### Project-Specific Tests
+
+```bash
+# Core tests only
+dotnet test tests/PostmanClone.Core.Tests -c Release
+
+# Scripting tests only
+dotnet test tests/PostmanClone.Scripting.Tests -c Release
+```
+
+---
+
+## Current Implementation Status
+
+### Completed Modules
+
+| Module | Status | Tests |
+|--------|--------|-------|
+| PostmanClone.Core | ✅ Complete | 30 tests passing |
+| PostmanClone.Scripting | ✅ Complete (Phase 1 - Mock) | 41 tests passing |
+
+### Pending Modules
+
+| Module | Status |
+|--------|--------|
+| PostmanClone.Data | 🔄 In Progress (another team member) |
+| PostmanClone.Http | 🔄 In Progress (another team member) |
+| PostmanClone.App | 🔄 In Progress (another team member) |
+
+---
+
+## Scripting Module API
+
+The Scripting module provides a Postman-compatible `pm.*` API for pre-request and post-response scripts.
+
+### Available APIs
+
+```javascript
+// Test assertions
+pm.test("test name", function() {
+    // assertions here
+});
+
+// Expectations
+pm.expect(value).to.equal(expected);
+pm.expect(value).to.be.ok();
+pm.expect(value).to.be.true();
+pm.expect(value).to.be.false();
+pm.expect(value).to.be.null();
+pm.expect(string).to.include(substring);
+pm.expect(number).to.be.above(n);
+pm.expect(number).to.be.below(n);
+pm.expect(string).to.have.length(n);
+pm.expect(value).not.to.equal(other);
+
+// Environment variables
+var value = pm.environment.get("key");
+pm.environment.set("key", "value");
+pm.environment.has("key");
+
+// Request info (read-only)
+pm.request.url;
+pm.request.method;
+pm.request.headers;
+pm.request.body;
+
+// Response info (post-response only)
+pm.response.code;
+pm.response.status;
+pm.response.responseTime;
+pm.response.text();
+pm.response.json();
+pm.response.headers;
+
+// Console logging
+console.log("message");
+```
+
+### Sandbox Constraints
+
+- **Timeout**: 5 seconds default (configurable)
+- **Statement limit**: 100,000 statements max
+- **Recursion limit**: 100 levels max
+- **CLR access**: Restricted (no System.* access)
+
+---
+
 ## Notes
 
 - Postman JSON has quirks — use Newtonsoft, not System.Text.Json
