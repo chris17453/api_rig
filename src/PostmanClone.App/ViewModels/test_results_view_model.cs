@@ -35,7 +35,7 @@ public partial class test_results_view_model : ObservableObject
 
     public test_results_view_model()
     {
-        // Start with empty results - will be populated from actual test execution
+        // Start with empty results - tests will be populated after request execution
     }
 
     public void AddTestResult(string name, bool passed, string? errorMessage = null)

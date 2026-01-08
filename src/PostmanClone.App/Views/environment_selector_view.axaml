@@ -3,17 +3,53 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:PostmanClone.App.ViewModels"
-             mc:Ignorable="d" d:DesignWidth="250" d:DesignHeight="50"
+             mc:Ignorable="d" d:DesignWidth="250" d:DesignHeight="400"
              x:Class="PostmanClone.App.Views.environment_selector_view"
              x:DataType="vm:environment_selector_view_model">
 
-    <StackPanel>
-        <TextBlock Text="Environment" 
-                   FontWeight="Bold" 
-                   FontSize="12"
-                   Foreground="#E0E0E0"
-                   Margin="0,0,0,5"/>
+    <StackPanel Spacing="5">
+        <!-- Environment Header with Add Button -->
+        <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Grid.Column="0"
+                       Text="Environment" 
+                       FontWeight="Bold" 
+                       FontSize="12"
+                       Foreground="#E0E0E0"
+                       VerticalAlignment="Center"/>
+            <Button Grid.Column="1"
+                    Command="{Binding StartCreateEnvironmentCommand}"
+                    Content="+"
+                    FontSize="14"
+                    Padding="8,2"
+                    Background="#0E639C"
+                    ToolTip.Tip="Create new environment"/>
+        </Grid>
+
+        <!-- Create Environment Panel -->
+        <Border IsVisible="{Binding IsCreatingEnvironment}"
+                Background="#333333"
+                CornerRadius="3"
+                Padding="8">
+            <StackPanel Spacing="5">
+                <TextBlock Text="New Environment Name:" FontSize="11" Foreground="#CCC"/>
+                <TextBox Text="{Binding NewEnvironmentName}"
+                         Watermark="Environment name"
+                         FontSize="11"/>
+                <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Right">
+                    <Button Command="{Binding CancelCreateEnvironmentCommand}"
+                            Content="Cancel"
+                            Padding="10,3"
+                            FontSize="11"/>
+                    <Button Command="{Binding CreateEnvironmentCommand}"
+                            Content="Create"
+                            Padding="10,3"
+                            FontSize="11"
+                            Background="#0E639C"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
         
+        <!-- Environment Selector -->
         <ComboBox ItemsSource="{Binding Environments}"
                   SelectedItem="{Binding SelectedEnvironment}"
                   HorizontalAlignment="Stretch">
@@ -29,5 +65,115 @@
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
+
+        <!-- Environment Actions (Rename/Delete) - Only show when an environment is selected -->
+        <StackPanel Orientation="Horizontal" 
+                    Spacing="5" 
+                    IsVisible="{Binding SelectedEnvironment.Id, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+            <Button Command="{Binding StartRenameEnvironmentCommand}"
+                    Content="Rename"
+                    Padding="8,3"
+                    FontSize="10"
+                    Background="#3C3C3C"/>
+            <Button Command="{Binding DeleteEnvironmentCommand}"
+                    Content="Delete"
+                    Padding="8,3"
+                    FontSize="10"
+                    Background="#8B0000"/>
+        </StackPanel>
+
+        <!-- Rename Environment Panel -->
+        <Border IsVisible="{Binding IsEditingName}"
+                Background="#333333"
+                CornerRadius="3"
+                Padding="8">
+            <StackPanel Spacing="5">
+                <TextBlock Text="Rename Environment:" FontSize="11" Foreground="#CCC"/>
+                <TextBox Text="{Binding EditingEnvironmentName}"
+                         FontSize="11"/>
+                <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Right">
+                    <Button Command="{Binding CancelRenameEnvironmentCommand}"
+                            Content="Cancel"
+                            Padding="10,3"
+                            FontSize="11"/>
+                    <Button Command="{Binding RenameEnvironmentCommand}"
+                            Content="Save"
+                            Padding="10,3"
+                            FontSize="11"
+                            Background="#0E639C"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Variables Toggle Button -->
+        <Button Command="{Binding ToggleVariablesCommand}"
+                HorizontalAlignment="Stretch"
+                Padding="5,3"
+                Background="#3C3C3C"
+                Margin="0,5,0,0"
+                IsVisible="{Binding SelectedEnvironment.Id, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+            <StackPanel Orientation="Horizontal" Spacing="5">
+                <TextBlock Text="▼" FontSize="10" IsVisible="{Binding IsVariablesExpanded}"/>
+                <TextBlock Text="▶" FontSize="10" IsVisible="{Binding !IsVariablesExpanded}"/>
+                <TextBlock Text="Variables" FontSize="11"/>
+                <TextBlock Text="{Binding Variables.Count, StringFormat=({0})}" FontSize="10" Foreground="#888"/>
+            </StackPanel>
+        </Button>
+
+        <!-- Variables Panel (Expandable) -->
+        <Border IsVisible="{Binding IsVariablesExpanded}"
+                Background="#252526"
+                CornerRadius="3"
+                Padding="8"
+                MaxHeight="250">
+            <Grid RowDefinitions="Auto,*,Auto">
+                <!-- Variables Header -->
+                <Grid Grid.Row="0" ColumnDefinitions="*,*,Auto" Margin="0,0,0,5">
+                    <TextBlock Grid.Column="0" Text="Variable Name" FontSize="10" Foreground="#888" FontWeight="Bold"/>
+                    <TextBlock Grid.Column="1" Text="Value" FontSize="10" Foreground="#888" FontWeight="Bold" Margin="3,0,0,0"/>
+                </Grid>
+                
+                <!-- Variables List -->
+                <ScrollViewer Grid.Row="1" MaxHeight="150">
+                    <ItemsControl ItemsSource="{Binding Variables}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:environment_variable_view_model">
+                                <Grid ColumnDefinitions="*,*,Auto" Margin="0,2">
+                                    <TextBox Grid.Column="0"
+                                             Text="{Binding Key}"
+                                             Watermark="variable_name"
+                                             FontSize="11"
+                                             Padding="5,3"
+                                             Margin="0,0,3,0"/>
+                                    <TextBox Grid.Column="1"
+                                             Text="{Binding Value}"
+                                             Watermark="value"
+                                             FontSize="11"
+                                             Padding="5,3"
+                                             Margin="0,0,3,0"/>
+                                    <Button Grid.Column="2"
+                                            Command="{Binding $parent[ItemsControl].((vm:environment_selector_view_model)DataContext).RemoveVariableCommand}"
+                                            CommandParameter="{Binding}"
+                                            Content="✕"
+                                            FontSize="10"
+                                            Padding="5,2"
+                                            Background="Transparent"
+                                            Foreground="#888"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <!-- Save Button -->
+                <Button Grid.Row="2"
+                        Command="{Binding SaveVariablesCommand}"
+                        Content="Save Variables"
+                        HorizontalAlignment="Stretch"
+                        Padding="5,5"
+                        Margin="0,8,0,0"
+                        Background="#0E639C"/>
+            </Grid>
+        </Border>
     </StackPanel>
 </UserControl>
