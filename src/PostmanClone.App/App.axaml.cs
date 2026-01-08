@@ -50,5 +50,7 @@ public partial class App : Application
         services.AddTransient<response_viewer_view_model>();
         services.AddTransient<sidebar_view_model>();
         services.AddTransient<environment_selector_view_model>();
+        services.AddTransient<script_editor_view_model>();
+        services.AddTransient<test_results_view_model>();
     }
 }

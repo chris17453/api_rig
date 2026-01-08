@@ -1,0 +1,103 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:PostmanClone.App.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="400"
+             x:Class="PostmanClone.App.Views.script_editor_view"
+             x:DataType="vm:script_editor_view_model">
+
+    <Grid RowDefinitions="Auto,*,Auto,150">
+        <!-- Script Type Tabs -->
+        <TabControl Grid.Row="0" Grid.RowSpan="2">
+            <!-- Pre-request Script Tab -->
+            <TabItem Header="Pre-request Script">
+                <Grid RowDefinitions="Auto,*">
+                    <TextBlock Grid.Row="0" 
+                               Text="This script runs before the request is sent."
+                               FontSize="12"
+                               Foreground="#888"
+                               Margin="0,5,0,10"/>
+                    
+                    <TextBox Grid.Row="1"
+                             Text="{Binding PreRequestScript, Mode=TwoWay}"
+                             AcceptsReturn="True"
+                             AcceptsTab="True"
+                             TextWrapping="NoWrap"
+                             FontFamily="Consolas"
+                             FontSize="13"
+                             Background="#1E1E1E"
+                             Foreground="#D4D4D4"
+                             BorderBrush="#3C3C3C"
+                             Padding="10"/>
+                </Grid>
+            </TabItem>
+            
+            <!-- Post-response Script Tab -->
+            <TabItem Header="Post-response Script">
+                <Grid RowDefinitions="Auto,*">
+                    <TextBlock Grid.Row="0" 
+                               Text="This script runs after receiving the response. Use pm.test() for assertions."
+                               FontSize="12"
+                               Foreground="#888"
+                               Margin="0,5,0,10"/>
+                    
+                    <TextBox Grid.Row="1"
+                             Text="{Binding PostResponseScript, Mode=TwoWay}"
+                             AcceptsReturn="True"
+                             AcceptsTab="True"
+                             TextWrapping="NoWrap"
+                             FontFamily="Consolas"
+                             FontSize="13"
+                             Background="#1E1E1E"
+                             Foreground="#D4D4D4"
+                             BorderBrush="#3C3C3C"
+                             Padding="10"/>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <!-- Console Header -->
+        <Border Grid.Row="2" Background="#252526" Padding="10,5">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" 
+                           Text="Console Output" 
+                           FontWeight="SemiBold"
+                           Foreground="#CCCCCC"
+                           VerticalAlignment="Center"/>
+                
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5">
+                    <Button Command="{Binding RunScriptCommand}"
+                            IsEnabled="{Binding !IsRunning}"
+                            Padding="10,3"
+                            Background="#0E639C"
+                            Foreground="White">
+                        <Panel>
+                            <TextBlock Text="Run Script" IsVisible="{Binding !IsRunning}"/>
+                            <TextBlock Text="Running..." IsVisible="{Binding IsRunning}"/>
+                        </Panel>
+                    </Button>
+                    
+                    <Button Command="{Binding ClearConsoleCommand}"
+                            Content="Clear"
+                            Padding="10,3"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Console Output -->
+        <Border Grid.Row="3" Background="#1E1E1E" BorderBrush="#3C3C3C" BorderThickness="1">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                <TextBox Text="{Binding ConsoleOutput}"
+                         IsReadOnly="True"
+                         TextWrapping="NoWrap"
+                         FontFamily="Consolas"
+                         FontSize="12"
+                         Background="Transparent"
+                         Foreground="#4EC9B0"
+                         BorderThickness="0"
+                         Padding="10"/>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</UserControl>

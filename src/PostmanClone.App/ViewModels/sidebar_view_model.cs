@@ -26,6 +26,73 @@ public partial class sidebar_view_model : ObservableObject
     [ObservableProperty]
     private bool _isLoading;
 
+    // Stores the original collection models for export
+    private List<postman_collection_model> _collectionModels = new();
+
+    /// <summary>
+    /// Gets the currently selected collection model for export.
+    /// </summary>
+    public postman_collection_model? SelectedCollection
+    {
+        get
+        {
+            // Find the root collection of the selected item
+            var selectedRoot = SelectedCollectionItem;
+            while (selectedRoot != null && !selectedRoot.IsCollectionRoot)
+            {
+                // Walk up to find the root (not possible in tree, so use collections list)
+                break;
+            }
+
+            if (selectedRoot?.IsCollectionRoot == true)
+            {
+                // Convert to postman_collection_model for export
+                return ConvertToCollectionModel(selectedRoot);
+            }
+
+            // Return first collection if nothing selected
+            return Collections.FirstOrDefault() is { } first 
+                ? ConvertToCollectionModel(first)
+                : null;
+        }
+    }
+
+    private postman_collection_model ConvertToCollectionModel(collection_tree_item_view_model tree_item)
+    {
+        var items = new List<collection_item_model>();
+        
+        // Collect all items from the tree
+        foreach (var child in tree_item.Children)
+        {
+            items.Add(ConvertToCollectionItem(child));
+        }
+
+        return new postman_collection_model
+        {
+            id = tree_item.Id.ToString(),
+            name = tree_item.Name ?? "Unnamed Collection",
+            items = items
+        };
+    }
+
+    private collection_item_model ConvertToCollectionItem(collection_tree_item_view_model item)
+    {
+        var children = new List<collection_item_model>();
+        foreach (var child in item.Children)
+        {
+            children.Add(ConvertToCollectionItem(child));
+        }
+
+        return new collection_item_model
+        {
+            id = item.Id.ToString(),
+            name = item.Name ?? "Unnamed",
+            is_folder = item.IsFolder,
+            request = item.request,
+            children = children
+        };
+    }
+
     public sidebar_view_model(i_collection_repository collection_repository, i_history_repository history_repository)
     {
         _collection_repository = collection_repository;

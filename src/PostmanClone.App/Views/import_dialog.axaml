@@ -1,0 +1,113 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:PostmanClone.App.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="500"
+        x:Class="PostmanClone.App.Views.import_dialog"
+        x:DataType="vm:import_export_view_model"
+        Title="Import Collection"
+        Width="600"
+        Height="500"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False">
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto,Auto" Margin="20">
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock Text="Import Postman Collection" 
+                       FontSize="20" 
+                       FontWeight="Bold"
+                       Foreground="#E0E0E0"/>
+            <TextBlock Text="Select a Postman collection JSON file (v2.0 or v2.1 format)"
+                       FontSize="12"
+                       Foreground="#888"
+                       Margin="0,5,0,0"/>
+        </StackPanel>
+
+        <!-- File Selection -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="0,0,0,15">
+            <TextBox Grid.Column="0"
+                     Text="{Binding ImportFilePath, Mode=TwoWay}"
+                     Watermark="Select a .json file..."
+                     IsReadOnly="True"
+                     Background="#2D2D2D"
+                     Foreground="#E0E0E0"
+                     Margin="0,0,10,0"/>
+            
+            <Button Grid.Column="1"
+                    Content="Browse..."
+                    Click="BrowseButton_Click"
+                    Padding="15,8"/>
+        </Grid>
+
+        <!-- Preview Section -->
+        <Grid Grid.Row="2" RowDefinitions="Auto,*">
+            <TextBlock Grid.Row="0" 
+                       Text="Preview:" 
+                       FontWeight="SemiBold"
+                       Foreground="#CCCCCC"
+                       Margin="0,0,0,5"/>
+            
+            <Border Grid.Row="1" 
+                    Background="#1E1E1E" 
+                    BorderBrush="#3C3C3C" 
+                    BorderThickness="1"
+                    CornerRadius="4">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" 
+                              VerticalScrollBarVisibility="Auto">
+                    <TextBox Text="{Binding ImportPreview}"
+                             IsReadOnly="True"
+                             TextWrapping="NoWrap"
+                             FontFamily="Consolas"
+                             FontSize="11"
+                             Background="Transparent"
+                             Foreground="#D4D4D4"
+                             BorderThickness="0"
+                             Padding="10"/>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+
+        <!-- Status Message -->
+        <Border Grid.Row="3" 
+                Margin="0,15,0,0"
+                Padding="10"
+                Background="#3C3C3C"
+                CornerRadius="4"
+                IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+            <TextBlock Text="{Binding StatusMessage}"
+                       Foreground="#F0F0F0"
+                       TextWrapping="Wrap"/>
+        </Border>
+
+        <!-- Buttons -->
+        <StackPanel Grid.Row="4" 
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Right"
+                    Spacing="10"
+                    Margin="0,20,0,0">
+            <Button Content="Preview"
+                    Command="{Binding PreviewImportCommand}"
+                    Padding="20,8"/>
+            
+            <Button Content="Cancel"
+                    Command="{Binding CancelImportCommand}"
+                    Click="CancelButton_Click"
+                    Padding="20,8"/>
+            
+            <Button Content="Import"
+                    Command="{Binding ImportCollectionCommand}"
+                    IsEnabled="{Binding !IsImporting}"
+                    Padding="20,8"
+                    Background="#0E639C"
+                    Foreground="White">
+                <Button.Styles>
+                    <Style Selector="Button:disabled">
+                        <Setter Property="Opacity" Value="0.5"/>
+                    </Style>
+                </Button.Styles>
+            </Button>
+        </StackPanel>
+    </Grid>
+</Window>

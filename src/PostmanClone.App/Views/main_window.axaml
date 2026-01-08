@@ -4,22 +4,22 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:PostmanClone.App.ViewModels"
         xmlns:views="using:PostmanClone.App.Views"
-        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
+        mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="900"
         x:Class="PostmanClone.App.Views.main_window"
         x:DataType="vm:main_view_model"
         Title="{Binding Title}"
-        Width="1200" Height="800"
+        Width="1400" Height="900"
         WindowStartupLocation="CenterScreen"
         Icon="avares://PostmanClone.App/Assets/logo.webp">
 
-    <Grid ColumnDefinitions="250,*">
+    <Grid ColumnDefinitions="280,*,350">
         <!-- Sidebar -->
         <Border Grid.Column="0" 
                 IsVisible="{Binding IsSidebarVisible}"
                 Background="#2D2D2D"
                 BorderBrush="#404040" 
                 BorderThickness="0,0,1,0">
-            <Grid RowDefinitions="Auto,Auto,*">
+            <Grid RowDefinitions="Auto,Auto,Auto,*">
                 <!-- Logo and App Title -->
                 <StackPanel Grid.Row="0" 
                             Orientation="Horizontal" 
@@ -34,28 +34,60 @@
                                Foreground="#FFFFFF"/>
                 </StackPanel>
                 
+                <!-- Import/Export Buttons -->
+                <StackPanel Grid.Row="1" 
+                            Orientation="Horizontal" 
+                            Margin="10,0,10,10"
+                            Spacing="5">
+                    <Button Content="Import"
+                            Click="ImportButton_Click"
+                            Padding="12,5"
+                            FontSize="11"
+                            Background="#404040"
+                            Foreground="#E0E0E0"/>
+                    <Button Content="Export"
+                            Click="ExportButton_Click"
+                            Padding="12,5"
+                            FontSize="11"
+                            Background="#404040"
+                            Foreground="#E0E0E0"/>
+                </StackPanel>
+                
                 <!-- Environment Selector -->
-                <views:environment_selector_view Grid.Row="1" 
+                <views:environment_selector_view Grid.Row="2" 
                                                   DataContext="{Binding EnvironmentSelector}"
                                                   Margin="10,0,10,10"/>
                 
                 <!-- Collections and History -->
-                <views:sidebar_view Grid.Row="2" 
+                <views:sidebar_view Grid.Row="3" 
                                     DataContext="{Binding Sidebar}"/>
             </Grid>
         </Border>
         
-        <!-- Main Content -->
-        <Grid Grid.Column="1" RowDefinitions="Auto,*">
+        <!-- Main Content Area -->
+        <Grid Grid.Column="1" RowDefinitions="Auto,Auto,*">
             <!-- Request Editor -->
             <views:request_editor_view Grid.Row="0" 
                                        DataContext="{Binding RequestEditor}"
                                        Margin="10"/>
             
+            <!-- Script Editor -->
+            <Border Grid.Row="1" Margin="10,0,10,10" MinHeight="250">
+                <views:script_editor_view DataContext="{Binding ScriptEditor}"/>
+            </Border>
+            
             <!-- Response Viewer -->
-            <views:response_viewer_view Grid.Row="1" 
+            <views:response_viewer_view Grid.Row="2" 
                                         DataContext="{Binding ResponseViewer}"
-                                        Margin="10"/>
+                                        Margin="10,0,10,10"/>
         </Grid>
+        
+        <!-- Right Panel - Test Results -->
+        <Border Grid.Column="2" 
+                Background="#252526"
+                BorderBrush="#404040"
+                BorderThickness="1,0,0,0">
+            <views:test_results_view DataContext="{Binding TestResults}"/>
+        </Border>
     </Grid>
 </Window>
