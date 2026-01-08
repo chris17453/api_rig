@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PostmanClone.Core.Interfaces;
 using PostmanClone.Core.Models;
+using PostmanClone.Data.Exporters;
 
 namespace PostmanClone.App.ViewModels;
 
@@ -61,34 +62,13 @@ public partial class import_export_view_model : ObservableObject
 
         try
         {
-            // Read the file content
-            if (!File.Exists(ImportFilePath))
-            {
-                StatusMessage = "File not found.";
-                HasError = true;
-                return;
-            }
-
-            var json = await File.ReadAllTextAsync(ImportFilePath);
+            // Use real import from collection_repository
+            var collection = await _collection_repository.import_from_file_async(ImportFilePath, CancellationToken.None);
             
-            // Parse and validate (mock for now - will use real parser from Data team)
-            var collection = ParsePostmanCollection(json);
+            StatusMessage = $"Successfully imported '{collection.name}' with {collection.items.Count} items.";
+            HasError = false;
             
-            if (collection is not null)
-            {
-                // Save to repository
-                await _collection_repository.save_async(collection, CancellationToken.None);
-                
-                StatusMessage = $"Successfully imported '{collection.name}' with {collection.items.Count} items.";
-                HasError = false;
-                
-                collection_imported?.Invoke(this, collection);
-            }
-            else
-            {
-                StatusMessage = "Invalid Postman collection format.";
-                HasError = true;
-            }
+            collection_imported?.Invoke(this, collection);
         }
         catch (Exception ex)
         {
@@ -124,11 +104,9 @@ public partial class import_export_view_model : ObservableObject
 
         try
         {
-            // Convert to Postman format (mock for now)
-            var json = ConvertToPostmanFormat(SelectedCollectionForExport);
-            
-            // Write to file
-            await File.WriteAllTextAsync(ExportFilePath, json);
+            // Use real collection exporter
+            var exporter = new collection_exporter();
+            exporter.export_to_file(SelectedCollectionForExport, ExportFilePath);
             
             StatusMessage = $"Successfully exported '{SelectedCollectionForExport.name}' to {ExportFilePath}";
             HasError = false;
@@ -180,72 +158,5 @@ public partial class import_export_view_model : ObservableObject
         import_cancelled?.Invoke(this, EventArgs.Empty);
     }
 
-    /// <summary>
-    /// Mock parser - will be replaced with real implementation from Data team.
-    /// </summary>
-    private postman_collection_model? ParsePostmanCollection(string json)
-    {
-        try
-        {
-            // Basic validation - check if it looks like a Postman collection
-            if (!json.Contains("\"info\"") || !json.Contains("\"item\""))
-            {
-                return null;
-            }
 
-            // Create a mock parsed collection
-            return new postman_collection_model
-            {
-                name = "Imported Collection",
-                description = "Imported from Postman",
-                items = new List<collection_item_model>
-                {
-                    new collection_item_model
-                    {
-                        name = "Sample Request",
-                        is_folder = false,
-                        request = new http_request_model
-                        {
-                            name = "Sample Request",
-                            method = http_method.get,
-                            url = "https://api.example.com/data"
-                        }
-                    }
-                }
-            };
-        }
-        catch
-        {
-            return null;
-        }
-    }
-
-    /// <summary>
-    /// Mock converter - will be replaced with real implementation from Data team.
-    /// </summary>
-    private string ConvertToPostmanFormat(postman_collection_model collection)
-    {
-        // Generate Postman collection v2.1 format
-        return $$"""
-        {
-            "info": {
-                "_postman_id": "{{collection.id}}",
-                "name": "{{collection.name}}",
-                "description": "{{collection.description ?? ""}}",
-                "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-            },
-            "item": [
-                {{string.Join(",\n        ", collection.items.Where(i => i.request != null).Select(i => $$"""
-                {
-                    "name": "{{i.name}}",
-                    "request": {
-                        "method": "{{i.request!.method.ToString().ToUpper()}}",
-                        "url": "{{i.request.url}}"
-                    }
-                }
-                """))}}
-            ]
-        }
-        """;
-    }
 }

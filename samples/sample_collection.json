@@ -1,0 +1,706 @@
+{
+    "info": {
+        "_postman_id": "sample-collection-001",
+        "name": "Real APIs Collection",
+        "description": "A collection of real, working public APIs to test the import functionality",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "JSONPlaceholder (Fake REST API)",
+            "item": [
+                {
+                    "name": "Get All Users",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "disabled": false
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://jsonplaceholder.typicode.com/users",
+                            "protocol": "https",
+                            "host": ["jsonplaceholder", "typicode", "com"],
+                            "path": ["users"]
+                        }
+                    }
+                },
+                {
+                    "name": "Get User by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "https://jsonplaceholder.typicode.com/users/1",
+                            "protocol": "https",
+                            "host": ["jsonplaceholder", "typicode", "com"],
+                            "path": ["users", "1"]
+                        }
+                    }
+                },
+                {
+                    "name": "Create User",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "disabled": false
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"john@example.com\",\n    \"username\": \"johndoe\"\n}"
+                        },
+                        "url": {
+                            "raw": "https://jsonplaceholder.typicode.com/users",
+                            "protocol": "https",
+                            "host": ["jsonplaceholder", "typicode", "com"],
+                            "path": ["users"]
+                        }
+                    }
+                },
+                {
+                    "name": "Update User",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "disabled": false
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"John Updated\",\n    \"email\": \"john.updated@example.com\"\n}"
+                        },
+                        "url": {
+                            "raw": "https://jsonplaceholder.typicode.com/users/1",
+                            "protocol": "https",
+                            "host": ["jsonplaceholder", "typicode", "com"],
+                            "path": ["users", "1"]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete User",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "https://jsonplaceholder.typicode.com/users/1",
+                            "protocol": "https",
+                            "host": ["jsonplaceholder", "typicode", "com"],
+                            "path": ["users", "1"]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Cat Facts API",
+            "item": [
+                {
+                    "name": "Get Random Cat Fact",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "https://catfact.ninja/fact",
+                            "protocol": "https",
+                            "host": ["catfact", "ninja"],
+                            "path": ["fact"]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Multiple Cat Facts",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "https://catfact.ninja/facts?limit=5",
+                            "protocol": "https",
+                            "host": ["catfact", "ninja"],
+                            "path": ["facts"],
+                            "query": [
+                                {
+                                    "key": "limit",
+                                    "value": "5"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Cat Breeds",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "https://catfact.ninja/breeds?limit=10",
+                            "protocol": "https",
+                            "host": ["catfact", "ninja"],
+                            "path": ["breeds"],
+                            "query": [
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Open Meteo Weather API",
+            "item": [
+                {
+                    "name": "Get Weather for New York",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "https://api.open-meteo.com/v1/forecast?latitude=40.7128&longitude=-74.0060&current_weather=true",
+                            "protocol": "https",
+                            "host": ["api", "open-meteo", "com"],
+                            "path": ["v1", "forecast"],
+                            "query": [
+                                {
+                                    "key": "latitude",
+                                    "value": "40.7128"
+                                },
+                                {
+                                    "key": "longitude",
+                                    "value": "-74.0060"
+                                },
+                                {
+                                    "key": "current_weather",
+                                    "value": "true"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Weather for London",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "https://api.open-meteo.com/v1/forecast?latitude=51.5074&longitude=-0.1278&current_weather=true&hourly=temperature_2m",
+                            "protocol": "https",
+                            "host": ["api", "open-meteo", "com"],
+                            "path": ["v1", "forecast"],
+                            "query": [
+                                {
+                                    "key": "latitude",
+                                    "value": "51.5074"
+                                },
+                                {
+                                    "key": "longitude",
+                                    "value": "-0.1278"
+                                },
+                                {
+                                    "key": "current_weather",
+                                    "value": "true"
+                                },
+                                {
+                                    "key": "hourly",
+                                    "value": "temperature_2m"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Random User Generator",
+            "item": [
+                {
+                    "name": "Get Random User",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "https://randomuser.me/api/",
+                            "protocol": "https",
+                            "host": ["randomuser", "me"],
+                            "path": ["api", ""]
+                        }
+                    }
+                },
+                {
+                    "name": "Get 5 Random Users",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "https://randomuser.me/api/?results=5&nat=us",
+                            "protocol": "https",
+                            "host": ["randomuser", "me"],
+                            "path": ["api", ""],
+                            "query": [
+                                {
+                                    "key": "results",
+                                    "value": "5"
+                                },
+                                {
+                                    "key": "nat",
+                                    "value": "us"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Dog CEO API",
+            "item": [
+                {
+                    "name": "Get Random Dog Image",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "https://dog.ceo/api/breeds/image/random",
+                            "protocol": "https",
+                            "host": ["dog", "ceo"],
+                            "path": ["api", "breeds", "image", "random"]
+                        }
+                    }
+                },
+                {
+                    "name": "Get All Dog Breeds",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "https://dog.ceo/api/breeds/list/all",
+                            "protocol": "https",
+                            "host": ["dog", "ceo"],
+                            "path": ["api", "breeds", "list", "all"]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Husky Images",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "https://dog.ceo/api/breed/husky/images/random/3",
+                            "protocol": "https",
+                            "host": ["dog", "ceo"],
+                            "path": ["api", "breed", "husky", "images", "random", "3"]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "HTTPBin (Echo Service)",
+            "item": [
+                {
+                    "name": "GET Request Echo",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "X-Custom-Header",
+                                "value": "TestValue"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://httpbin.org/get?param1=value1&param2=value2",
+                            "protocol": "https",
+                            "host": ["httpbin", "org"],
+                            "path": ["get"],
+                            "query": [
+                                {
+                                    "key": "param1",
+                                    "value": "value1"
+                                },
+                                {
+                                    "key": "param2",
+                                    "value": "value2"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "POST JSON Echo",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Test User\",\n    \"email\": \"test@example.com\",\n    \"message\": \"Hello from API Rig!\"\n}"
+                        },
+                        "url": {
+                            "raw": "https://httpbin.org/post",
+                            "protocol": "https",
+                            "host": ["httpbin", "org"],
+                            "path": ["post"]
+                        }
+                    }
+                },
+                {
+                    "name": "Get IP Address",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "https://httpbin.org/ip",
+                            "protocol": "https",
+                            "host": ["httpbin", "org"],
+                            "path": ["ip"]
+                        }
+                    }
+                },
+                {
+                    "name": "Get User Agent",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "https://httpbin.org/user-agent",
+                            "protocol": "https",
+                            "host": ["httpbin", "org"],
+                            "path": ["user-agent"]
+                        }
+                    }
+                },
+                {
+                    "name": "Delayed Response (3 sec)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "https://httpbin.org/delay/3",
+                            "protocol": "https",
+                            "host": ["httpbin", "org"],
+                            "path": ["delay", "3"]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Specific Status Code",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "https://httpbin.org/status/418",
+                            "protocol": "https",
+                            "host": ["httpbin", "org"],
+                            "path": ["status", "418"]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Public APIs Directory",
+            "item": [
+                {
+                    "name": "Get Random Public API",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "https://api.publicapis.org/random",
+                            "protocol": "https",
+                            "host": ["api", "publicapis", "org"],
+                            "path": ["random"]
+                        }
+                    }
+                },
+                {
+                    "name": "Get APIs by Category",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "https://api.publicapis.org/entries?category=Animals",
+                            "protocol": "https",
+                            "host": ["api", "publicapis", "org"],
+                            "path": ["entries"],
+                            "query": [
+                                {
+                                    "key": "category",
+                                    "value": "Animals"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Jokes API",
+            "item": [
+                {
+                    "name": "Get Random Joke",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function() {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has joke', function() {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.joke || jsonData.setup).to.exist;",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "https://official-joke-api.appspot.com/random_joke",
+                            "protocol": "https",
+                            "host": ["official-joke-api", "appspot", "com"],
+                            "path": ["random_joke"]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Programming Jokes",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "https://official-joke-api.appspot.com/jokes/programming/random",
+                            "protocol": "https",
+                            "host": ["official-joke-api", "appspot", "com"],
+                            "path": ["jokes", "programming", "random"]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Countries API",
+            "item": [
+                {
+                    "name": "Get All Countries",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "https://restcountries.com/v3.1/all",
+                            "protocol": "https",
+                            "host": ["restcountries", "com"],
+                            "path": ["v3.1", "all"]
+                        }
+                    }
+                },
+                {
+                    "name": "Search Country by Name",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "https://restcountries.com/v3.1/name/united",
+                            "protocol": "https",
+                            "host": ["restcountries", "com"],
+                            "path": ["v3.1", "name", "united"]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Country by Code",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "https://restcountries.com/v3.1/alpha/usa",
+                            "protocol": "https",
+                            "host": ["restcountries", "com"],
+                            "path": ["v3.1", "alpha", "usa"]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Posts",
+            "item": [
+                {
+                    "name": "Get All Posts",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "https://jsonplaceholder.typicode.com/posts",
+                            "protocol": "https",
+                            "host": ["jsonplaceholder", "typicode", "com"],
+                            "path": ["posts"]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Posts with Query Params",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "https://jsonplaceholder.typicode.com/posts?userId=1&_limit=5",
+                            "protocol": "https",
+                            "host": ["jsonplaceholder", "typicode", "com"],
+                            "path": ["posts"],
+                            "query": [
+                                {
+                                    "key": "userId",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "_limit",
+                                    "value": "5"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Post",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "console.log('Pre-request script running...');",
+                                    "pm.environment.set('timestamp', Date.now());"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 201', function() {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has id', function() {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.id).to.exist;",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"title\": \"Test Post\",\n    \"body\": \"This is a test post body\",\n    \"userId\": 1\n}"
+                        },
+                        "url": {
+                            "raw": "https://jsonplaceholder.typicode.com/posts",
+                            "protocol": "https",
+                            "host": ["jsonplaceholder", "typicode", "com"],
+                            "path": ["posts"]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Authenticated Request",
+            "request": {
+                "auth": {
+                    "type": "bearer",
+                    "bearer": [
+                        {
+                            "key": "token",
+                            "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.sample.token",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "https://api.example.com/protected/resource",
+                    "protocol": "https",
+                    "host": ["api", "example", "com"],
+                    "path": ["protected", "resource"]
+                }
+            }
+        },
+        {
+            "name": "Form Data Example",
+            "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                    "mode": "formdata",
+                    "formdata": [
+                        {
+                            "key": "username",
+                            "value": "testuser",
+                            "type": "text"
+                        },
+                        {
+                            "key": "email",
+                            "value": "test@example.com",
+                            "type": "text"
+                        }
+                    ]
+                },
+                "url": {
+                    "raw": "https://httpbin.org/post",
+                    "protocol": "https",
+                    "host": ["httpbin", "org"],
+                    "path": ["post"]
+                }
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "https://jsonplaceholder.typicode.com",
+            "disabled": false
+        },
+        {
+            "key": "apiVersion",
+            "value": "v1",
+            "disabled": false
+        }
+    ]
+}
