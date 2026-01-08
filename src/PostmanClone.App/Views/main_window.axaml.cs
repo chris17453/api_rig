@@ -9,6 +9,15 @@ public partial class main_window : Window
     public main_window()
     {
         InitializeComponent();
+        Loaded += OnLoaded;
+    }
+
+    private async void OnLoaded(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is main_view_model mainVm)
+        {
+            await mainVm.initialize_async(CancellationToken.None);
+        }
     }
 
     private async void ImportButton_Click(object? sender, RoutedEventArgs e)
