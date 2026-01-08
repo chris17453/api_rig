@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
 using PostmanClone.Core.Interfaces;
 using PostmanClone.Core.Models;
 using PostmanClone.Data.Services;
@@ -11,6 +12,7 @@ public partial class request_editor_view_model : ObservableObject
 {
     private readonly request_orchestrator _request_orchestrator;
     private readonly i_history_repository _history_repository;
+    private readonly ILogger<request_editor_view_model> _logger;
 
     [ObservableProperty]
     private string _url = string.Empty;
@@ -39,10 +41,14 @@ public partial class request_editor_view_model : ObservableObject
 
     public IReadOnlyList<http_method> available_methods { get; } = Enum.GetValues<http_method>();
 
-    public request_editor_view_model(request_orchestrator request_orchestrator, i_history_repository history_repository)
+    public request_editor_view_model(
+        request_orchestrator request_orchestrator,
+        i_history_repository history_repository,
+        ILogger<request_editor_view_model> logger)
     {
         _request_orchestrator = request_orchestrator;
         _history_repository = history_repository;
+        _logger = logger;
         
         // Add default empty header row
         _headers.Add(new key_value_pair_view_model());
@@ -104,9 +110,7 @@ public partial class request_editor_view_model : ObservableObject
         }
         catch (Exception ex)
         {
-            // Handle critical failures (e.g. orchestrator crash)
-            // ideally log this
-            Console.WriteLine($"Error executing request: {ex}");
+            _logger.LogError(ex, "Error executing request");
         }
         finally
         {
