@@ -2,13 +2,14 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PostmanClone.Core.Interfaces;
 using PostmanClone.Core.Models;
+using PostmanClone.Data.Services;
 using System.Collections.ObjectModel;
 
 namespace PostmanClone.App.ViewModels;
 
 public partial class request_editor_view_model : ObservableObject
 {
-    private readonly i_request_executor _request_executor;
+    private readonly request_orchestrator _request_orchestrator;
     private readonly i_history_repository _history_repository;
 
     [ObservableProperty]
@@ -29,18 +30,25 @@ public partial class request_editor_view_model : ObservableObject
     [ObservableProperty]
     private ObservableCollection<key_value_pair_view_model> _queryParams = new();
 
+    // Scripts
+    [ObservableProperty]
+    private string _preRequestScript = string.Empty;
+
+    [ObservableProperty]
+    private string _postResponseScript = string.Empty;
+
     public IReadOnlyList<http_method> available_methods { get; } = Enum.GetValues<http_method>();
 
-    public request_editor_view_model(i_request_executor request_executor, i_history_repository history_repository)
+    public request_editor_view_model(request_orchestrator request_orchestrator, i_history_repository history_repository)
     {
-        _request_executor = request_executor;
+        _request_orchestrator = request_orchestrator;
         _history_repository = history_repository;
         
         // Add default empty header row
         _headers.Add(new key_value_pair_view_model());
     }
 
-    public event EventHandler<http_response_model>? response_received;
+    public event EventHandler<request_execution_result>? execution_completed;
 
     [RelayCommand(CanExecute = nameof(CanSendRequest))]
     private async Task SendRequest(CancellationToken cancellation_token)
@@ -65,29 +73,40 @@ public partial class request_editor_view_model : ObservableObject
                 {
                     body_type = request_body_type.raw,
                     raw_content = RequestBody
-                }
+                },
+                pre_request_script = PreRequestScript,
+                post_response_script = PostResponseScript
             };
 
-            var response = await _request_executor.execute_async(request, cancellation_token);
+            var result = await _request_orchestrator.execute_request_async(request, cancellation_token);
 
-            // Add to history
-            var history_entry = new history_entry_model
+            if (result.response != null)
             {
-                request_name = request.name,
-                method = request.method,
-                url = request.url,
-                status_code = response.status_code,
-                status_description = response.status_description,
-                elapsed_ms = response.elapsed_ms,
-                response_size_bytes = response.size_bytes,
-                executed_at = DateTime.UtcNow,
-                error_message = response.error_message,
-                request_snapshot = request,
-                response_snapshot = response
-            };
-            await _history_repository.append_async(history_entry, cancellation_token);
+                // Add to history
+                var history_entry = new history_entry_model
+                {
+                    request_name = request.name,
+                    method = request.method,
+                    url = request.url, // Note: This stores the original URL with variables, not the resolved one
+                    status_code = result.response.status_code,
+                    status_description = result.response.status_description,
+                    elapsed_ms = result.response.elapsed_ms,
+                    response_size_bytes = result.response.size_bytes,
+                    executed_at = DateTime.UtcNow,
+                    error_message = result.response.error_message,
+                    request_snapshot = request,
+                    response_snapshot = result.response
+                };
+                await _history_repository.append_async(history_entry, cancellation_token);
+            }
 
-            response_received?.Invoke(this, response);
+            execution_completed?.Invoke(this, result);
+        }
+        catch (Exception ex)
+        {
+            // Handle critical failures (e.g. orchestrator crash)
+            // ideally log this
+            Console.WriteLine($"Error executing request: {ex}");
         }
         finally
         {
@@ -117,6 +136,8 @@ public partial class request_editor_view_model : ObservableObject
         Url = request.url;
         SelectedMethod = request.method;
         RequestBody = request.body?.raw_content ?? string.Empty;
+        PreRequestScript = request.pre_request_script ?? string.Empty;
+        PostResponseScript = request.post_response_script ?? string.Empty;
         
         Headers.Clear();
         foreach (var h in request.headers)

@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PostmanClone.Core.Interfaces;
 using PostmanClone.Core.Models;
+using PostmanClone.Data.Services;
 
 namespace PostmanClone.App.ViewModels;
 
@@ -51,7 +52,7 @@ public partial class main_view_model : ObservableObject
         _collection_repository = collection_repository;
 
         // Wire up events
-        _requestEditor.response_received += on_response_received;
+        _requestEditor.execution_completed += on_execution_completed;
         _sidebar.request_selected += on_request_selected;
     }
 
@@ -82,7 +83,12 @@ public partial class main_view_model : ObservableObject
 
     private void on_response_received(object? sender, http_response_model response)
     {
-        ResponseViewer.load_response(response);
+        if (result.response != null)
+        {
+            ResponseViewer.load_response(result.response);
+        }
+        // TODO: Pass logs and test results to a "Test Results" view model if we implement one
+        
         _ = Sidebar.refresh_history_async(CancellationToken.None);
     }
 

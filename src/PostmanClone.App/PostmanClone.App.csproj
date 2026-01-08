@@ -18,11 +18,16 @@
     <PackageReference Include="Avalonia.ReactiveUI" Version="11.2.1" />
     <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.2.1" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\PostmanClone.Core\PostmanClone.Core.csproj" />
+    <ProjectReference Include="..\PostmanClone.Data\PostmanClone.Data.csproj" />
+    <ProjectReference Include="..\PostmanClone.Http\PostmanClone.Http.csproj" />
+    <ProjectReference Include="..\PostmanClone.Scripting\PostmanClone.Scripting.csproj" />
   </ItemGroup>
 
   <ItemGroup>
