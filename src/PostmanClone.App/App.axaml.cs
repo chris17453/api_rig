@@ -47,7 +47,7 @@ public partial class App : Application
         base.OnFrameworkInitializationCompleted();
     }
 
-    private void configure_services(IServiceCollection services)
+    private static void configure_services(IServiceCollection services)
     {
         // Core Infrastructure
         services.AddDbContext<postman_clone_db_context>(options =>
@@ -67,7 +67,6 @@ public partial class App : Application
         services.AddScoped<i_collection_repository, collection_repository>();
 
         // ViewModels
-        services.AddTransient<main_view_model>();
         services.AddTransient<request_editor_view_model>();
         services.AddTransient<response_viewer_view_model>();
         services.AddTransient<sidebar_view_model>();
@@ -75,5 +74,14 @@ public partial class App : Application
         services.AddTransient<script_editor_view_model>();
         services.AddTransient<test_results_view_model>();
         services.AddTransient<tabs_view_model>();
+        services.AddTransient(sp => new MainViewDependencies(
+            sp.GetRequiredService<request_editor_view_model>(),
+            sp.GetRequiredService<response_viewer_view_model>(),
+            sp.GetRequiredService<sidebar_view_model>(),
+            sp.GetRequiredService<environment_selector_view_model>(),
+            sp.GetRequiredService<script_editor_view_model>(),
+            sp.GetRequiredService<test_results_view_model>(),
+            sp.GetRequiredService<tabs_view_model>()));
+        services.AddTransient<main_view_model>();
     }
 }

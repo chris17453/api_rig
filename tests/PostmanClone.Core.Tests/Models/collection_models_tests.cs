@@ -3,7 +3,7 @@ using PostmanClone.Core.Models;
 
 namespace PostmanClone.Core.Tests.Models;
 
-public class collection_models_tests
+public class Collection_Models_Tests
 {
     [Fact]
     public void collection_allows_minimum_viable_tree_when_items_nested()
@@ -38,9 +38,11 @@ public class collection_models_tests
 
         collection.items.Should().HaveCount(1);
         collection.items[0].is_folder.Should().BeTrue();
-        collection.items[0].children.Should().HaveCount(1);
-        collection.items[0].children![0].request.Should().NotBeNull();
-        collection.items[0].children[0].request!.name.Should().Be("Get User");
+        collection.items[0].children.Should().NotBeNull();
+        collection.items[0].children!.Count.Should().Be(1);
+        var first_child = collection.items[0].children![0];
+        first_child.request.Should().NotBeNull();
+        first_child.request!.name.Should().Be("Get User");
     }
 
     [Fact]
