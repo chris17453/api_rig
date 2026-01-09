@@ -53,6 +53,7 @@ public partial class main_view_model : ObservableObject
 
         // Wire up events
         _requestEditor.execution_completed += on_execution_completed;
+        _requestEditor.request_saved += on_request_saved;
         _sidebar.request_selected += on_request_selected;
         
         // Sync scripts from ScriptEditor to RequestEditor when they change
@@ -63,6 +64,7 @@ public partial class main_view_model : ObservableObject
             else if (e.PropertyName == nameof(script_editor_view_model.PostResponseScript))
                 _requestEditor.PostResponseScript = _scriptEditor.PostResponseScript;
         };
+        _sidebar.request_with_collection_selected += on_request_with_collection_selected;
     }
 
     [RelayCommand]
@@ -125,6 +127,19 @@ public partial class main_view_model : ObservableObject
         ScriptEditor.LoadScriptsFromRequest(request);
         ResponseViewer.clear();
         TestResults.ClearResultsCommand.Execute(null);
+    }
+
+    private void on_request_with_collection_selected(object? sender, (http_request_model request, string collectionId, string collectionItemId) data)
+    {
+        RequestEditor.load_request(data.request, data.collectionId, data.collectionItemId);
+        ScriptEditor.LoadScriptsFromRequest(data.request);
+        ResponseViewer.clear();
+        TestResults.ClearResultsCommand.Execute(null);
+    }
+
+    private async void on_request_saved(object? sender, EventArgs e)
+    {
+        await Sidebar.load_data_async(CancellationToken.None);
     }
 
     public import_export_view_model CreateImportExportViewModel()

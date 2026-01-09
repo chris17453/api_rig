@@ -32,9 +32,66 @@
         </Style>
     </UserControl.Styles>
 
-    <Grid RowDefinitions="Auto,Auto,*">
-        <!-- URL Bar -->
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,*">
+        <!-- Request Name and Save Button -->
         <Border Grid.Row="0" 
+                Background="#161B22" 
+                CornerRadius="12" 
+                Padding="16"
+                BorderBrush="#21262D"
+                BorderThickness="1"
+                Margin="0,0,0,12">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <TextBlock Grid.Column="0" 
+                           Text="Name:" 
+                           VerticalAlignment="Center"
+                           Margin="0,0,12,0"
+                           Foreground="#8B949E"
+                           FontSize="13"/>
+                <TextBox Grid.Column="1" 
+                         Classes="url-input"
+                         Text="{Binding RequestName, Mode=TwoWay}"
+                         Watermark="Enter request name"
+                         Margin="0,0,12,0"/>
+                <Button Grid.Column="2"
+                        Command="{Binding SaveRequestCommand}"
+                        MinWidth="100"
+                        HorizontalContentAlignment="Center">
+                    <Button.Content>
+                        <Panel>
+                            <TextBlock Text="💾 Save" IsVisible="{Binding !IsSaving}"/>
+                            <TextBlock Text="Saving..." IsVisible="{Binding IsSaving}"/>
+                        </Panel>
+                    </Button.Content>
+                    <Button.Styles>
+                        <Style Selector="Button">
+                            <Setter Property="Background" Value="#238636"/>
+                            <Setter Property="Foreground" Value="White"/>
+                            <Setter Property="CornerRadius" Value="6"/>
+                            <Setter Property="Padding" Value="12,8"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                        </Style>
+                        <Style Selector="Button:pointerover /template/ ContentPresenter">
+                            <Setter Property="Background" Value="#2EA043"/>
+                        </Style>
+                        <Style Selector="Button:disabled">
+                            <Setter Property="Opacity" Value="0.5"/>
+                        </Style>
+                    </Button.Styles>
+                </Button>
+            </Grid>
+        </Border>
+        
+        <!-- Status Message -->
+        <TextBlock Grid.Row="1" 
+                   Text="{Binding StatusMessage}"
+                   IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                   Margin="0,0,0,12"
+                   FontSize="12"
+                   Foreground="#8B949E"/>
+        
+        <!-- URL Bar -->
+        <Border Grid.Row="2" 
                 Background="#161B22" 
                 CornerRadius="12" 
                 Padding="16"
@@ -72,24 +129,21 @@
                         HorizontalContentAlignment="Center">
                     <Button.Content>
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Text="▶" FontSize="10" IsVisible="{Binding !IsSending}"/>
-                            <TextBlock Text="Send" IsVisible="{Binding !IsSending}" FontWeight="SemiBold"/>
-                            <TextBlock Text="Sending..." IsVisible="{Binding IsSending}"/>
+                            <TextBlock Text="🚀" IsVisible="{Binding !IsSending}"/>
+                            <TextBlock Text="Send" IsVisible="{Binding !IsSending}"/>
+                            <TextBlock Text="⏳ Sending..." IsVisible="{Binding IsSending}"/>
                         </StackPanel>
                     </Button.Content>
                     <Button.Styles>
                         <Style Selector="Button">
-                            <Setter Property="Background" Value="#238636"/>
+                            <Setter Property="Background" Value="#1F6FEB"/>
                             <Setter Property="Foreground" Value="White"/>
                             <Setter Property="CornerRadius" Value="6"/>
-                            <Setter Property="Padding" Value="16,10"/>
+                            <Setter Property="Padding" Value="12,8"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
                         </Style>
                         <Style Selector="Button:pointerover /template/ ContentPresenter">
-                            <Setter Property="Background" Value="#2EA043"/>
-                        </Style>
-                        <Style Selector="Button:disabled /template/ ContentPresenter">
-                            <Setter Property="Background" Value="#21262D"/>
-                            <Setter Property="Opacity" Value="0.6"/>
+                            <Setter Property="Background" Value="#388BFD"/>
                         </Style>
                     </Button.Styles>
                 </Button>
@@ -97,122 +151,70 @@
         </Border>
 
         <!-- Tabs for Headers/Body -->
-        <Border Grid.Row="1" Grid.RowSpan="2" 
-                Background="#161B22" 
-                CornerRadius="12"
-                BorderBrush="#21262D"
-                BorderThickness="1"
-                Padding="4"
-                MinHeight="120">
-            <TabControl Background="Transparent">
-                <TabControl.Styles>
-                    <Style Selector="TabItem">
-                        <Setter Property="Background" Value="Transparent"/>
-                        <Setter Property="Foreground" Value="#8B949E"/>
-                        <Setter Property="Padding" Value="16,10"/>
-                        <Setter Property="FontSize" Value="13"/>
-                    </Style>
-                    <Style Selector="TabItem:selected">
-                        <Setter Property="Foreground" Value="#F0F6FC"/>
-                        <Setter Property="FontWeight" Value="SemiBold"/>
-                    </Style>
-                </TabControl.Styles>
-                
-                <!-- Headers Tab -->
-                <TabItem Header="Headers">
-                    <Grid RowDefinitions="Auto,*" Margin="12">
-                        <Button Grid.Row="0" 
-                                Command="{Binding AddHeaderCommand}"
-                                HorizontalAlignment="Left"
-                                Margin="0,0,0,12">
-                            <Button.Styles>
-                                <Style Selector="Button">
-                                    <Setter Property="Background" Value="#21262D"/>
-                                    <Setter Property="Foreground" Value="#58A6FF"/>
-                                    <Setter Property="BorderBrush" Value="#30363D"/>
-                                    <Setter Property="BorderThickness" Value="1"/>
-                                    <Setter Property="CornerRadius" Value="6"/>
-                                    <Setter Property="Padding" Value="12,6"/>
-                                </Style>
-                                <Style Selector="Button:pointerover /template/ ContentPresenter">
-                                    <Setter Property="Background" Value="#30363D"/>
-                                </Style>
-                            </Button.Styles>
-                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                <TextBlock Text="+" FontWeight="Bold"/>
-                                <TextBlock Text="Add Header"/>
-                            </StackPanel>
-                        </Button>
-                        
-                        <ScrollViewer Grid.Row="1">
-                            <ItemsControl ItemsSource="{Binding Headers}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="vm:key_value_pair_view_model">
-                                        <Border Background="#0D1117" 
-                                                CornerRadius="6" 
-                                                Padding="8"
-                                                Margin="0,0,0,6">
-                                            <Grid ColumnDefinitions="Auto,*,*" Margin="0">
-                                                <CheckBox Grid.Column="0" 
-                                                          IsChecked="{Binding IsEnabled}"
-                                                          Margin="0,0,12,0"/>
-                                                <TextBox Grid.Column="1" 
-                                                         Text="{Binding Key, Mode=TwoWay}"
-                                                         Watermark="Header name"
-                                                         Background="#161B22"
-                                                         Foreground="#C9D1D9"
-                                                         BorderBrush="#30363D"
-                                                         CornerRadius="4"
-                                                         Padding="8,6"
-                                                         Margin="0,0,8,0"/>
-                                                <TextBox Grid.Column="2" 
-                                                         Text="{Binding Value, Mode=TwoWay}"
-                                                         Watermark="Value"
-                                                         Background="#161B22"
-                                                         Foreground="#C9D1D9"
-                                                         BorderBrush="#30363D"
-                                                         CornerRadius="4"
-                                                         Padding="8,6"/>
-                                            </Grid>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
-                    </Grid>
-                </TabItem>
-
-                <!-- Body Tab -->
-                <TabItem Header="Body">
-                    <Grid RowDefinitions="Auto,*" Margin="12">
-                        <Border Grid.Row="0" 
-                                Background="#21262D" 
-                                CornerRadius="6" 
-                                Padding="10,6"
-                                Margin="0,0,0,12"
-                                HorizontalAlignment="Left">
-                            <TextBlock Text="application/json" 
-                                       FontSize="11" 
-                                       Foreground="#8B949E"
-                                       FontFamily="JetBrains Mono, Consolas, monospace"/>
-                        </Border>
-                        
-                        <TextBox Grid.Row="1" 
-                                 Text="{Binding RequestBody, Mode=TwoWay}"
-                                 AcceptsReturn="True"
-                                 AcceptsTab="True"
-                                 TextWrapping="NoWrap"
-                                 FontFamily="JetBrains Mono, Consolas, monospace"
-                                 FontSize="13"
-                                 Watermark="Enter JSON body..."
-                                 Background="#0D1117"
-                                 Foreground="#C9D1D9"
-                                 BorderBrush="#30363D"
-                                 CornerRadius="8"
-                                 Padding="12"/>
-                    </Grid>
-                </TabItem>
-            </TabControl>
-        </Border>
+        <TabControl Grid.Row="3" Grid.RowSpan="2" MinHeight="150">
+            <!-- Headers Tab -->
+            <TabItem Header="Headers">
+                <Grid RowDefinitions="Auto,*">
+                    <Button Grid.Row="0" 
+                            Command="{Binding AddHeaderCommand}"
+                            Content="+ Add Header"
+                            HorizontalAlignment="Left"
+                            Margin="0,5"/>
+                    
+                    <ScrollViewer Grid.Row="1" Margin="0,5">
+                        <ItemsControl ItemsSource="{Binding Headers}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:key_value_pair_view_model">
+                                    <Grid ColumnDefinitions="Auto,*,*,Auto" Margin="0,2">
+                                        <CheckBox Grid.Column="0" 
+                                                  IsChecked="{Binding IsEnabled}"
+                                                  Margin="0,0,10,0"/>
+                                        <TextBox Grid.Column="1" 
+                                                 Text="{Binding Key, Mode=TwoWay}"
+                                                 Watermark="Key"
+                                                 Margin="0,0,5,0"/>
+                                        <TextBox Grid.Column="2" 
+                                                 Text="{Binding Value, Mode=TwoWay}"
+                                                 Watermark="Value"
+                                                 Margin="5,0,0,0"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+            
+            <!-- Body Tab -->
+            <TabItem Header="Body">
+                <Grid RowDefinitions="Auto,*" Margin="12">
+                    <Border Grid.Row="0" 
+                            Background="#21262D" 
+                            CornerRadius="6" 
+                            Padding="10,6"
+                            Margin="0,0,0,12"
+                            HorizontalAlignment="Left">
+                        <TextBlock Text="application/json" 
+                                   FontSize="11" 
+                                   Foreground="#8B949E"
+                                   FontFamily="JetBrains Mono, Consolas, monospace"/>
+                    </Border>
+                    
+                    <TextBox Grid.Row="1" 
+                             Text="{Binding RequestBody, Mode=TwoWay}"
+                             AcceptsReturn="True"
+                             AcceptsTab="True"
+                             TextWrapping="NoWrap"
+                             FontFamily="JetBrains Mono, Consolas, monospace"
+                             FontSize="13"
+                             Watermark="Enter JSON body..."
+                             Background="#0D1117"
+                             Foreground="#C9D1D9"
+                             BorderBrush="#30363D"
+                             CornerRadius="8"
+                             Padding="12"/>
+                </Grid>
+            </TabItem>
+        </TabControl>
     </Grid>
 </UserControl>

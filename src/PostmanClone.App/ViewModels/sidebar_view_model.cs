@@ -100,6 +100,8 @@ public partial class sidebar_view_model : ObservableObject
     }
 
     public event EventHandler<http_request_model>? request_selected;
+    public event EventHandler<(http_request_model request, string collectionId, string collectionItemId)>? request_with_collection_selected;
+    public event EventHandler? collection_changed;
 
     [RelayCommand]
     public async Task load_data_async(CancellationToken cancellation_token)
@@ -108,12 +110,20 @@ public partial class sidebar_view_model : ObservableObject
 
         try
         {
+            // Store expanded state before reloading
+            var expandedCollectionIds = Collections
+                .Where(c => c.IsExpanded)
+                .Select(c => c.Id)
+                .ToHashSet();
+
             // Load collections
             var collections = await _collection_repository.list_all_async(cancellation_token);
             Collections.Clear();
             foreach (var col in collections)
             {
                 var tree_item = map_collection_to_tree_item(col);
+                // Restore expanded state - set to true if it was expanded, false otherwise
+                tree_item.IsExpanded = expandedCollectionIds.Count == 0 || expandedCollectionIds.Contains(tree_item.Id);
                 Collections.Add(tree_item);
             }
 
@@ -140,11 +150,33 @@ public partial class sidebar_view_model : ObservableObject
         }
     }
 
+    [RelayCommand]
+    public async Task CreateCollection(CancellationToken cancellation_token)
+    {
+        var newCollection = new postman_collection_model
+        {
+            id = Guid.NewGuid().ToString(),
+            name = $"Collection {DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}",
+            description = "New collection",
+            items = new List<collection_item_model>()
+        };
+
+        await _collection_repository.save_async(newCollection, cancellation_token);
+        await load_data_async(cancellation_token);
+        collection_changed?.Invoke(this, EventArgs.Empty);
+    }
+
     partial void OnSelectedCollectionItemChanged(collection_tree_item_view_model? value)
     {
         if (value?.request != null)
         {
-            request_selected?.Invoke(this, value.request);
+            // Find the collection that contains this request
+            var parentCollection = find_parent_collection(value);
+            if (parentCollection != null)
+            {
+                // Pass the collection item ID (value.Id) not the request ID
+                request_with_collection_selected?.Invoke(this, (value.request, parentCollection.Id, value.Id));
+            }
         }
     }
 
@@ -154,6 +186,107 @@ public partial class sidebar_view_model : ObservableObject
         {
             request_selected?.Invoke(this, value.request_snapshot);
         }
+    }
+
+    [RelayCommand]
+    public async Task DeleteItem(collection_tree_item_view_model item, CancellationToken cancellation_token = default)
+    {
+        if (item == null) return;
+
+        if (item.IsCollectionRoot)
+        {
+            // Delete entire collection
+            var collection = await _collection_repository.get_by_id_async(item.Id, cancellation_token);
+            if (collection != null)
+            {
+                await _collection_repository.delete_async(item.Id, cancellation_token);
+                await load_data_async(cancellation_token);
+                collection_changed?.Invoke(this, EventArgs.Empty);
+            }
+        }
+        else
+        {
+            // Delete request from its collection - find parent collection
+            var parentCollection = find_parent_collection(item);
+            if (parentCollection != null)
+            {
+                var collection = await _collection_repository.get_by_id_async(parentCollection.Id, cancellation_token);
+                if (collection != null)
+                {
+                    // Filter out the item by its ID (collection_item_model.id, not request.id)
+                    var items = collection.items.Where(i => i.id != item.Id).ToList();
+                    collection = collection with { items = items };
+                    await _collection_repository.save_async(collection, cancellation_token);
+                    await load_data_async(cancellation_token);
+                    collection_changed?.Invoke(this, EventArgs.Empty);
+                }
+            }
+        }
+    }
+
+    [RelayCommand]
+    public async Task AddRequestToCollection(collection_tree_item_view_model collectionItem, CancellationToken cancellation_token = default)
+    {
+        if (collectionItem == null || !collectionItem.IsCollectionRoot) return;
+
+        // Create a new empty request
+        var newRequest = new http_request_model
+        {
+            id = Guid.NewGuid().ToString(),
+            name = "New Request",
+            method = http_method.get,
+            url = "https://api.example.com",
+            headers = new List<key_value_pair_model>(),
+            query_params = new List<key_value_pair_model>()
+        };
+
+        var collection = await _collection_repository.get_by_id_async(collectionItem.Id, cancellation_token);
+        if (collection != null)
+        {
+            var items = collection.items.ToList();
+            var newCollectionItem = new collection_item_model
+            {
+                id = Guid.NewGuid().ToString(),
+                name = newRequest.name,
+                is_folder = false,
+                request = newRequest
+            };
+            items.Add(newCollectionItem);
+
+            collection = collection with { items = items };
+            await _collection_repository.save_async(collection, cancellation_token);
+            await load_data_async(cancellation_token);
+            
+            // Trigger request selection to load it in the editor with collection ID and collection item ID
+            request_with_collection_selected?.Invoke(this, (newRequest, collection.id, newCollectionItem.id));
+            collection_changed?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private collection_tree_item_view_model? find_parent_collection(collection_tree_item_view_model item)
+    {
+        // Search through all collections to find the parent
+        foreach (var collection in Collections)
+        {
+            if (contains_item(collection, item))
+            {
+                return collection;
+            }
+        }
+        return null;
+    }
+
+    private bool contains_item(collection_tree_item_view_model parent, collection_tree_item_view_model target)
+    {
+        if (parent == target) return true;
+        
+        foreach (var child in parent.Children)
+        {
+            if (child == target || contains_item(child, target))
+                return true;
+        }
+        
+        return false;
     }
 
     [RelayCommand]
@@ -204,6 +337,7 @@ public partial class sidebar_view_model : ObservableObject
             Id = item.id,
             Name = item.name,
             IsFolder = item.is_folder,
+            IsCollectionRoot = false,
             request = item.request,
             Method = item.request?.method
         };
