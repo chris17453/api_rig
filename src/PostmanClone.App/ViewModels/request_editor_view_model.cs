@@ -534,8 +534,8 @@ public partial class request_editor_view_model : ObservableObject, IDisposable
                 {
                     var parts = segment.Split('=', 2);
                     var key = WebUtility.UrlDecode(parts[0]);
-                    var value = parts.Length > 1 ? WebUtility.UrlDecode(parts[1]) : string.Empty;
-                    QueryParams.Add(new key_value_pair_view_model { Key = key ?? string.Empty, Value = value ?? string.Empty, IsEnabled = true });
+                    var value = parts.Length > 1 ? (WebUtility.UrlDecode(parts[1]) ?? string.Empty) : string.Empty;
+                    QueryParams.Add(new key_value_pair_view_model { Key = key ?? string.Empty, Value = value, IsEnabled = true });
                 }
             }
 
