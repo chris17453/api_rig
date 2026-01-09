@@ -9,9 +9,9 @@
 
     <UserControl.Styles>
         <Style Selector="TextBox.url-input">
-            <Setter Property="Background" Value="#0D1117"/>
-            <Setter Property="Foreground" Value="#C9D1D9"/>
-            <Setter Property="BorderBrush" Value="#30363D"/>
+            <Setter Property="Background" Value="{DynamicResource InputBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderLightBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="6"/>
             <Setter Property="Padding" Value="12,10"/>
@@ -19,12 +19,12 @@
             <Setter Property="FontSize" Value="13"/>
         </Style>
         <Style Selector="TextBox.url-input:focus">
-            <Setter Property="BorderBrush" Value="#58A6FF"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentHoverBrush}"/>
         </Style>
         <Style Selector="ComboBox.method-selector">
-            <Setter Property="Background" Value="#21262D"/>
-            <Setter Property="Foreground" Value="#7EE787"/>
-            <Setter Property="BorderBrush" Value="#30363D"/>
+            <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource SuccessTextBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderLightBrush}"/>
             <Setter Property="CornerRadius" Value="6"/>
             <Setter Property="Padding" Value="12,8"/>
             <Setter Property="FontWeight" Value="Bold"/>
@@ -35,10 +35,10 @@
     <Grid RowDefinitions="Auto,Auto,Auto,Auto,*">
         <!-- Request Name and Save Button -->
         <Border Grid.Row="0" 
-                Background="#161B22" 
+                Background="{DynamicResource CardBackgroundBrush}" 
                 CornerRadius="12" 
                 Padding="16"
-                BorderBrush="#21262D"
+                BorderBrush="{DynamicResource ButtonBackgroundBrush}"
                 BorderThickness="1"
                 Margin="0,0,0,12">
             <Grid ColumnDefinitions="Auto,*,Auto">
@@ -46,7 +46,7 @@
                            Text="Name:" 
                            VerticalAlignment="Center"
                            Margin="0,0,12,0"
-                           Foreground="#8B949E"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
                            FontSize="13"/>
                 <TextBox Grid.Column="1" 
                          Classes="url-input"
@@ -65,14 +65,14 @@
                     </Button.Content>
                     <Button.Styles>
                         <Style Selector="Button">
-                            <Setter Property="Background" Value="#238636"/>
+                            <Setter Property="Background" Value="{DynamicResource SuccessBrush}"/>
                             <Setter Property="Foreground" Value="White"/>
                             <Setter Property="CornerRadius" Value="6"/>
                             <Setter Property="Padding" Value="12,8"/>
                             <Setter Property="FontWeight" Value="SemiBold"/>
                         </Style>
                         <Style Selector="Button:pointerover /template/ ContentPresenter">
-                            <Setter Property="Background" Value="#2EA043"/>
+                            <Setter Property="Background" Value="{DynamicResource SuccessHoverBrush}"/>
                         </Style>
                         <Style Selector="Button:disabled">
                             <Setter Property="Opacity" Value="0.5"/>
@@ -88,14 +88,14 @@
                    IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
                    Margin="0,0,0,12"
                    FontSize="12"
-                   Foreground="#8B949E"/>
+                   Foreground="{DynamicResource TextSecondaryBrush}"/>
         
         <!-- URL Bar -->
         <Border Grid.Row="2" 
-                Background="#161B22" 
+                Background="{DynamicResource CardBackgroundBrush}" 
                 CornerRadius="12" 
                 Padding="16"
-                BorderBrush="#21262D"
+                BorderBrush="{DynamicResource ButtonBackgroundBrush}"
                 BorderThickness="1"
                 Margin="0,0,0,12">
             <Grid ColumnDefinitions="Auto,*,Auto">
@@ -110,7 +110,7 @@
                         <DataTemplate>
                             <TextBlock Text="{Binding}" 
                                        FontWeight="Bold"
-                                       Foreground="#7EE787"/>
+                                       Foreground="{DynamicResource SuccessTextBrush}"/>
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
@@ -136,14 +136,14 @@
                     </Button.Content>
                     <Button.Styles>
                         <Style Selector="Button">
-                            <Setter Property="Background" Value="#1F6FEB"/>
+                            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
                             <Setter Property="Foreground" Value="White"/>
                             <Setter Property="CornerRadius" Value="6"/>
                             <Setter Property="Padding" Value="12,8"/>
                             <Setter Property="FontWeight" Value="SemiBold"/>
                         </Style>
                         <Style Selector="Button:pointerover /template/ ContentPresenter">
-                            <Setter Property="Background" Value="#388BFD"/>
+                            <Setter Property="Background" Value="{DynamicResource AccentHoverBrush}"/>
                         </Style>
                     </Button.Styles>
                 </Button>
@@ -189,14 +189,14 @@
             <TabItem Header="Body">
                 <Grid RowDefinitions="Auto,*" Margin="12">
                     <Border Grid.Row="0" 
-                            Background="#21262D" 
+                            Background="{DynamicResource ButtonBackgroundBrush}" 
                             CornerRadius="6" 
                             Padding="10,6"
                             Margin="0,0,0,12"
                             HorizontalAlignment="Left">
                         <TextBlock Text="application/json" 
                                    FontSize="11" 
-                                   Foreground="#8B949E"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
                                    FontFamily="JetBrains Mono, Consolas, monospace"/>
                     </Border>
                     
@@ -208,9 +208,9 @@
                              FontFamily="JetBrains Mono, Consolas, monospace"
                              FontSize="13"
                              Watermark="Enter JSON body..."
-                             Background="#0D1117"
-                             Foreground="#C9D1D9"
-                             BorderBrush="#30363D"
+                             Background="{DynamicResource InputBackgroundBrush}"
+                             Foreground="{DynamicResource ButtonTextBrush}"
+                             BorderBrush="{DynamicResource BorderLightBrush}"
                              CornerRadius="8"
                              Padding="12"/>
                 </Grid>

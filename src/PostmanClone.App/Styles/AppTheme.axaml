@@ -1,0 +1,106 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    
+    <!-- Dark Theme Colors -->
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Dark">
+            <!-- Background Colors -->
+            <Color x:Key="AppBackgroundColor">#0D1117</Color>
+            <Color x:Key="SidebarBackgroundColor">#161B22</Color>
+            <Color x:Key="PanelBackgroundColor">#0D1117</Color>
+            <Color x:Key="CardBackgroundColor">#161B22</Color>
+            <Color x:Key="InputBackgroundColor">#0D1117</Color>
+            
+            <!-- Border Colors -->
+            <Color x:Key="BorderColor">#21262D</Color>
+            <Color x:Key="BorderLightColor">#30363D</Color>
+            
+            <!-- Text Colors -->
+            <Color x:Key="TextPrimaryColor">#F0F6FC</Color>
+            <Color x:Key="TextSecondaryColor">#8B949E</Color>
+            <Color x:Key="TextTertiaryColor">#6E7681</Color>
+            
+            <!-- Button Colors -->
+            <Color x:Key="ButtonBackgroundColor">#21262D</Color>
+            <Color x:Key="ButtonHoverColor">#30363D</Color>
+            <Color x:Key="ButtonPressedColor">#161B22</Color>
+            <Color x:Key="ButtonTextColor">#C9D1D9</Color>
+            
+            <!-- Accent Colors -->
+            <Color x:Key="AccentColor">#1F6FEB</Color>
+            <Color x:Key="AccentHoverColor">#388BFD</Color>
+            <Color x:Key="SuccessColor">#238636</Color>
+            <Color x:Key="SuccessHoverColor">#2EA043</Color>
+            
+            <!-- Status Colors -->
+            <Color x:Key="SuccessTextColor">#3FB950</Color>
+            <Color x:Key="ErrorTextColor">#F85149</Color>
+            <Color x:Key="WarningTextColor">#D29922</Color>
+        </ResourceDictionary>
+        
+        <!-- Light Theme Colors -->
+        <ResourceDictionary x:Key="Light">
+            <!-- Background Colors -->
+            <Color x:Key="AppBackgroundColor">#FFFFFF</Color>
+            <Color x:Key="SidebarBackgroundColor">#F6F8FA</Color>
+            <Color x:Key="PanelBackgroundColor">#FFFFFF</Color>
+            <Color x:Key="CardBackgroundColor">#F6F8FA</Color>
+            <Color x:Key="InputBackgroundColor">#FFFFFF</Color>
+            
+            <!-- Border Colors -->
+            <Color x:Key="BorderColor">#D0D7DE</Color>
+            <Color x:Key="BorderLightColor">#E5E9ED</Color>
+            
+            <!-- Text Colors -->
+            <Color x:Key="TextPrimaryColor">#24292F</Color>
+            <Color x:Key="TextSecondaryColor">#57606A</Color>
+            <Color x:Key="TextTertiaryColor">#6E7781</Color>
+            
+            <!-- Button Colors -->
+            <Color x:Key="ButtonBackgroundColor">#F6F8FA</Color>
+            <Color x:Key="ButtonHoverColor">#E5E9ED</Color>
+            <Color x:Key="ButtonPressedColor">#D0D7DE</Color>
+            <Color x:Key="ButtonTextColor">#24292F</Color>
+            
+            <!-- Accent Colors -->
+            <Color x:Key="AccentColor">#0969DA</Color>
+            <Color x:Key="AccentHoverColor">#0550AE</Color>
+            <Color x:Key="SuccessColor">#1A7F37</Color>
+            <Color x:Key="SuccessHoverColor">#2DA44E</Color>
+            
+            <!-- Status Colors -->
+            <Color x:Key="SuccessTextColor">#1A7F37</Color>
+            <Color x:Key="ErrorTextColor">#CF222E</Color>
+            <Color x:Key="WarningTextColor">#9A6700</Color>
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+    
+    <!-- Brush Resources (these automatically resolve based on current theme) -->
+    <SolidColorBrush x:Key="AppBackgroundBrush" Color="{DynamicResource AppBackgroundColor}"/>
+    <SolidColorBrush x:Key="SidebarBackgroundBrush" Color="{DynamicResource SidebarBackgroundColor}"/>
+    <SolidColorBrush x:Key="PanelBackgroundBrush" Color="{DynamicResource PanelBackgroundColor}"/>
+    <SolidColorBrush x:Key="CardBackgroundBrush" Color="{DynamicResource CardBackgroundColor}"/>
+    <SolidColorBrush x:Key="InputBackgroundBrush" Color="{DynamicResource InputBackgroundColor}"/>
+    
+    <SolidColorBrush x:Key="BorderBrush" Color="{DynamicResource BorderColor}"/>
+    <SolidColorBrush x:Key="BorderLightBrush" Color="{DynamicResource BorderLightColor}"/>
+    
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="{DynamicResource TextPrimaryColor}"/>
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="{DynamicResource TextSecondaryColor}"/>
+    <SolidColorBrush x:Key="TextTertiaryBrush" Color="{DynamicResource TextTertiaryColor}"/>
+    
+    <SolidColorBrush x:Key="ButtonBackgroundBrush" Color="{DynamicResource ButtonBackgroundColor}"/>
+    <SolidColorBrush x:Key="ButtonHoverBrush" Color="{DynamicResource ButtonHoverColor}"/>
+    <SolidColorBrush x:Key="ButtonPressedBrush" Color="{DynamicResource ButtonPressedColor}"/>
+    <SolidColorBrush x:Key="ButtonTextBrush" Color="{DynamicResource ButtonTextColor}"/>
+    
+    <SolidColorBrush x:Key="AccentBrush" Color="{DynamicResource AccentColor}"/>
+    <SolidColorBrush x:Key="AccentHoverBrush" Color="{DynamicResource AccentHoverColor}"/>
+    <SolidColorBrush x:Key="SuccessBrush" Color="{DynamicResource SuccessColor}"/>
+    <SolidColorBrush x:Key="SuccessHoverBrush" Color="{DynamicResource SuccessHoverColor}"/>
+    
+    <SolidColorBrush x:Key="SuccessTextBrush" Color="{DynamicResource SuccessTextColor}"/>
+    <SolidColorBrush x:Key="ErrorTextBrush" Color="{DynamicResource ErrorTextColor}"/>
+    <SolidColorBrush x:Key="WarningTextBrush" Color="{DynamicResource WarningTextColor}"/>
+    
+</ResourceDictionary>

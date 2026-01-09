@@ -10,9 +10,9 @@
     <UserControl.Styles>
         <!-- Tab Item Style -->
         <Style Selector="Button.tab-item">
-            <Setter Property="Background" Value="#161B22"/>
-            <Setter Property="Foreground" Value="#8B949E"/>
-            <Setter Property="BorderBrush" Value="#21262D"/>
+            <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ButtonBackgroundBrush}"/>
             <Setter Property="BorderThickness" Value="1,1,1,0"/>
             <Setter Property="CornerRadius" Value="8,8,0,0"/>
             <Setter Property="Padding" Value="12,8"/>
@@ -22,22 +22,22 @@
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
         </Style>
         <Style Selector="Button.tab-item:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="#21262D"/>
+            <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
         </Style>
         <Style Selector="Button.tab-item.active">
-            <Setter Property="Background" Value="#0D1117"/>
-            <Setter Property="Foreground" Value="#F0F6FC"/>
-            <Setter Property="BorderBrush" Value="#58A6FF"/>
+            <Setter Property="Background" Value="{DynamicResource PanelBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentHoverBrush}"/>
             <Setter Property="BorderThickness" Value="1,2,1,0"/>
         </Style>
         <Style Selector="Button.tab-item.active /template/ ContentPresenter">
-            <Setter Property="Background" Value="#0D1117"/>
+            <Setter Property="Background" Value="{DynamicResource PanelBackgroundBrush}"/>
         </Style>
         
         <!-- Close Button Style -->
         <Style Selector="Button.tab-close">
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#8B949E"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Padding" Value="4"/>
             <Setter Property="Width" Value="20"/>
@@ -45,7 +45,7 @@
             <Setter Property="CornerRadius" Value="4"/>
         </Style>
         <Style Selector="Button.tab-close:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="#DA3633"/>
+            <Setter Property="Background" Value="{DynamicResource ErrorTextBrush}"/>
         </Style>
         <Style Selector="Button.tab-close:pointerover">
             <Setter Property="Foreground" Value="White"/>
@@ -53,8 +53,8 @@
         
         <!-- New Tab Button Style -->
         <Style Selector="Button.new-tab">
-            <Setter Property="Background" Value="#21262D"/>
-            <Setter Property="Foreground" Value="#8B949E"/>
+            <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="CornerRadius" Value="6"/>
             <Setter Property="Padding" Value="8,6"/>
@@ -62,15 +62,15 @@
             <Setter Property="Height" Value="32"/>
         </Style>
         <Style Selector="Button.new-tab:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="#30363D"/>
+            <Setter Property="Background" Value="{DynamicResource BorderLightBrush}"/>
         </Style>
         <Style Selector="Button.new-tab:pointerover">
-            <Setter Property="Foreground" Value="#F0F6FC"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
         </Style>
     </UserControl.Styles>
 
-    <Border Background="#161B22" 
-            BorderBrush="#21262D" 
+    <Border Background="{DynamicResource CardBackgroundBrush}" 
+            BorderBrush="{DynamicResource ButtonBackgroundBrush}" 
             BorderThickness="0,0,0,1"
             Padding="8,8,8,0">
         <Grid ColumnDefinitions="*,Auto">
@@ -94,7 +94,7 @@
                                     <!-- Unsaved Changes Indicator -->
                                     <Ellipse Grid.Column="0"
                                              Width="8" Height="8"
-                                             Fill="#F0883E"
+                                             Fill="{DynamicResource WarningTextBrush}"
                                              Margin="0,0,8,0"
                                              IsVisible="{Binding HasUnsavedChanges}"
                                              ToolTip.Tip="Unsaved changes"/>

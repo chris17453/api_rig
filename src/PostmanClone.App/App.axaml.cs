@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Styling;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -35,6 +36,9 @@ public partial class App : Application
         // Initialize DB
         var db = services.GetRequiredService<postman_clone_db_context>();
         db.Database.EnsureCreated();
+
+        // Set default theme to Dark
+        RequestedThemeVariant = ThemeVariant.Dark;
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {

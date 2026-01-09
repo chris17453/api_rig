@@ -9,13 +9,13 @@
 
     <Grid RowDefinitions="Auto,*">
         <!-- Header -->
-        <Border Grid.Row="0" Background="#252526" Padding="10">
+        <Border Grid.Row="0" Background="{DynamicResource ButtonBackgroundBrush}" Padding="10">
             <Grid ColumnDefinitions="*,Auto">
                 <TextBlock Grid.Column="0"
                            Text="Console Output" 
                            FontWeight="Bold" 
                            FontSize="14"
-                           Foreground="#CCCCCC"/>
+                           Foreground="{DynamicResource TextPrimaryBrush}"/>
                 
                 <Button Grid.Column="1" 
                         Command="{Binding ClearLogsCommand}"
@@ -26,12 +26,12 @@
         </Border>
 
         <!-- Logs List -->
-        <ScrollViewer Grid.Row="1" Background="#1E1E1E">
+        <ScrollViewer Grid.Row="1" Background="{DynamicResource PanelBackgroundBrush}">
             <ItemsControl ItemsSource="{Binding Logs}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="vm:console_log_item_view_model">
                         <Border Padding="10,5" 
-                                BorderBrush="#333333" 
+                                BorderBrush="{DynamicResource BorderBrush}" 
                                 BorderThickness="0,0,0,1">
                             <Grid ColumnDefinitions="Auto,Auto,*">
                                 <!-- Level Icon -->
@@ -46,7 +46,7 @@
                                 <!-- Timestamp -->
                                 <TextBlock Grid.Column="1"
                                            Text="{Binding Timestamp, StringFormat={}{0:HH:mm:ss.fff}}"
-                                           Foreground="#666666"
+                                           Foreground="{DynamicResource TextTertiaryBrush}"
                                            FontFamily="Consolas"
                                            FontSize="11"
                                            Margin="0,0,10,0"
@@ -55,7 +55,7 @@
                                 <!-- Message -->
                                 <TextBlock Grid.Column="2"
                                            Text="{Binding Message}"
-                                           Foreground="#D4D4D4"
+                                           Foreground="{DynamicResource ButtonTextBrush}"
                                            FontFamily="Consolas"
                                            FontSize="12"
                                            TextWrapping="Wrap"/>
@@ -68,10 +68,10 @@
 
         <!-- Empty State -->
         <Border Grid.Row="1" 
-                Background="#1E1E1E" 
+                Background="{DynamicResource PanelBackgroundBrush}" 
                 IsVisible="{Binding !HasLogs}">
             <TextBlock Text="No console output"
-                       Foreground="#666"
+                       Foreground="{DynamicResource TextTertiaryBrush}"
                        FontSize="12"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Center"/>
