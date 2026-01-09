@@ -1,4 +1,5 @@
-<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl x:Name="Root"
+             xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -38,7 +39,8 @@
         </Style>
     </UserControl.Styles>
 
-    <Grid RowDefinitions="Auto,Auto,Auto,Auto,*">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto,*">
         <!-- Request Name and Save Button -->
         <Border Grid.Row="0" 
                 Background="{DynamicResource CardBackgroundBrush}" 
@@ -156,71 +158,153 @@
             </Grid>
         </Border>
 
-        <!-- Tabs for Headers/Body -->
-        <TabControl Grid.Row="3" Grid.RowSpan="2" MinHeight="150">
-            <!-- Headers Tab -->
-            <TabItem Header="Headers">
-                <Grid RowDefinitions="Auto,*">
-                    <Button Grid.Row="0" 
-                            Command="{Binding AddHeaderCommand}"
-                            Content="+ Add Header"
-                            HorizontalAlignment="Left"
-                            Margin="0,5"/>
-                    
-                    <ScrollViewer Grid.Row="1" Margin="0,5">
-                        <ItemsControl ItemsSource="{Binding Headers}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="vm:key_value_pair_view_model">
-                                    <Grid ColumnDefinitions="Auto,*,*,Auto" Margin="0,2">
-                                        <CheckBox Grid.Column="0" 
-                                                  IsChecked="{Binding IsEnabled}"
-                                                  Margin="0,0,10,0"/>
-                                        <TextBox Grid.Column="1" 
-                                                 Text="{Binding Key, Mode=TwoWay}"
-                                                 Watermark="Key"
-                                                 Margin="0,0,5,0"/>
-                                        <TextBox Grid.Column="2" 
-                                                 Text="{Binding Value, Mode=TwoWay}"
-                                                 Watermark="Value"
-                                                 Margin="5,0,0,0"/>
-                                    </Grid>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
-                </Grid>
-            </TabItem>
-            
-            <!-- Body Tab -->
-            <TabItem Header="Body">
-                <Grid RowDefinitions="Auto,*" Margin="12">
-                    <Border Grid.Row="0" 
-                            Background="{DynamicResource ButtonBackgroundBrush}" 
-                            CornerRadius="6" 
-                            Padding="10,6"
-                            Margin="0,0,0,12"
-                            HorizontalAlignment="Left">
-                        <TextBlock Text="application/json" 
-                                   FontSize="11" 
-                                   Foreground="{DynamicResource TextSecondaryBrush}"
+        <!-- Request Details (Headers, Params, Body) -->
+        <Expander Grid.Row="3" Grid.RowSpan="2" 
+                  Header="Request Details (Headers, Params, Body)" 
+                  Classes="modern-card"
+                  IsExpanded="True"
+                  Margin="0,0,0,12">
+            <TabControl x:Name="EditorTabs" MinHeight="150">
+                <!-- Headers Tab -->
+                <TabItem Header="Headers">
+                    <Grid RowDefinitions="Auto,*" Margin="0,4,0,0">
+                        <Button Grid.Row="0" 
+                                Command="{Binding AddHeaderCommand}"
+                                Content="+ Add Header"
+                                HorizontalAlignment="Left"
+                                Margin="0,5"/>
+                        
+                        <ScrollViewer Grid.Row="1" Margin="0,5">
+                            <ItemsControl ItemsSource="{Binding Headers}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:key_value_pair_view_model">
+                                        <Grid ColumnDefinitions="Auto,*,*,Auto" Margin="0,2">
+                                            <CheckBox Grid.Column="0" 
+                                                      IsChecked="{Binding IsEnabled}"
+                                                      Margin="0,0,10,0"/>
+                                            <TextBox Grid.Column="1" 
+                                                     Text="{Binding Key, Mode=TwoWay}"
+                                                     Watermark="Key"
+                                                     Margin="0,0,5,0"/>
+                                            <TextBox Grid.Column="2" 
+                                                     Text="{Binding Value, Mode=TwoWay}"
+                                                     Watermark="Value"
+                                                     Margin="5,0,0,0"/>
+                                            <Button Grid.Column="3"
+                                                    x:CompileBindings="False"
+                                                    Command="{Binding DataContext.RemoveHeaderCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding .}"
+                                                    Content="✕"
+                                                    Margin="5,0,0,0"
+                                                    Padding="6,2"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                </TabItem>
+
+                <!-- Params Tab -->
+                <TabItem Header="Params">
+                    <Grid RowDefinitions="Auto,*" Margin="0,4,0,0">
+                        <Button Grid.Row="0" 
+                                Command="{Binding AddParamCommand}"
+                                Content="+ Add Param"
+                                HorizontalAlignment="Left"
+                                Margin="0,5"/>
+                        
+                        <ScrollViewer Grid.Row="1" Margin="0,5">
+                            <ItemsControl ItemsSource="{Binding QueryParams}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:key_value_pair_view_model">
+                                        <Grid ColumnDefinitions="Auto,*,*,Auto" Margin="0,2">
+                                            <CheckBox Grid.Column="0" 
+                                                      IsChecked="{Binding IsEnabled}"
+                                                      Margin="0,0,10,0"/>
+                                            <TextBox Grid.Column="1" 
+                                                     Text="{Binding Key, Mode=TwoWay}"
+                                                     Watermark="Key"
+                                                     Margin="0,0,5,0"/>
+                                            <TextBox Grid.Column="2" 
+                                                     Text="{Binding Value, Mode=TwoWay}"
+                                                     Watermark="Value"
+                                                     Margin="5,0,5,0"/>
+                                            <Button Grid.Column="3"
+                                                    x:CompileBindings="False"
+                                                    Command="{Binding DataContext.RemoveParamCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding .}"
+                                                    Content="✕"
+                                                    Margin="5,0,0,0"
+                                                    Padding="6,2"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                </TabItem>
+                
+                <!-- Body Tab -->
+                <TabItem Header="Body">
+                    <Grid RowDefinitions="Auto,*,Auto" Margin="12">
+                        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,12">
+                            <Border Grid.Column="0" 
+                                    Background="{DynamicResource ButtonBackgroundBrush}" 
+                                    CornerRadius="6" 
+                                    Padding="10,6"
+                                    HorizontalAlignment="Left">
+                                <TextBlock Text="application/json" 
+                                           FontSize="11" 
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           FontFamily="JetBrains Mono, Consolas, monospace"/>
+                            </Border>
+
+                            <Button Grid.Column="2"
+                                    Command="{Binding FormatJsonCommand}"
+                                    Content="Format JSON"
+                                    FontSize="11"
+                                    Padding="8,4"
+                                    Background="{DynamicResource ButtonBackgroundBrush}"
+                                    Foreground="{DynamicResource ButtonTextBrush}"
+                                    BorderBrush="{DynamicResource BorderLightBrush}"
+                                    BorderThickness="1">
+                                <Button.Styles>
+                                    <Style Selector="Button:pointerover /template/ ContentPresenter">
+                                        <Setter Property="Background" Value="{DynamicResource ButtonHoverBrush}"/>
+                                    </Style>
+                                </Button.Styles>
+                            </Button>
+                        </Grid>
+                        
+                        <Border Grid.Row="1" 
+                                Background="{DynamicResource InputBackgroundBrush}"
+                                BorderBrush="{Binding IsJsonValid, Converter={StaticResource JsonValidityToBrushConverter}}"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Padding="1">
+                            <AvaloniaEdit:TextEditor Name="BodyEditor"
+                                                     FontFamily="JetBrains Mono, Consolas, monospace"
+                                                     FontSize="13"
+                                                     Background="Transparent"
+                                                     Foreground="{DynamicResource ButtonTextBrush}"
+                                                     ShowLineNumbers="True"
+                                                     HorizontalScrollBarVisibility="Auto"
+                                                     VerticalScrollBarVisibility="Visible"/>
+                        </Border>
+
+                        <TextBlock Grid.Row="2"
+                                   Text="{Binding JsonValidationError}"
+                                   IsVisible="{Binding !IsJsonValid}"
+                                   Foreground="{DynamicResource ErrorTextBrush}"
+                                   FontSize="11"
+                                   Margin="0,8,0,0"
+                                   TextWrapping="Wrap"
                                    FontFamily="JetBrains Mono, Consolas, monospace"/>
-                    </Border>
-                    
-                    <TextBox Grid.Row="1" 
-                             Text="{Binding RequestBody, Mode=TwoWay}"
-                             AcceptsReturn="True"
-                             AcceptsTab="True"
-                             TextWrapping="NoWrap"
-                             FontFamily="JetBrains Mono, Consolas, monospace"
-                             FontSize="13"
-                             Watermark="Enter JSON body..."
-                             Background="{DynamicResource InputBackgroundBrush}"
-                             Foreground="{DynamicResource ButtonTextBrush}"
-                             BorderBrush="{DynamicResource BorderLightBrush}"
-                             CornerRadius="8"
-                             Padding="12"/>
-                </Grid>
-            </TabItem>
-        </TabControl>
-    </Grid>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+        </Expander>
+        </Grid>
+    </ScrollViewer>
 </UserControl>

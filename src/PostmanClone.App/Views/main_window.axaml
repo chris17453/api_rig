@@ -154,36 +154,43 @@
         
         <!-- Main Content Area -->
         <Border Grid.Column="1" Background="{DynamicResource AppBackgroundBrush}">
-            <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="0">
+            <Grid RowDefinitions="Auto,*" Margin="0">
                 <!-- Tab Bar -->
                 <views:tab_bar_view Grid.Row="0" 
                                     DataContext="{Binding Tabs}"/>
                 
-                <!-- Request Editor -->
-                <views:request_editor_view Grid.Row="1" 
-                                           DataContext="{Binding RequestEditor}"
-                                           Margin="20,16,20,0"/>
-                
-                <!-- Script Editor -->
-                <Border Grid.Row="2" 
-                        Margin="20,16,20,16" 
-                        MinHeight="220"
-                        Background="{DynamicResource CardBackgroundBrush}"
-                        CornerRadius="12"
-                        BorderBrush="{DynamicResource ButtonBackgroundBrush}"
-                        BorderThickness="1">
-                    <views:script_editor_view DataContext="{Binding ScriptEditor}"/>
-                </Border>
-                
-                <!-- Response Viewer -->
-                <Border Grid.Row="3"
-                        Margin="20,0,20,16"
-                        Background="{DynamicResource CardBackgroundBrush}"
-                        CornerRadius="12"
-                        BorderBrush="{DynamicResource ButtonBackgroundBrush}"
-                        BorderThickness="1">
-                    <views:response_viewer_view DataContext="{Binding ResponseViewer}"/>
-                </Border>
+                <!-- Scrollable Content -->
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Spacing="0">
+                        <!-- Request Editor -->
+                        <views:request_editor_view DataContext="{Binding RequestEditor}"
+                                                   Margin="20,16,20,0"/>
+                        
+                        <!-- Script Editor -->
+                        <Expander Header="Scripts &amp; Console" 
+                                  Classes="modern-card"
+                                  IsExpanded="True" 
+                                  Margin="20,16,20,0">
+                            <Border MinHeight="220"
+                                    Background="{DynamicResource CardBackgroundBrush}"
+                                    CornerRadius="0,0,12,12"
+                                    BorderBrush="{DynamicResource BorderBrush}"
+                                    BorderThickness="1">
+                                <views:script_editor_view DataContext="{Binding ScriptEditor}"/>
+                            </Border>
+                        </Expander>
+                        
+                        <!-- Response Viewer -->
+                        <Border Margin="20,16,20,16"
+                                Background="{DynamicResource CardBackgroundBrush}"
+                                CornerRadius="12"
+                                BorderBrush="{DynamicResource BorderBrush}"
+                                BorderThickness="1"
+                                MinHeight="300">
+                            <views:response_viewer_view DataContext="{Binding ResponseViewer}"/>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
             </Grid>
         </Border>
         
