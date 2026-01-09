@@ -156,7 +156,7 @@ public partial class sidebar_view_model : ObservableObject
         var newCollection = new postman_collection_model
         {
             id = Guid.NewGuid().ToString(),
-            name = $"Collection {DateTime.Now:HH:mm:ss}",
+            name = $"Collection {DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}",
             description = "New collection",
             items = new List<collection_item_model>()
         };
