@@ -12,18 +12,6 @@ using System.Reactive.Subjects;
 
 namespace PostmanClone.App.ViewModels;
 
-public partial class key_value_pair_view_model : ObservableObject
-{
-    [ObservableProperty]
-    private string _key = string.Empty;
-
-    [ObservableProperty]
-    private string _value = string.Empty;
-
-    [ObservableProperty]
-    private bool _isEnabled = true;
-}
-
 public partial class request_editor_view_model : ObservableObject, IDisposable
 {
     private readonly request_orchestrator _request_orchestrator;
@@ -328,12 +316,7 @@ public partial class request_editor_view_model : ObservableObject, IDisposable
 
         try
         {
-            using var stringReader = new StringReader(json);
-            using var jsonReader = new JsonTextReader(stringReader);
-            while (jsonReader.Read()) 
-            { 
-                // Just reading the tokens to validate syntax
-            }
+            _ = JToken.Parse(json);
             IsJsonValid = true;
             JsonValidationError = string.Empty;
         }
