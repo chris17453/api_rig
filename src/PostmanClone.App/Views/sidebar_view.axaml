@@ -50,8 +50,9 @@
                   Background="Transparent"
                   Margin="8,0">
             <TreeView.Styles>
-                <Style Selector="TreeViewItem">
+                <Style Selector="TreeViewItem" x:DataType="vm:collection_tree_item_view_model">
                     <Setter Property="Padding" Value="8,6"/>
+                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
                 </Style>
             </TreeView.Styles>
             <TreeView.ItemTemplate>
