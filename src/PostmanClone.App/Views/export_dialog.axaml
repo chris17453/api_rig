@@ -18,30 +18,30 @@
             <TextBlock Text="Export Collection" 
                        FontSize="20" 
                        FontWeight="Bold"
-                       Foreground="#E0E0E0"/>
+                       Foreground="{DynamicResource TextPrimaryBrush}"/>
             <TextBlock Text="Export your collection to Postman format (v2.1)"
                        FontSize="12"
-                       Foreground="#888"
+                       Foreground="{DynamicResource TextSecondaryBrush}"
                        Margin="0,5,0,0"/>
         </StackPanel>
 
         <!-- Collection Info -->
         <Border Grid.Row="1" 
-                Background="#2D2D2D" 
+                Background="{DynamicResource ButtonBackgroundBrush}" 
                 Padding="15" 
                 CornerRadius="4"
                 Margin="0,0,0,15"
                 IsVisible="{Binding SelectedCollectionForExport, Converter={x:Static ObjectConverters.IsNotNull}}">
             <StackPanel Spacing="5">
                 <TextBlock Text="Selected Collection:" 
-                           Foreground="#888" 
+                           Foreground="{DynamicResource TextSecondaryBrush}" 
                            FontSize="12"/>
                 <TextBlock Text="{Binding SelectedCollectionForExport.name}" 
-                           Foreground="#E0E0E0"
+                           Foreground="{DynamicResource TextPrimaryBrush}"
                            FontWeight="SemiBold"
                            FontSize="14"/>
                 <TextBlock Text="{Binding SelectedCollectionForExport.items.Count, StringFormat={}{0} items}"
-                           Foreground="#888"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
                            FontSize="12"/>
             </StackPanel>
         </Border>
@@ -52,8 +52,8 @@
                      Text="{Binding ExportFilePath, Mode=TwoWay}"
                      Watermark="Choose export location..."
                      IsReadOnly="True"
-                     Background="#2D2D2D"
-                     Foreground="#E0E0E0"
+                     Background="{DynamicResource ButtonBackgroundBrush}"
+                     Foreground="{DynamicResource TextPrimaryBrush}"
                      Margin="0,0,10,0"/>
             
             <Button Grid.Column="1"
@@ -65,12 +65,12 @@
         <!-- Status Message -->
         <Border Grid.Row="3" 
                 Padding="10"
-                Background="#3C3C3C"
+                Background="{DynamicResource ButtonBackgroundBrush}"
                 CornerRadius="4"
                 VerticalAlignment="Top"
                 IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
             <TextBlock Text="{Binding StatusMessage}"
-                       Foreground="#F0F0F0"
+                       Foreground="{DynamicResource TextPrimaryBrush}"
                        TextWrapping="Wrap"/>
         </Border>
 
@@ -88,7 +88,7 @@
                     Command="{Binding ExportCollectionCommand}"
                     IsEnabled="{Binding !IsExporting}"
                     Padding="20,8"
-                    Background="#0E639C"
+                    Background="{DynamicResource AccentBrush}"
                     Foreground="White">
                 <Button.Styles>
                     <Style Selector="Button:disabled">

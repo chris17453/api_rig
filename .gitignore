@@ -3,6 +3,13 @@
 ##
 ## Get latest from `dotnet new gitignore`
 
+# SQLite database files
+postman_clone.db
+postman_clone.db-shm
+postman_clone.db-wal
+*.db-shm
+*.db-wal
+
 # dotenv files
 .env
 
@@ -482,3 +489,6 @@ $RECYCLE.BIN/
 *.swp
 
 *.db
+*.db-schema
+*.db.wal
+.gitignore

@@ -1,3 +1,5 @@
+using Avalonia;
+using Avalonia.Styling;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PostmanClone.Core.Interfaces;
@@ -53,6 +55,9 @@ public partial class main_view_model : ObservableObject
     [ObservableProperty]
     private bool _isSidebarVisible = true;
 
+    [ObservableProperty]
+    private bool _isDarkTheme = true;
+
     public main_view_model(
         MainViewDependencies dependencies,
         i_collection_repository collection_repository)
@@ -107,6 +112,19 @@ public partial class main_view_model : ObservableObject
     private void toggle_sidebar()
     {
         IsSidebarVisible = !IsSidebarVisible;
+    }
+
+    [RelayCommand]
+    private void ToggleTheme()
+    {
+        IsDarkTheme = !IsDarkTheme;
+        
+        if (Application.Current != null)
+        {
+            Application.Current.RequestedThemeVariant = IsDarkTheme 
+                ? ThemeVariant.Dark 
+                : ThemeVariant.Light;
+        }
     }
 
     [RelayCommand]
