@@ -229,6 +229,11 @@ dotnet test tests/PostmanClone.Scripting.Tests -c Release
 
 ## Current Implementation Status
 
+**For detailed feature comparison with Postman, see:**
+- **[GAP_ANALYSIS.md](GAP_ANALYSIS.md)** - Comprehensive 18-section analysis (911 lines)
+- **[GAP_ANALYSIS_SUMMARY.md](GAP_ANALYSIS_SUMMARY.md)** - Quick reference with visual comparison
+- **[STATUS.md](STATUS.md)** - Detailed implementation status report
+
 ### Completed Modules
 
 | Module | Status | Tests |
