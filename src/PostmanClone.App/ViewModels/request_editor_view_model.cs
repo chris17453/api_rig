@@ -408,52 +408,61 @@ public partial class request_editor_view_model : ObservableObject, IDisposable
 
     public void load_request(http_request_model request, string? collectionId = null, string? collectionItemId = null)
     {
-        _logger.LogInformation("Loading request '{RequestName}' with CollectionId='{CollectionId}', CollectionItemId='{CollectionItemId}'", 
-            request.name, collectionId ?? "null", collectionItemId ?? "null");
-        
-        RequestName = request.name;
-        // Use the collection item ID for tracking, not the request ID
-        CurrentRequestId = collectionItemId ?? request.id;
-        CurrentCollectionId = collectionId;
-        
-        _logger.LogInformation("Set CurrentCollectionId to '{CurrentCollectionId}'", CurrentCollectionId ?? "null");
-        
-        Url = request.url;
-        SelectedMethod = request.method;
-        RequestBody = request.body?.raw_content ?? string.Empty;
-        PreRequestScript = request.pre_request_script ?? string.Empty;
-        PostResponseScript = request.post_response_script ?? string.Empty;
-        
-        Headers.Clear();
-        foreach (var h in request.headers)
+        _isSyncingParamsFromUrl = true;
+        try
         {
-            Headers.Add(new key_value_pair_view_model
+            _logger.LogInformation("Loading request '{RequestName}' with CollectionId='{CollectionId}', CollectionItemId='{CollectionItemId}'", 
+                request.name, collectionId ?? "null", collectionItemId ?? "null");
+            
+            RequestName = request.name;
+            // Use the collection item ID for tracking, not the request ID
+            CurrentRequestId = collectionItemId ?? request.id;
+            CurrentCollectionId = collectionId;
+            
+            _logger.LogInformation("Set CurrentCollectionId to '{CurrentCollectionId}'", CurrentCollectionId ?? "null");
+            
+            Url = request.url;
+            SelectedMethod = request.method;
+            RequestBody = request.body?.raw_content ?? string.Empty;
+            PreRequestScript = request.pre_request_script ?? string.Empty;
+            PostResponseScript = request.post_response_script ?? string.Empty;
+            
+            Headers.Clear();
+            foreach (var h in request.headers)
             {
-                Key = h.key,
-                Value = h.value,
-                IsEnabled = h.enabled
-            });
-        }
-        if (Headers.Count == 0)
-            Headers.Add(new key_value_pair_view_model());
-
-        QueryParams.Clear();
-        if (request.query_params != null && request.query_params.Count > 0)
-        {
-            foreach (var q in request.query_params)
-            {
-                QueryParams.Add(new key_value_pair_view_model
+                Headers.Add(new key_value_pair_view_model
                 {
-                    Key = q.key,
-                    Value = q.value,
-                    IsEnabled = q.enabled
+                    Key = h.key,
+                    Value = h.value,
+                    IsEnabled = h.enabled
                 });
             }
+            if (Headers.Count == 0)
+                Headers.Add(new key_value_pair_view_model());
+
+            QueryParams.Clear();
+            if (request.query_params != null && request.query_params.Count > 0)
+            {
+                foreach (var q in request.query_params)
+                {
+                    QueryParams.Add(new key_value_pair_view_model
+                    {
+                        Key = q.key,
+                        Value = q.value,
+                        IsEnabled = q.enabled
+                    });
+                }
+            }
+            else
+            {
+                SyncQueryParamsFromUrl();
+            }
         }
-        else
+        finally
         {
-            SyncQueryParamsFromUrl();
+            _isSyncingParamsFromUrl = false;
         }
+
         EnsureParamsRow();
         UpdateUrlFromParams();
     }
