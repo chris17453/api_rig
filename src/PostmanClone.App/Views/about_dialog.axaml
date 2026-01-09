@@ -13,54 +13,54 @@
         MinHeight="500"
         WindowStartupLocation="CenterOwner"
         CanResize="True"
-        Background="#1E1E1E">
+        Background="{DynamicResource AppBackgroundBrush}">
 
     <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" Margin="25">
         <!-- Header with Logo and Title -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="15" Margin="0,0,0,20">
-            <Border Background="#FF6C37" CornerRadius="10" Padding="10">
+            <Border Background="{DynamicResource AccentBrush}" CornerRadius="10" Padding="10">
                 <TextBlock Text="🚀" FontSize="32"/>
             </Border>
             <StackPanel VerticalAlignment="Center">
                 <TextBlock Text="{Binding ApplicationName}" 
                            FontSize="24" 
                            FontWeight="Bold"
-                           Foreground="#FFFFFF"/>
+                           Foreground="{DynamicResource TextPrimaryBrush}"/>
                 <StackPanel Orientation="Horizontal" Spacing="15">
                     <TextBlock Text="{Binding Version, StringFormat='Version {0}'}"
                                FontSize="14"
-                               Foreground="#888"/>
-                    <TextBlock Text="|" Foreground="#555"/>
+                               Foreground="{DynamicResource TextSecondaryBrush}"/>
+                    <TextBlock Text="|" Foreground="{DynamicResource TextTertiaryBrush}"/>
                     <TextBlock Text="{Binding BuildDate}"
                                FontSize="14"
-                               Foreground="#888"/>
+                               Foreground="{DynamicResource TextSecondaryBrush}"/>
                 </StackPanel>
             </StackPanel>
         </StackPanel>
 
         <!-- Tech Stack Badge -->
         <Border Grid.Row="1" 
-                Background="#2D2D2D" 
+                Background="{DynamicResource ButtonBackgroundBrush}" 
                 CornerRadius="5" 
                 Padding="10,8"
                 Margin="0,0,0,15"
                 HorizontalAlignment="Left">
             <TextBlock Text="{Binding TechStack}" 
                        FontSize="12" 
-                       Foreground="#FF6C37"
+                       Foreground="{DynamicResource AccentBrush}"
                        FontWeight="SemiBold"/>
         </Border>
 
         <!-- Description -->
         <Border Grid.Row="2" 
-                Background="#252526" 
+                Background="{DynamicResource CardBackgroundBrush}" 
                 CornerRadius="8" 
                 Padding="15"
                 Margin="0,0,0,20">
             <ScrollViewer MaxHeight="150" VerticalScrollBarVisibility="Auto">
                 <TextBlock Text="{Binding Description}" 
                            FontSize="13"
-                           Foreground="#CCCCCC"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
                            TextWrapping="Wrap"
                            LineHeight="22"/>
             </ScrollViewer>
@@ -73,11 +73,11 @@
                 <TextBlock Text="Team Members" 
                            FontSize="16" 
                            FontWeight="Bold"
-                           Foreground="#FFFFFF"/>
-                <Border Background="#3C8039" CornerRadius="10" Padding="8,2">
+                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                <Border Background="{DynamicResource SuccessBrush}" CornerRadius="10" Padding="8,2">
                     <TextBlock Text="{Binding TestingStatus}" 
                                FontSize="11" 
-                               Foreground="#FFFFFF"/>
+                               Foreground="White"/>
                 </Border>
             </StackPanel>
 
@@ -85,14 +85,14 @@
                 <ItemsControl ItemsSource="{Binding TeamMembers}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="vm:team_member_model">
-                            <Border Background="#2D2D2D" 
+                            <Border Background="{DynamicResource ButtonBackgroundBrush}" 
                                     CornerRadius="8" 
                                     Padding="15"
                                     Margin="0,0,0,10">
                                 <Grid RowDefinitions="Auto,Auto,Auto">
                                     <!-- Name -->
                                     <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="10">
-                                        <Border Background="#404040" CornerRadius="15" Width="30" Height="30">
+                                        <Border Background="{DynamicResource BorderLightBrush}" CornerRadius="15" Width="30" Height="30">
                                             <TextBlock Text="👤"
                                                        HorizontalAlignment="Center"
                                                        VerticalAlignment="Center"
@@ -101,27 +101,27 @@
                                         <TextBlock Text="{Binding Name}" 
                                                    FontSize="15"
                                                    FontWeight="SemiBold"
-                                                   Foreground="#FFFFFF"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}"
                                                    VerticalAlignment="Center"/>
                                     </StackPanel>
                                     
                                     <!-- Role -->
                                     <Border Grid.Row="1" 
-                                            Background="#3C3C3C" 
+                                            Background="{DynamicResource BorderLightBrush}" 
                                             CornerRadius="3" 
                                             Padding="6,3"
                                             Margin="40,8,0,8"
                                             HorizontalAlignment="Left">
                                         <TextBlock Text="{Binding Role}" 
                                                    FontSize="11"
-                                                   Foreground="#FF6C37"/>
+                                                   Foreground="{DynamicResource AccentBrush}"/>
                                     </Border>
                                     
                                     <!-- Contributions -->
                                     <TextBlock Grid.Row="2" 
                                                Text="{Binding Contributions}" 
                                                FontSize="12"
-                                               Foreground="#AAAAAA"
+                                               Foreground="{DynamicResource TextSecondaryBrush}"
                                                TextWrapping="Wrap"
                                                Margin="40,0,0,0"
                                                LineHeight="18"/>
@@ -138,14 +138,14 @@
             <TextBlock Grid.Column="0" 
                        Text="{Binding License}"
                        FontSize="12"
-                       Foreground="#666"
+                       Foreground="{DynamicResource TextTertiaryBrush}"
                        VerticalAlignment="Center"/>
             <Button Grid.Column="1"
                     Content="Close"
                     Click="CloseButton_Click"
                     Padding="25,10"
-                    Background="#FF6C37"
-                    Foreground="#FFFFFF"
+                    Background="{DynamicResource AccentBrush}"
+                    Foreground="White"
                     FontWeight="SemiBold"/>
         </Grid>
     </Grid>

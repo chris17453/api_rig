@@ -4,50 +4,54 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:PostmanClone.App.ViewModels"
         xmlns:views="using:PostmanClone.App.Views"
+        xmlns:converters="using:PostmanClone.App.Converters"
         mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="900"
         x:Class="PostmanClone.App.Views.main_window"
         x:DataType="vm:main_view_model"
         Title="{Binding Title}"
         Width="1400" Height="900"
         WindowStartupLocation="CenterScreen"
-        Background="#0D1117"
         Icon="avares://PostmanClone.App/Assets/logo.webp">
+
+    <Window.Resources>
+        <converters:theme_icon_converter x:Key="ThemeIconConverter"/>
+    </Window.Resources>
 
     <Window.Styles>
         <!-- Modern Button Style -->
         <Style Selector="Button.modern">
-            <Setter Property="Background" Value="#21262D"/>
-            <Setter Property="Foreground" Value="#C9D1D9"/>
-            <Setter Property="BorderBrush" Value="#30363D"/>
+            <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="6"/>
             <Setter Property="Padding" Value="12,6"/>
             <Setter Property="FontSize" Value="12"/>
         </Style>
         <Style Selector="Button.modern:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="#30363D"/>
+            <Setter Property="Background" Value="{DynamicResource ButtonHoverBrush}"/>
         </Style>
         <Style Selector="Button.primary">
-            <Setter Property="Background" Value="#238636"/>
-            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="Background" Value="{DynamicResource SuccessBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="CornerRadius" Value="6"/>
             <Setter Property="Padding" Value="16,8"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
         </Style>
         <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="#2EA043"/>
+            <Setter Property="Background" Value="{DynamicResource SuccessHoverBrush}"/>
         </Style>
         <Style Selector="Button.accent">
-            <Setter Property="Background" Value="#1F6FEB"/>
-            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="CornerRadius" Value="6"/>
             <Setter Property="Padding" Value="14,8"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
         </Style>
         <Style Selector="Button.accent:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="#388BFD"/>
+            <Setter Property="Background" Value="{DynamicResource AccentHoverBrush}"/>
         </Style>
     </Window.Styles>
 
@@ -55,13 +59,13 @@
         <!-- Sidebar -->
         <Border Grid.Column="0" 
                 IsVisible="{Binding IsSidebarVisible}"
-                Background="#161B22"
-                BorderBrush="#21262D" 
+                Background="{DynamicResource SidebarBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" 
                 BorderThickness="0,0,1,0">
-            <Grid RowDefinitions="Auto,Auto,Auto,*">
+            <Grid RowDefinitions="Auto,Auto,Auto,*,Auto">
                 <!-- Logo and App Title -->
                 <Border Grid.Row="0" 
-                        Background="#0D1117"
+                        Background="{DynamicResource PanelBackgroundBrush}"
                         Padding="16,20,16,16">
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <Border CornerRadius="10" 
@@ -73,10 +77,10 @@
                             <TextBlock Text="API Rig" 
                                        FontSize="18" 
                                        FontWeight="Bold"
-                                       Foreground="#F0F6FC"/>
+                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
                             <TextBlock Text="REST Client"
                                        FontSize="11"
-                                       Foreground="#8B949E"/>
+                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
@@ -84,8 +88,8 @@
                 <!-- Import/Export Buttons -->
                 <StackPanel Grid.Row="1" 
                             Orientation="Horizontal" 
-                            Margin="16,0,16,16"
-                            Spacing="8">
+                            Spacing="8"
+                            Margin="16,0,16,16">
                     <Button Classes="modern"
                             Click="ImportButton_Click">
                         <StackPanel Orientation="Horizontal" Spacing="6">
@@ -114,11 +118,42 @@
                 <!-- Collections and History -->
                 <views:sidebar_view Grid.Row="3" 
                                     DataContext="{Binding Sidebar}"/>
+                
+                <!-- Sidebar Footer -->
+                <Border Grid.Row="4"
+                        Background="{DynamicResource PanelBackgroundBrush}"
+                        BorderBrush="{DynamicResource BorderBrush}"
+                        BorderThickness="0,1,0,0"
+                        Padding="16,12">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Grid.Column="0"
+                                   Text="v1.0.0"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   VerticalAlignment="Center"/>
+                        <StackPanel Grid.Column="1" 
+                                    Orientation="Horizontal" 
+                                    Spacing="8">
+                            <!-- Theme Toggle Button -->
+                            <Button Classes="modern"
+                                    Command="{Binding ToggleThemeCommand}"
+                                    ToolTip.Tip="Toggle Light/Dark Theme"
+                                    Width="36"
+                                    Height="36"
+                                    Padding="0">
+                                <TextBlock Text="{Binding IsDarkTheme, Converter={StaticResource ThemeIconConverter}}"
+                                           FontSize="16"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
             </Grid>
         </Border>
         
         <!-- Main Content Area -->
-        <Border Grid.Column="1" Background="#0D1117">
+        <Border Grid.Column="1" Background="{DynamicResource AppBackgroundBrush}">
             <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="0">
                 <!-- Tab Bar -->
                 <views:tab_bar_view Grid.Row="0" 
@@ -133,9 +168,9 @@
                 <Border Grid.Row="2" 
                         Margin="20,16,20,16" 
                         MinHeight="220"
-                        Background="#161B22"
+                        Background="{DynamicResource CardBackgroundBrush}"
                         CornerRadius="12"
-                        BorderBrush="#21262D"
+                        BorderBrush="{DynamicResource ButtonBackgroundBrush}"
                         BorderThickness="1">
                     <views:script_editor_view DataContext="{Binding ScriptEditor}"/>
                 </Border>
@@ -143,9 +178,9 @@
                 <!-- Response Viewer -->
                 <Border Grid.Row="3"
                         Margin="20,0,20,16"
-                        Background="#161B22"
+                        Background="{DynamicResource CardBackgroundBrush}"
                         CornerRadius="12"
-                        BorderBrush="#21262D"
+                        BorderBrush="{DynamicResource ButtonBackgroundBrush}"
                         BorderThickness="1">
                     <views:response_viewer_view DataContext="{Binding ResponseViewer}"/>
                 </Border>
@@ -154,8 +189,8 @@
         
         <!-- Right Panel - Test Results -->
         <Border Grid.Column="2" 
-                Background="#161B22"
-                BorderBrush="#21262D"
+                Background="{DynamicResource CardBackgroundBrush}"
+                BorderBrush="{DynamicResource ButtonBackgroundBrush}"
                 BorderThickness="1,0,0,0">
             <views:test_results_view DataContext="{Binding TestResults}"/>
         </Border>
