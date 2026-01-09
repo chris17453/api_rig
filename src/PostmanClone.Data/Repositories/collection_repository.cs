@@ -35,11 +35,45 @@ public class collection_repository : i_collection_repository
 
     public async Task<postman_collection_model> import_from_json_async(string json_content, CancellationToken cancellation_token)
     {
-        var json_obj = JObject.Parse(json_content);
-        var collection = parse_postman_collection(json_obj);
+        var collection = parse_collection_from_any_format(json_content);
         
         await save_async(collection, cancellation_token);
         return collection;
+    }
+
+    private static postman_collection_model parse_collection_from_any_format(string json_content)
+    {
+        // Try OpenAPI 3.0
+        var openapi_v3_parser = new Parsers.openapi_v3_parser();
+        if (openapi_v3_parser.can_parse(json_content))
+        {
+            return openapi_v3_parser.parse(json_content);
+        }
+
+        // Try Swagger 2.0
+        var swagger_v2_parser = new Parsers.swagger_v2_parser();
+        if (swagger_v2_parser.can_parse(json_content))
+        {
+            return swagger_v2_parser.parse(json_content);
+        }
+
+        // Try Postman v2.1
+        var postman_v21_parser = new Parsers.postman_v21_parser();
+        if (postman_v21_parser.can_parse(json_content))
+        {
+            return postman_v21_parser.parse(json_content);
+        }
+
+        // Try Postman v2.0
+        var postman_v20_parser = new Parsers.postman_v20_parser();
+        if (postman_v20_parser.can_parse(json_content))
+        {
+            return postman_v20_parser.parse(json_content);
+        }
+
+        // Fallback to legacy parser for unrecognized formats
+        var json_obj = JObject.Parse(json_content);
+        return parse_postman_collection(json_obj);
     }
 
     public async Task<IReadOnlyList<postman_collection_model>> list_all_async(CancellationToken cancellation_token)
