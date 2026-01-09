@@ -117,7 +117,7 @@ public partial class request_editor_view_model : ObservableObject, IDisposable
                     .ToList(),
                 body = string.IsNullOrWhiteSpace(RequestBody) ? null : new request_body_model
                 {
-                    body_type = request_body_type.raw,
+                    body_type = request_body_type.json,
                     raw_content = RequestBody
                 },
                 pre_request_script = PreRequestScript,
