@@ -7,6 +7,9 @@ using PostmanClone.Core.Interfaces;
 using PostmanClone.Core.Models;
 using PostmanClone.Data.Services;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
+using System.Net;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 
@@ -39,6 +42,8 @@ public partial class request_editor_view_model : ObservableObject, IDisposable
 
     private readonly Subject<string> _bodyChangedSubject = new();
     private IDisposable? _debounceSubscription;
+    private bool _isSyncingParamsFromUrl;
+    private bool _isSyncingUrlFromParams;
 
     [ObservableProperty]
     private bool _isSending;
@@ -87,6 +92,8 @@ public partial class request_editor_view_model : ObservableObject, IDisposable
 
         // Add default empty header row
         _headers.Add(new key_value_pair_view_model());
+        EnsureParamsRow();
+        AttachParamHandlers(QueryParams);
     }
 
     public event EventHandler? execution_started;
@@ -296,6 +303,10 @@ public partial class request_editor_view_model : ObservableObject, IDisposable
 
     partial void OnUrlChanged(string value)
     {
+        if (!_isSyncingUrlFromParams)
+        {
+            SyncQueryParamsFromUrl();
+        }
         SendRequestCommand.NotifyCanExecuteChanged();
         SaveRequestCommand.NotifyCanExecuteChanged();
     }
@@ -303,6 +314,11 @@ public partial class request_editor_view_model : ObservableObject, IDisposable
     partial void OnRequestBodyChanged(string value)
     {
         _bodyChangedSubject.OnNext(value);
+    }
+
+    partial void OnQueryParamsChanged(ObservableCollection<key_value_pair_view_model> value)
+    {
+        AttachParamHandlers(value);
     }
 
     private void ValidateJson(string json)
@@ -352,6 +368,20 @@ public partial class request_editor_view_model : ObservableObject, IDisposable
     private void AddHeader()
     {
         Headers.Add(new key_value_pair_view_model());
+    }
+
+    [RelayCommand]
+    private void AddParam()
+    {
+        QueryParams.Add(new key_value_pair_view_model());
+    }
+
+    [RelayCommand]
+    private void RemoveParam(key_value_pair_view_model param)
+    {
+        QueryParams.Remove(param);
+        EnsureParamsRow();
+        UpdateUrlFromParams();
     }
 
     [RelayCommand]
@@ -406,5 +436,136 @@ public partial class request_editor_view_model : ObservableObject, IDisposable
         }
         if (Headers.Count == 0)
             Headers.Add(new key_value_pair_view_model());
+
+        QueryParams.Clear();
+        if (request.query_params != null && request.query_params.Count > 0)
+        {
+            foreach (var q in request.query_params)
+            {
+                QueryParams.Add(new key_value_pair_view_model
+                {
+                    Key = q.key,
+                    Value = q.value,
+                    IsEnabled = q.enabled
+                });
+            }
+        }
+        else
+        {
+            SyncQueryParamsFromUrl();
+        }
+        EnsureParamsRow();
+        UpdateUrlFromParams();
+    }
+
+    private void EnsureParamsRow()
+    {
+        if (QueryParams.Count == 0)
+        {
+            QueryParams.Add(new key_value_pair_view_model());
+        }
+    }
+
+    private void AttachParamHandlers(ObservableCollection<key_value_pair_view_model> collection)
+    {
+        collection.CollectionChanged -= OnParamsCollectionChanged;
+        collection.CollectionChanged += OnParamsCollectionChanged;
+        foreach (var item in collection)
+        {
+            item.PropertyChanged -= OnParamPropertyChanged;
+            item.PropertyChanged += OnParamPropertyChanged;
+        }
+    }
+
+    private void OnParamsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (e.NewItems != null)
+        {
+            foreach (key_value_pair_view_model item in e.NewItems)
+            {
+                item.PropertyChanged += OnParamPropertyChanged;
+            }
+        }
+        if (e.OldItems != null)
+        {
+            foreach (key_value_pair_view_model item in e.OldItems)
+            {
+                item.PropertyChanged -= OnParamPropertyChanged;
+            }
+        }
+
+        if (_isSyncingParamsFromUrl || _isSyncingUrlFromParams) return;
+
+        EnsureParamsRow();
+        UpdateUrlFromParams();
+    }
+
+    private void OnParamPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(key_value_pair_view_model.Key) or nameof(key_value_pair_view_model.Value) or nameof(key_value_pair_view_model.IsEnabled))
+        {
+            UpdateUrlFromParams();
+        }
+    }
+
+    private void SyncQueryParamsFromUrl()
+    {
+        if (_isSyncingParamsFromUrl || _isSyncingUrlFromParams) return;
+        _isSyncingParamsFromUrl = true;
+
+        try
+        {
+            QueryParams.Clear();
+
+            var queryStart = Url.IndexOf('?', StringComparison.Ordinal);
+            if (queryStart >= 0 && queryStart < Url.Length - 1)
+            {
+                var query = Url[(queryStart + 1)..];
+                foreach (var segment in query.Split('&', StringSplitOptions.RemoveEmptyEntries))
+                {
+                    var parts = segment.Split('=', 2);
+                    var key = WebUtility.UrlDecode(parts[0]);
+                    var value = parts.Length > 1 ? WebUtility.UrlDecode(parts[1]) : string.Empty;
+                    QueryParams.Add(new key_value_pair_view_model { Key = key ?? string.Empty, Value = value ?? string.Empty, IsEnabled = true });
+                }
+            }
+
+            EnsureParamsRow();
+        }
+        finally
+        {
+            _isSyncingParamsFromUrl = false;
+        }
+    }
+
+    private void UpdateUrlFromParams()
+    {
+        if (_isSyncingParamsFromUrl || _isSyncingUrlFromParams) return;
+        _isSyncingUrlFromParams = true;
+
+        try
+        {
+            var baseUrl = Url;
+            var queryIndex = baseUrl.IndexOf('?', StringComparison.Ordinal);
+            if (queryIndex >= 0)
+            {
+                baseUrl = baseUrl[..queryIndex];
+            }
+
+            var enabledParams = QueryParams
+                .Where(p => p.IsEnabled && !string.IsNullOrWhiteSpace(p.Key))
+                .Select(p => $"{WebUtility.UrlEncode(p.Key)}={(p.Value is { Length: > 0 } ? WebUtility.UrlEncode(p.Value) : string.Empty)}")
+                .ToList();
+
+            var newUrl = enabledParams.Count > 0
+                ? $"{baseUrl}?{string.Join("&", enabledParams)}"
+                : baseUrl;
+
+            Url = newUrl;
+        }
+        finally
+        {
+            _isSyncingUrlFromParams = false;
+        }
     }
 }

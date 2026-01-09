@@ -5,5 +5,36 @@
     <Application.Styles>
         <FluentTheme />
         <StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml" />
+        
+        <!-- Modern Expander Style -->
+        <Style Selector="Expander.modern-card">
+            <Setter Property="Background" Value="#161B22"/>
+            <Setter Property="BorderBrush" Value="#21262D"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        </Style>
+        
+        <Style Selector="Expander.modern-card /template/ ToggleButton#ExpanderHeader">
+            <Setter Property="Background" Value="#21262D"/>
+            <Setter Property="Padding" Value="16,12"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        </Style>
+        
+        <Style Selector="Expander.modern-card /template/ ToggleButton#ExpanderHeader:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#30363D"/>
+        </Style>
+
+        <Style Selector="Expander.modern-card /template/ Border#ExpanderContent">
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+        
+        <Style Selector="Expander.modern-card /template/ ToggleButton#ExpanderHeader TextBlock">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="#F0F6FC"/>
+        </Style>
     </Application.Styles>
 </Application>
