@@ -119,14 +119,19 @@
         
         <!-- Main Content Area -->
         <Border Grid.Column="1" Background="#0D1117">
-            <Grid RowDefinitions="Auto,Auto,*" Margin="20,16,20,16">
+            <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="0">
+                <!-- Tab Bar -->
+                <views:tab_bar_view Grid.Row="0" 
+                                    DataContext="{Binding Tabs}"/>
+                
                 <!-- Request Editor -->
-                <views:request_editor_view Grid.Row="0" 
-                                           DataContext="{Binding RequestEditor}"/>
+                <views:request_editor_view Grid.Row="1" 
+                                           DataContext="{Binding RequestEditor}"
+                                           Margin="20,16,20,0"/>
                 
                 <!-- Script Editor -->
-                <Border Grid.Row="1" 
-                        Margin="0,16,0,16" 
+                <Border Grid.Row="2" 
+                        Margin="20,16,20,16" 
                         MinHeight="220"
                         Background="#161B22"
                         CornerRadius="12"
@@ -136,7 +141,8 @@
                 </Border>
                 
                 <!-- Response Viewer -->
-                <Border Grid.Row="2"
+                <Border Grid.Row="3"
+                        Margin="20,0,20,16"
                         Background="#161B22"
                         CornerRadius="12"
                         BorderBrush="#21262D"
