@@ -5,11 +5,27 @@ using CommunityToolkit.Mvvm.Input;
 using PostmanClone.Core.Interfaces;
 using PostmanClone.Core.Models;
 using PostmanClone.Data.Services;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace PostmanClone.App.ViewModels;
 
+public record MainViewDependencies(
+    request_editor_view_model request_editor,
+    response_viewer_view_model response_viewer,
+    sidebar_view_model sidebar,
+    environment_selector_view_model environment_selector,
+    script_editor_view_model script_editor,
+    test_results_view_model test_results,
+    tabs_view_model tabs);
+
 public partial class main_view_model : ObservableObject
 {
+    private const string heavy_separator = "═══════════════════════════════════════";
+    private const string light_separator = "───────────────────────────────────────";
+
     private readonly i_collection_repository _collection_repository;
 
     [ObservableProperty]
@@ -43,32 +59,26 @@ public partial class main_view_model : ObservableObject
     private bool _isDarkTheme = true;
 
     public main_view_model(
-        request_editor_view_model request_editor,
-        response_viewer_view_model response_viewer,
-        sidebar_view_model sidebar,
-        environment_selector_view_model environment_selector,
-        script_editor_view_model script_editor,
-        test_results_view_model test_results,
-        tabs_view_model tabs,
+        MainViewDependencies dependencies,
         i_collection_repository collection_repository)
     {
-        _requestEditor = request_editor;
-        _responseViewer = response_viewer;
-        _sidebar = sidebar;
-        _environmentSelector = environment_selector;
-        _scriptEditor = script_editor;
-        _testResults = test_results;
-        _tabs = tabs;
+        _requestEditor = dependencies.request_editor;
+        _responseViewer = dependencies.response_viewer;
+        _sidebar = dependencies.sidebar;
+        _environmentSelector = dependencies.environment_selector;
+        _scriptEditor = dependencies.script_editor;
+        _testResults = dependencies.test_results;
+        _tabs = dependencies.tabs;
         _collection_repository = collection_repository;
 
         // Wire up events
-        _requestEditor.execution_started += on_execution_started;
-        _requestEditor.execution_completed += on_execution_completed;
-        _requestEditor.request_saved += on_request_saved;
-        _sidebar.request_selected += on_request_selected;
+        _requestEditor.execution_started += (_, _) => on_execution_started();
+        _requestEditor.execution_completed += async (_, result) => await on_execution_completed(result);
+        _requestEditor.request_saved += async (_, _) => await on_request_saved_async();
+        _sidebar.request_selected += (_, request) => on_request_selected(request);
         
         // Sync scripts from ScriptEditor to RequestEditor when they change
-        _scriptEditor.PropertyChanged += (s, e) =>
+        _scriptEditor.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(script_editor_view_model.PreRequestScript))
             {
@@ -81,14 +91,14 @@ public partial class main_view_model : ObservableObject
                 sync_editor_to_active_tab();
             }
         };
-        _sidebar.request_with_collection_selected += on_request_with_collection_selected;
+        _sidebar.request_with_collection_selected += (_, data) => on_request_with_collection_selected(data);
         
         // Wire up tab events
-        _tabs.tab_activated += on_tab_activated;
-        _tabs.tab_closed += on_tab_closed;
+        _tabs.tab_activated += (_, tab) => on_tab_activated(tab);
+        _tabs.tab_closed += (_, tab) => on_tab_closed(tab);
         
         // Wire up request editor property changes to track unsaved changes
-        _requestEditor.PropertyChanged += on_request_editor_property_changed;
+        _requestEditor.PropertyChanged += (_, e) => on_request_editor_property_changed(e);
     }
 
     [RelayCommand]
@@ -129,146 +139,163 @@ public partial class main_view_model : ObservableObject
         // Dialog will be shown from the view
     }
 
-    private void on_execution_started(object? sender, EventArgs e)
+    private void on_execution_started()
     {
         // Clear console and test results before new execution
         ScriptEditor.ClearConsoleCommand.Execute(null);
         TestResults.ClearResultsCommand.Execute(null);
         ResponseViewer.clear();
         
-        ScriptEditor.AppendConsoleOutput("═══════════════════════════════════════");
+        ScriptEditor.AppendConsoleOutput(heavy_separator);
         ScriptEditor.AppendConsoleOutput("Starting request execution...");
-        ScriptEditor.AppendConsoleOutput("═══════════════════════════════════════");
+        ScriptEditor.AppendConsoleOutput(heavy_separator);
     }
 
-    private void on_execution_completed(object? sender, request_execution_result result)
+    private async Task on_execution_completed(request_execution_result result)
     {
-        // Show pre-script results
-        if (result.pre_script_result != null)
+        log_pre_request(result.pre_script_result);
+        log_http_request(result.response);
+        log_post_request(result.post_script_result);
+        log_test_results(result.all_test_results);
+        update_test_results_panel(result.all_test_results);
+        log_completion();
+
+        await Sidebar.refresh_history_async(CancellationToken.None);
+    }
+
+    private void log_pre_request(script_execution_result_model? pre_script_result)
+    {
+        if (pre_script_result == null) return;
+
+        ScriptEditor.AppendConsoleOutput(string.Empty);
+        ScriptEditor.AppendConsoleOutput("▶ PRE-REQUEST SCRIPT");
+        ScriptEditor.AppendConsoleOutput(light_separator);
+
+        foreach (var log in pre_script_result.logs)
         {
-            ScriptEditor.AppendConsoleOutput("");
-            ScriptEditor.AppendConsoleOutput("▶ PRE-REQUEST SCRIPT");
-            ScriptEditor.AppendConsoleOutput("───────────────────────────────────────");
-            
-            foreach (var log in result.pre_script_result.logs)
-            {
-                ScriptEditor.AppendConsoleOutput($"  {log}");
-            }
-            
-            foreach (var error in result.pre_script_result.errors)
-            {
-                ScriptEditor.AppendConsoleOutput($"  [ERROR] {error}");
-            }
-            
-            var pre_status = result.pre_script_result.success ? "✓ completed" : "✗ failed";
-            ScriptEditor.AppendConsoleOutput($"  Script {pre_status} ({result.pre_script_result.execution_time_ms}ms)");
+            ScriptEditor.AppendConsoleOutput($"  {log}");
         }
-        
-        // Show HTTP request result
-        ScriptEditor.AppendConsoleOutput("");
-        ScriptEditor.AppendConsoleOutput("▶ HTTP REQUEST");
-        ScriptEditor.AppendConsoleOutput("───────────────────────────────────────");
-        
-        if (result.response != null)
+
+        foreach (var error in pre_script_result.errors)
         {
-            ResponseViewer.load_response(result.response);
-            Tabs.set_active_tab_response(result.response);
-            ScriptEditor.AppendConsoleOutput($"  Status: {result.response.status_code} {result.response.status_description}");
-            ScriptEditor.AppendConsoleOutput($"  Time: {result.response.elapsed_ms}ms");
-            ScriptEditor.AppendConsoleOutput($"  Size: {result.response.size_bytes} bytes");
+            ScriptEditor.AppendConsoleOutput($"  [ERROR] {error}");
+        }
+
+        var pre_status = pre_script_result.success ? "✓ completed" : "✗ failed";
+        ScriptEditor.AppendConsoleOutput($"  Script {pre_status} ({pre_script_result.execution_time_ms}ms)");
+    }
+
+    private void log_http_request(http_response_model? response)
+    {
+        ScriptEditor.AppendConsoleOutput(string.Empty);
+        ScriptEditor.AppendConsoleOutput("▶ HTTP REQUEST");
+        ScriptEditor.AppendConsoleOutput(light_separator);
+
+        if (response != null)
+        {
+            ResponseViewer.load_response(response);
+            Tabs.set_active_tab_response(response);
+            ScriptEditor.AppendConsoleOutput($"  Status: {response.status_code} {response.status_description}");
+            ScriptEditor.AppendConsoleOutput($"  Time: {response.elapsed_ms}ms");
+            ScriptEditor.AppendConsoleOutput($"  Size: {response.size_bytes} bytes");
         }
         else
         {
             Tabs.set_active_tab_response(null);
             ScriptEditor.AppendConsoleOutput("  [ERROR] No response received");
         }
-        
-        // Show post-script results
-        if (result.post_script_result != null)
+    }
+
+    private void log_post_request(script_execution_result_model? post_script_result)
+    {
+        if (post_script_result == null) return;
+
+        ScriptEditor.AppendConsoleOutput(string.Empty);
+        ScriptEditor.AppendConsoleOutput("▶ POST-RESPONSE SCRIPT");
+        ScriptEditor.AppendConsoleOutput(light_separator);
+
+        foreach (var log in post_script_result.logs)
         {
-            ScriptEditor.AppendConsoleOutput("");
-            ScriptEditor.AppendConsoleOutput("▶ POST-RESPONSE SCRIPT");
-            ScriptEditor.AppendConsoleOutput("───────────────────────────────────────");
-            
-            foreach (var log in result.post_script_result.logs)
-            {
-                ScriptEditor.AppendConsoleOutput($"  {log}");
-            }
-            
-            foreach (var error in result.post_script_result.errors)
-            {
-                ScriptEditor.AppendConsoleOutput($"  [ERROR] {error}");
-            }
-            
-            var post_status = result.post_script_result.success ? "✓ completed" : "✗ failed";
-            ScriptEditor.AppendConsoleOutput($"  Script {post_status} ({result.post_script_result.execution_time_ms}ms)");
+            ScriptEditor.AppendConsoleOutput($"  {log}");
         }
-        
-        // Show test results summary
-        if (result.all_test_results.Count > 0)
+
+        foreach (var error in post_script_result.errors)
         {
-            ScriptEditor.AppendConsoleOutput("");
-            ScriptEditor.AppendConsoleOutput("▶ TEST RESULTS");
-            ScriptEditor.AppendConsoleOutput("───────────────────────────────────────");
-            
-            foreach (var test in result.all_test_results)
+            ScriptEditor.AppendConsoleOutput($"  [ERROR] {error}");
+        }
+
+        var post_status = post_script_result.success ? "✓ completed" : "✗ failed";
+        ScriptEditor.AppendConsoleOutput($"  Script {post_status} ({post_script_result.execution_time_ms}ms)");
+    }
+
+    private void log_test_results(IReadOnlyList<test_result_model> all_test_results)
+    {
+        if (all_test_results.Count == 0) return;
+
+        ScriptEditor.AppendConsoleOutput(string.Empty);
+        ScriptEditor.AppendConsoleOutput("▶ TEST RESULTS");
+        ScriptEditor.AppendConsoleOutput(light_separator);
+
+        foreach (var test in all_test_results)
+        {
+            var icon = test.passed ? "✓" : "✗";
+            ScriptEditor.AppendConsoleOutput($"  {icon} {test.name}");
+            if (!test.passed && !string.IsNullOrEmpty(test.error_message))
             {
-                var icon = test.passed ? "✓" : "✗";
-                ScriptEditor.AppendConsoleOutput($"  {icon} {test.name}");
-                if (!test.passed && !string.IsNullOrEmpty(test.error_message))
-                {
-                    ScriptEditor.AppendConsoleOutput($"    Error: {test.error_message}");
-                }
+                ScriptEditor.AppendConsoleOutput($"    Error: {test.error_message}");
             }
         }
-        
-        // Update Test Results panel
-        foreach (var test in result.all_test_results)
+    }
+
+    private void update_test_results_panel(IReadOnlyList<test_result_model> all_test_results)
+    {
+        foreach (var test in all_test_results)
         {
             TestResults.AddTestResult(test.name, test.passed, test.error_message);
         }
-        
-        ScriptEditor.AppendConsoleOutput("");
-        ScriptEditor.AppendConsoleOutput("═══════════════════════════════════════");
-        ScriptEditor.AppendConsoleOutput("Execution completed");
-        ScriptEditor.AppendConsoleOutput("═══════════════════════════════════════");
-        
-        _ = Sidebar.refresh_history_async(CancellationToken.None);
     }
 
-    private void on_request_selected(object? sender, http_request_model request)
+    private void log_completion()
+    {
+        ScriptEditor.AppendConsoleOutput(string.Empty);
+        ScriptEditor.AppendConsoleOutput(heavy_separator);
+        ScriptEditor.AppendConsoleOutput("Execution completed");
+        ScriptEditor.AppendConsoleOutput(heavy_separator);
+    }
+
+    private void on_request_selected(http_request_model request)
     {
         // Open in a new tab (history items don't have collection info)
         var tab = Tabs.open_request(request, null, null);
         load_tab_into_editor(tab);
     }
 
-    private void on_request_with_collection_selected(object? sender, (http_request_model request, string collectionId, string collectionItemId) data)
+    private void on_request_with_collection_selected((http_request_model request, string collectionId, string collectionItemId) data)
     {
         // Open in a new tab or activate existing tab
         var tab = Tabs.open_request(data.request, data.collectionId, data.collectionItemId);
         load_tab_into_editor(tab);
     }
 
-    private async void on_request_saved(object? sender, EventArgs e)
+    private async Task on_request_saved_async()
     {
         // Mark the active tab as saved
         Tabs.mark_active_tab_saved(RequestEditor.CurrentCollectionId, RequestEditor.CurrentRequestId);
         await Sidebar.load_data_async(CancellationToken.None);
     }
     
-    private void on_tab_activated(object? sender, tab_state tab)
+    private void on_tab_activated(tab_state tab)
     {
         load_tab_into_editor(tab);
     }
     
-    private void on_tab_closed(object? sender, tab_state tab)
+    private void on_tab_closed(tab_state tab)
     {
         // If there are remaining tabs, the tabs_view_model will activate another one
         // which will trigger on_tab_activated
     }
     
-    private void on_request_editor_property_changed(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    private void on_request_editor_property_changed(System.ComponentModel.PropertyChangedEventArgs e)
     {
         // Track changes for unsaved indicator
         var trackableProperties = new[] 
@@ -276,7 +303,8 @@ public partial class main_view_model : ObservableObject
             nameof(request_editor_view_model.RequestName),
             nameof(request_editor_view_model.Url),
             nameof(request_editor_view_model.SelectedMethod),
-            nameof(request_editor_view_model.RequestBody)
+            nameof(request_editor_view_model.RequestBody),
+            nameof(request_editor_view_model.Headers)
         };
         
         if (trackableProperties.Contains(e.PropertyName))

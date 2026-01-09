@@ -1,14 +1,18 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using PostmanClone.Core.Interfaces;
 using PostmanClone.Core.Models;
 using PostmanClone.Data.Services;
 using System.Collections.ObjectModel;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 
 namespace PostmanClone.App.ViewModels;
 
-public partial class request_editor_view_model : ObservableObject
+public partial class request_editor_view_model : ObservableObject, IDisposable
 {
     private readonly request_orchestrator _request_orchestrator;
     private readonly i_history_repository _history_repository;
@@ -26,6 +30,15 @@ public partial class request_editor_view_model : ObservableObject
 
     [ObservableProperty]
     private string _requestBody = string.Empty;
+
+    [ObservableProperty]
+    private string _jsonValidationError = string.Empty;
+
+    [ObservableProperty]
+    private bool _isJsonValid = true;
+
+    private readonly Subject<string> _bodyChangedSubject = new();
+    private IDisposable? _debounceSubscription;
 
     [ObservableProperty]
     private bool _isSending;
@@ -68,6 +81,10 @@ public partial class request_editor_view_model : ObservableObject
         _collection_repository = collection_repository;
         _logger = logger;
         
+        _debounceSubscription = _bodyChangedSubject
+            .Throttle(TimeSpan.FromMilliseconds(500))
+            .Subscribe(ValidateJson);
+
         // Add default empty header row
         _headers.Add(new key_value_pair_view_model());
     }
@@ -100,7 +117,7 @@ public partial class request_editor_view_model : ObservableObject
                     .ToList(),
                 body = string.IsNullOrWhiteSpace(RequestBody) ? null : new request_body_model
                 {
-                    body_type = request_body_type.raw,
+                    body_type = request_body_type.json,
                     raw_content = RequestBody
                 },
                 pre_request_script = PreRequestScript,
@@ -155,132 +172,9 @@ public partial class request_editor_view_model : ObservableObject
 
         try
         {
-            var request = new http_request_model
-            {
-                id = CurrentRequestId ?? Guid.NewGuid().ToString(),
-                name = RequestName,
-                method = SelectedMethod,
-                url = Url,
-                headers = Headers.Where(h => !string.IsNullOrWhiteSpace(h.Key))
-                    .Select(h => new key_value_pair_model { key = h.Key, value = h.Value, enabled = h.IsEnabled }).ToList(),
-                query_params = QueryParams.Where(q => !string.IsNullOrWhiteSpace(q.Key))
-                    .Select(q => new key_value_pair_model { key = q.Key, value = q.Value, enabled = q.IsEnabled }).ToList(),
-                body = string.IsNullOrWhiteSpace(RequestBody) ? null : new request_body_model
-                {
-                    body_type = request_body_type.raw,
-                    raw_content = RequestBody
-                },
-                pre_request_script = PreRequestScript,
-                post_response_script = PostResponseScript
-            };
-
-            // Get the target collection
-            var targetCollectionId = CurrentCollectionId;
-            
-            _logger.LogInformation("SaveRequest: CurrentCollectionId='{CurrentCollectionId}'", CurrentCollectionId ?? "null");
-            
-            if (string.IsNullOrWhiteSpace(targetCollectionId))
-            {
-                // Create default collection if none exists
-                var collections = await _collection_repository.list_all_async(cancellation_token);
-                var defaultCollection = collections.FirstOrDefault();
-                
-                if (defaultCollection == null)
-                {
-                    defaultCollection = new postman_collection_model
-                    {
-                        id = Guid.NewGuid().ToString(),
-                        name = "My Requests",
-                        description = "Default collection",
-                        items = new List<collection_item_model>()
-                    };
-                    await _collection_repository.save_async(defaultCollection, cancellation_token);
-                }
-                
-                targetCollectionId = defaultCollection.id;
-            }
-
-            var collection = await _collection_repository.get_by_id_async(targetCollectionId, cancellation_token);
-            if (collection != null)
-            {
-                var items = collection.items.ToList();
-                
-                // Check if a request with this name already exists in the collection
-                var duplicateNameIndex = items.FindIndex(i => 
-                    i.name.Equals(request.name, StringComparison.OrdinalIgnoreCase));
-                
-                // Check if we're updating an existing request by ID (different from the one with same name)
-                var currentItemIndex = -1;
-                if (!string.IsNullOrWhiteSpace(CurrentRequestId))
-                {
-                    currentItemIndex = items.FindIndex(i => i.id == CurrentRequestId);
-                }
-                
-                string itemId;
-                
-                if (duplicateNameIndex >= 0)
-                {
-                    // A request with this name exists - overwrite it
-                    itemId = items[duplicateNameIndex].id;
-                    _logger.LogInformation("Overwriting existing request '{RequestName}'", RequestName);
-                    
-                    // If we were editing a different request (currentItemIndex is different), remove the old one
-                    if (currentItemIndex >= 0 && currentItemIndex != duplicateNameIndex)
-                    {
-                        items.RemoveAt(currentItemIndex);
-                        // Adjust duplicate index if needed
-                        if (currentItemIndex < duplicateNameIndex)
-                        {
-                            duplicateNameIndex--;
-                        }
-                    }
-                }
-                else if (currentItemIndex >= 0)
-                {
-                    // Updating existing request by ID, no name conflict
-                    itemId = items[currentItemIndex].id;
-                }
-                else
-                {
-                    // New request
-                    itemId = Guid.NewGuid().ToString();
-                }
-                
-                var collectionItem = new collection_item_model
-                {
-                    id = itemId,
-                    name = request.name,
-                    is_folder = false,
-                    request = request
-                };
-
-                if (duplicateNameIndex >= 0)
-                {
-                    // Replace the item with duplicate name
-                    items[duplicateNameIndex] = collectionItem;
-                }
-                else if (currentItemIndex >= 0)
-                {
-                    // Replace the current item
-                    items[currentItemIndex] = collectionItem;
-                }
-                else
-                {
-                    // Add as new request
-                    items.Add(collectionItem);
-                }
-
-                collection = collection with { items = items };
-                await _collection_repository.save_async(collection, cancellation_token);
-
-                // Update tracking - use collection item ID for tracking
-                CurrentRequestId = itemId;
-                CurrentCollectionId = collection.id;
-
-                _logger.LogInformation("Request '{RequestName}' saved successfully", RequestName);
-                StatusMessage = $"✓ Request '{RequestName}' saved successfully";
-                request_saved?.Invoke(this, EventArgs.Empty);
-            }
+            var request = CreateRequestModel();
+            var targetCollectionId = await GetTargetCollectionIdAsync(cancellation_token);
+            await SaveToCollectionAsync(targetCollectionId, request, cancellation_token);
         }
         catch (Exception ex)
         {
@@ -291,6 +185,104 @@ public partial class request_editor_view_model : ObservableObject
         {
             IsSaving = false;
         }
+    }
+
+    private http_request_model CreateRequestModel()
+    {
+        return new http_request_model
+        {
+            id = CurrentRequestId ?? Guid.NewGuid().ToString(),
+            name = RequestName,
+            method = SelectedMethod,
+            url = Url,
+            headers = Headers.Where(h => !string.IsNullOrWhiteSpace(h.Key))
+                .Select(h => new key_value_pair_model { key = h.Key, value = h.Value, enabled = h.IsEnabled }).ToList(),
+            query_params = QueryParams.Where(q => !string.IsNullOrWhiteSpace(q.Key))
+                .Select(q => new key_value_pair_model { key = q.Key, value = q.Value, enabled = q.IsEnabled }).ToList(),
+            body = string.IsNullOrWhiteSpace(RequestBody) ? null : new request_body_model
+            {
+                body_type = request_body_type.raw,
+                raw_content = RequestBody
+            },
+            pre_request_script = PreRequestScript,
+            post_response_script = PostResponseScript
+        };
+    }
+
+    private async Task<string> GetTargetCollectionIdAsync(CancellationToken cancellation_token)
+    {
+        var targetCollectionId = CurrentCollectionId;
+
+        if (!string.IsNullOrWhiteSpace(targetCollectionId))
+            return targetCollectionId;
+
+        var collections = await _collection_repository.list_all_async(cancellation_token);
+        var defaultCollection = collections.FirstOrDefault();
+
+        if (defaultCollection == null)
+        {
+            defaultCollection = new postman_collection_model
+            {
+                id = Guid.NewGuid().ToString(),
+                name = "My Requests",
+                description = "Default collection",
+                items = new List<collection_item_model>()
+            };
+            await _collection_repository.save_async(defaultCollection, cancellation_token);
+        }
+
+        return defaultCollection.id;
+    }
+
+    private async Task SaveToCollectionAsync(string collectionId, http_request_model request, CancellationToken cancellation_token)
+    {
+        var collection = await _collection_repository.get_by_id_async(collectionId, cancellation_token);
+        if (collection == null) return;
+
+        var items = collection.items.ToList();
+        var duplicateNameIndex = items.FindIndex(i => i.name.Equals(request.name, StringComparison.OrdinalIgnoreCase));
+        var currentItemIndex = string.IsNullOrWhiteSpace(CurrentRequestId) ? -1 : items.FindIndex(i => i.id == CurrentRequestId);
+
+        string itemId;
+
+        if (duplicateNameIndex >= 0)
+        {
+            itemId = items[duplicateNameIndex].id;
+            if (currentItemIndex >= 0 && currentItemIndex != duplicateNameIndex)
+            {
+                items.RemoveAt(currentItemIndex);
+                if (currentItemIndex < duplicateNameIndex) duplicateNameIndex--;
+            }
+        }
+        else if (currentItemIndex >= 0)
+        {
+            itemId = items[currentItemIndex].id;
+        }
+        else
+        {
+            itemId = Guid.NewGuid().ToString();
+        }
+
+        var collectionItem = new collection_item_model
+        {
+            id = itemId,
+            name = request.name,
+            is_folder = false,
+            request = request
+        };
+
+        if (duplicateNameIndex >= 0) items[duplicateNameIndex] = collectionItem;
+        else if (currentItemIndex >= 0) items[currentItemIndex] = collectionItem;
+        else items.Add(collectionItem);
+
+        collection = collection with { items = items };
+        await _collection_repository.save_async(collection, cancellation_token);
+
+        CurrentRequestId = itemId;
+        CurrentCollectionId = collection.id;
+
+        StatusMessage = $"✓ Request '{RequestName}' saved successfully";
+        request_saved?.Invoke(this, EventArgs.Empty);
     }
 
     private bool CanSaveRequest() => !IsSaving && !string.IsNullOrWhiteSpace(Url) && !string.IsNullOrWhiteSpace(RequestName);
@@ -308,6 +300,54 @@ public partial class request_editor_view_model : ObservableObject
         SaveRequestCommand.NotifyCanExecuteChanged();
     }
 
+    partial void OnRequestBodyChanged(string value)
+    {
+        _bodyChangedSubject.OnNext(value);
+    }
+
+    private void ValidateJson(string json)
+    {
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            IsJsonValid = true;
+            JsonValidationError = string.Empty;
+            return;
+        }
+
+        try
+        {
+            _ = JToken.Parse(json);
+            IsJsonValid = true;
+            JsonValidationError = string.Empty;
+        }
+        catch (JsonReaderException ex)
+        {
+            IsJsonValid = false;
+            JsonValidationError = $"Invalid JSON: {ex.Message}";
+        }
+        catch (Exception ex)
+        {
+            IsJsonValid = false;
+            JsonValidationError = $"Error: {ex.Message}";
+        }
+    }
+
+    [RelayCommand]
+    private void FormatJson()
+    {
+        if (string.IsNullOrWhiteSpace(RequestBody)) return;
+
+        try
+        {
+            var token = JToken.Parse(RequestBody);
+            RequestBody = token.ToString(Formatting.Indented);
+        }
+        catch (Exception ex)
+        {
+            JsonValidationError = $"Cannot format: {ex.Message}";
+        }
+    }
+
     [RelayCommand]
     private void AddHeader()
     {
@@ -318,6 +358,22 @@ public partial class request_editor_view_model : ObservableObject
     private void RemoveHeader(key_value_pair_view_model header)
     {
         Headers.Remove(header);
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _debounceSubscription?.Dispose();
+            _debounceSubscription = null;
+            _bodyChangedSubject.Dispose();
+        }
     }
 
     public void load_request(http_request_model request, string? collectionId = null, string? collectionItemId = null)
@@ -351,16 +407,4 @@ public partial class request_editor_view_model : ObservableObject
         if (Headers.Count == 0)
             Headers.Add(new key_value_pair_view_model());
     }
-}
-
-public partial class key_value_pair_view_model : ObservableObject
-{
-    [ObservableProperty]
-    private string _key = string.Empty;
-
-    [ObservableProperty]
-    private string _value = string.Empty;
-
-    [ObservableProperty]
-    private bool _isEnabled = true;
 }

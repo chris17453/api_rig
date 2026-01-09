@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using PostmanClone.Core.Interfaces;
 using PostmanClone.Core.Models;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace PostmanClone.App.ViewModels;
 
@@ -26,9 +27,6 @@ public partial class sidebar_view_model : ObservableObject
     [ObservableProperty]
     private bool _isLoading;
 
-    // Stores the original collection models for export
-    private List<postman_collection_model> _collectionModels = new();
-
     /// <summary>
     /// Gets the currently selected collection model for export.
     /// </summary>
@@ -36,23 +34,12 @@ public partial class sidebar_view_model : ObservableObject
     {
         get
         {
-            // Find the root collection of the selected item
-            var selectedRoot = SelectedCollectionItem;
-            while (selectedRoot != null && !selectedRoot.IsCollectionRoot)
-            {
-                // Walk up to find the root (not possible in tree, so use collections list)
-                break;
-            }
+            var selectedRoot = SelectedCollectionItem?.IsCollectionRoot == true
+                ? SelectedCollectionItem
+                : Collections.FirstOrDefault();
 
-            if (selectedRoot?.IsCollectionRoot == true)
-            {
-                // Convert to postman_collection_model for export
-                return ConvertToCollectionModel(selectedRoot);
-            }
-
-            // Return first collection if nothing selected
-            return Collections.FirstOrDefault() is { } first 
-                ? ConvertToCollectionModel(first)
+            return selectedRoot != null
+                ? ConvertToCollectionModel(selectedRoot)
                 : null;
         }
     }
@@ -110,11 +97,8 @@ public partial class sidebar_view_model : ObservableObject
 
         try
         {
-            // Store expanded state before reloading
-            var expandedCollectionIds = Collections
-                .Where(c => c.IsExpanded)
-                .Select(c => c.Id)
-                .ToHashSet();
+            // Store expanded state before reloading (including all nested items)
+            var expandedIds = GetAllExpandedIds(Collections);
 
             // Load collections
             var collections = await _collection_repository.list_all_async(cancellation_token);
@@ -122,8 +106,8 @@ public partial class sidebar_view_model : ObservableObject
             foreach (var col in collections)
             {
                 var tree_item = map_collection_to_tree_item(col);
-                // Restore expanded state - set to true if it was expanded, false otherwise
-                tree_item.IsExpanded = expandedCollectionIds.Count == 0 || expandedCollectionIds.Contains(tree_item.Id);
+                // Restore expanded state for this item and all children
+                RestoreExpandedState(tree_item, expandedIds);
                 Collections.Add(tree_item);
             }
 
@@ -154,16 +138,12 @@ public partial class sidebar_view_model : ObservableObject
     public async Task CreateCollection(CancellationToken cancellation_token)
     {
         // Find the highest collection number to increment
-        int maxNumber = 0;
-        foreach (var col in Collections)
-        {
-            // Parse collection names like "Collection#1", "Collection#2", etc.
-            if (col.Name.StartsWith("Collection#") && 
-                int.TryParse(col.Name.Substring("Collection#".Length), out int num))
-            {
-                maxNumber = Math.Max(maxNumber, num);
-            }
-        }
+        var maxNumber = Collections
+            .Select(col => col.Name)
+            .Where(name => name.StartsWith("Collection#", StringComparison.Ordinal))
+            .Select(name => int.TryParse(name["Collection#".Length..], out var num) ? num : 0)
+            .DefaultIfEmpty(0)
+            .Max();
 
         var newCollection = new postman_collection_model
         {
@@ -247,7 +227,7 @@ public partial class sidebar_view_model : ObservableObject
             id = Guid.NewGuid().ToString(),
             name = "New Request",
             method = http_method.get,
-            url = "https://api.example.com",
+            url = string.Empty,
             headers = new List<key_value_pair_model>(),
             query_params = new List<key_value_pair_model>()
         };
@@ -277,28 +257,48 @@ public partial class sidebar_view_model : ObservableObject
 
     private collection_tree_item_view_model? find_parent_collection(collection_tree_item_view_model item)
     {
-        // Search through all collections to find the parent
-        foreach (var collection in Collections)
-        {
-            if (contains_item(collection, item))
-            {
-                return collection;
-            }
-        }
-        return null;
+        return Collections.FirstOrDefault(collection => contains_item(collection, item));
     }
 
     private bool contains_item(collection_tree_item_view_model parent, collection_tree_item_view_model target)
     {
         if (parent == target) return true;
-        
-        foreach (var child in parent.Children)
+
+        return parent.Children.Any(child => child == target || contains_item(child, target));
+    }
+
+    private HashSet<string> GetAllExpandedIds(IEnumerable<collection_tree_item_view_model> items)
+    {
+        var expandedIds = new HashSet<string>();
+        foreach (var item in items)
         {
-            if (child == target || contains_item(child, target))
-                return true;
+            CollectExpandedIds(item, expandedIds);
         }
+        return expandedIds;
+    }
+
+    private void CollectExpandedIds(collection_tree_item_view_model item, HashSet<string> expandedIds)
+    {
+        if (item.IsExpanded)
+        {
+            expandedIds.Add(item.Id);
+        }
+        foreach (var child in item.Children)
+        {
+            CollectExpandedIds(child, expandedIds);
+        }
+    }
+
+    private void RestoreExpandedState(collection_tree_item_view_model item, HashSet<string> expandedIds)
+    {
+        // Only expand if the ID was previously in the expanded set
+        // On initial load (empty expandedIds), all collections remain collapsed
+        item.IsExpanded = expandedIds.Contains(item.Id);
         
-        return false;
+        foreach (var child in item.Children)
+        {
+            RestoreExpandedState(child, expandedIds);
+        }
     }
 
     [RelayCommand]
@@ -444,7 +444,7 @@ public partial class collection_tree_item_view_model : ObservableObject
     private http_method? _method;
 
     [ObservableProperty]
-    private bool _isExpanded = true;
+    private bool _isExpanded = false;
 
     [ObservableProperty]
     private bool _isEditing = false;

@@ -3,9 +3,15 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:PostmanClone.App.ViewModels"
+             xmlns:AvaloniaEdit="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
+             xmlns:converters="using:PostmanClone.App.Converters"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="200"
              x:Class="PostmanClone.App.Views.request_editor_view"
              x:DataType="vm:request_editor_view_model">
+
+    <UserControl.Resources>
+        <converters:JsonValidityToBrushConverter x:Key="JsonValidityToBrushConverter"/>
+    </UserControl.Resources>
 
     <UserControl.Styles>
         <Style Selector="TextBox.url-input">
