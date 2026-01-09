@@ -1,0 +1,143 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:PostmanClone.App.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="40"
+             x:Class="PostmanClone.App.Views.tab_bar_view"
+             x:DataType="vm:tabs_view_model">
+
+    <UserControl.Styles>
+        <!-- Tab Item Style -->
+        <Style Selector="Button.tab-item">
+            <Setter Property="Background" Value="#161B22"/>
+            <Setter Property="Foreground" Value="#8B949E"/>
+            <Setter Property="BorderBrush" Value="#21262D"/>
+            <Setter Property="BorderThickness" Value="1,1,1,0"/>
+            <Setter Property="CornerRadius" Value="8,8,0,0"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="MinWidth" Value="120"/>
+            <Setter Property="MaxWidth" Value="200"/>
+            <Setter Property="Margin" Value="0,0,2,0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        </Style>
+        <Style Selector="Button.tab-item:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#21262D"/>
+        </Style>
+        <Style Selector="Button.tab-item.active">
+            <Setter Property="Background" Value="#0D1117"/>
+            <Setter Property="Foreground" Value="#F0F6FC"/>
+            <Setter Property="BorderBrush" Value="#58A6FF"/>
+            <Setter Property="BorderThickness" Value="1,2,1,0"/>
+        </Style>
+        <Style Selector="Button.tab-item.active /template/ ContentPresenter">
+            <Setter Property="Background" Value="#0D1117"/>
+        </Style>
+        
+        <!-- Close Button Style -->
+        <Style Selector="Button.tab-close">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#8B949E"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="4"/>
+            <Setter Property="Width" Value="20"/>
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="CornerRadius" Value="4"/>
+        </Style>
+        <Style Selector="Button.tab-close:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#DA3633"/>
+        </Style>
+        <Style Selector="Button.tab-close:pointerover">
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        
+        <!-- New Tab Button Style -->
+        <Style Selector="Button.new-tab">
+            <Setter Property="Background" Value="#21262D"/>
+            <Setter Property="Foreground" Value="#8B949E"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="Width" Value="32"/>
+            <Setter Property="Height" Value="32"/>
+        </Style>
+        <Style Selector="Button.new-tab:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#30363D"/>
+        </Style>
+        <Style Selector="Button.new-tab:pointerover">
+            <Setter Property="Foreground" Value="#F0F6FC"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Border Background="#161B22" 
+            BorderBrush="#21262D" 
+            BorderThickness="0,0,0,1"
+            Padding="8,8,8,0">
+        <Grid ColumnDefinitions="*,Auto">
+            <!-- Tabs ScrollViewer -->
+            <ScrollViewer Grid.Column="0" 
+                          HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollBarVisibility="Disabled">
+                <ItemsControl ItemsSource="{Binding Tabs}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:tab_state">
+                            <Button Classes="tab-item"
+                                    Classes.active="{Binding IsActive}"
+                                    Command="{Binding $parent[ItemsControl].((vm:tabs_view_model)DataContext).ActivateTabCommand}"
+                                    CommandParameter="{Binding}">
+                                <Grid ColumnDefinitions="Auto,*,Auto">
+                                    <!-- Unsaved Changes Indicator -->
+                                    <Ellipse Grid.Column="0"
+                                             Width="8" Height="8"
+                                             Fill="#F0883E"
+                                             Margin="0,0,8,0"
+                                             IsVisible="{Binding HasUnsavedChanges}"
+                                             ToolTip.Tip="Unsaved changes"/>
+                                    
+                                    <!-- Tab Title -->
+                                    <TextBlock Grid.Column="1"
+                                               Text="{Binding RequestName}"
+                                               TextTrimming="CharacterEllipsis"
+                                               VerticalAlignment="Center"
+                                               FontSize="12"/>
+                                    
+                                    <!-- Close Button -->
+                                    <Button Grid.Column="2"
+                                            Classes="tab-close"
+                                            Margin="8,0,0,0"
+                                            Command="{Binding $parent[ItemsControl].((vm:tabs_view_model)DataContext).CloseTabCommand}"
+                                            CommandParameter="{Binding}"
+                                            ToolTip.Tip="Close tab">
+                                        <TextBlock Text="×" 
+                                                   FontSize="14" 
+                                                   FontWeight="Bold"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+                                    </Button>
+                                </Grid>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+            
+            <!-- New Tab Button -->
+            <Button Grid.Column="1"
+                    Classes="new-tab"
+                    Margin="8,0,0,0"
+                    Command="{Binding CreateNewTabCommand}"
+                    ToolTip.Tip="New request (Ctrl+T)">
+                <TextBlock Text="+" 
+                           FontSize="18" 
+                           FontWeight="Bold"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+            </Button>
+        </Grid>
+    </Border>
+</UserControl>
