@@ -72,6 +72,7 @@ public partial class request_editor_view_model : ObservableObject
         _headers.Add(new key_value_pair_view_model());
     }
 
+    public event EventHandler? execution_started;
     public event EventHandler<request_execution_result>? execution_completed;
     public event EventHandler? request_saved;
 
@@ -82,6 +83,9 @@ public partial class request_editor_view_model : ObservableObject
             return;
 
         IsSending = true;
+        
+        // Notify that execution is starting
+        execution_started?.Invoke(this, EventArgs.Empty);
 
         try
         {
