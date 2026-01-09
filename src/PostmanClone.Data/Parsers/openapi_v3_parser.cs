@@ -260,10 +260,11 @@ public class openapi_v3_parser
             {
                 body_text = example.ToString(Formatting.Indented);
             }
-            else if (examples is not null && examples.First is not null)
+            else if (examples is not null && examples.Count > 0)
             {
-                var first_example = examples.First.First?["value"];
-                body_text = first_example?.ToString(Formatting.Indented) ?? generate_example_from_schema(schema);
+                var first_example_property = examples.First;
+                var first_example_value = first_example_property?.First?["value"];
+                body_text = first_example_value?.ToString(Formatting.Indented) ?? generate_example_from_schema(schema);
             }
             else
             {
@@ -313,11 +314,14 @@ public class openapi_v3_parser
                     });
                 }
 
-                var body_type = content.Property("multipart/form-data") is not null
+                var is_multipart = content.Property("multipart/form-data") is not null;
+                var body_type = is_multipart
                     ? request_body_type.form_data
                     : request_body_type.x_www_form_urlencoded;
 
-                var form_dict = form_data.ToDictionary(kvp => kvp.key, kvp => kvp.value);
+                var form_dict = form_data
+                    .GroupBy(kvp => kvp.key)
+                    .ToDictionary(g => g.Key, g => g.First().value);
 
                 return new request_body_model
                 {

@@ -17,6 +17,12 @@ public class collection_repository : i_collection_repository
         Formatting = Formatting.Indented
     };
 
+    // Cache parser instances to avoid repeated allocation
+    private static readonly Parsers.openapi_v3_parser _openapi_v3_parser = new();
+    private static readonly Parsers.swagger_v2_parser _swagger_v2_parser = new();
+    private static readonly Parsers.postman_v21_parser _postman_v21_parser = new();
+    private static readonly Parsers.postman_v20_parser _postman_v20_parser = new();
+
     public collection_repository(postman_clone_db_context context)
     {
         _context = context;
@@ -44,31 +50,27 @@ public class collection_repository : i_collection_repository
     private static postman_collection_model parse_collection_from_any_format(string json_content)
     {
         // Try OpenAPI 3.0
-        var openapi_v3_parser = new Parsers.openapi_v3_parser();
-        if (openapi_v3_parser.can_parse(json_content))
+        if (_openapi_v3_parser.can_parse(json_content))
         {
-            return openapi_v3_parser.parse(json_content);
+            return _openapi_v3_parser.parse(json_content);
         }
 
         // Try Swagger 2.0
-        var swagger_v2_parser = new Parsers.swagger_v2_parser();
-        if (swagger_v2_parser.can_parse(json_content))
+        if (_swagger_v2_parser.can_parse(json_content))
         {
-            return swagger_v2_parser.parse(json_content);
+            return _swagger_v2_parser.parse(json_content);
         }
 
         // Try Postman v2.1
-        var postman_v21_parser = new Parsers.postman_v21_parser();
-        if (postman_v21_parser.can_parse(json_content))
+        if (_postman_v21_parser.can_parse(json_content))
         {
-            return postman_v21_parser.parse(json_content);
+            return _postman_v21_parser.parse(json_content);
         }
 
         // Try Postman v2.0
-        var postman_v20_parser = new Parsers.postman_v20_parser();
-        if (postman_v20_parser.can_parse(json_content))
+        if (_postman_v20_parser.can_parse(json_content))
         {
-            return postman_v20_parser.parse(json_content);
+            return _postman_v20_parser.parse(json_content);
         }
 
         // Fallback to legacy parser for unrecognized formats

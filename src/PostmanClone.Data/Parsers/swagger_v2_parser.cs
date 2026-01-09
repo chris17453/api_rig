@@ -340,7 +340,9 @@ public class swagger_v2_parser
                 ? request_body_type.form_data
                 : request_body_type.x_www_form_urlencoded;
 
-            var form_dict = form_data.ToDictionary(kvp => kvp.key, kvp => kvp.value);
+            var form_dict = form_data
+                .GroupBy(kvp => kvp.key)
+                .ToDictionary(g => g.Key, g => g.First().value);
 
             return new request_body_model
             {
