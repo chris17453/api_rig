@@ -464,7 +464,6 @@ public partial class request_editor_view_model : ObservableObject, IDisposable
         }
 
         EnsureParamsRow();
-        UpdateUrlFromParams();
     }
 
     private void EnsureParamsRow()
