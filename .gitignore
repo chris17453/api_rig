@@ -482,3 +482,6 @@ $RECYCLE.BIN/
 *.swp
 
 *.db
+*.db-schema
+*.db.wal
+.gitignore
