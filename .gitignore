@@ -480,3 +480,11 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Installer artifacts
+publish/
+packages/
+installer/bin/
+installer/obj/
+*.wixobj
+*.wixpdb

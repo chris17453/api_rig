@@ -13,4 +13,7 @@
     <Project Path="tests/PostmanClone.Http.Tests/PostmanClone.Http.Tests.csproj" />
     <Project Path="tests/PostmanClone.Scripting.Tests/PostmanClone.Scripting.Tests.csproj" />
   </Folder>
+  <Folder Name="/installer/">
+    <Project Path="installer/PostmanClone.Installer.wixproj" />
+  </Folder>
 </Solution>

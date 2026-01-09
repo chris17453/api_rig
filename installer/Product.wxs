@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+     xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+  
+  <?define ProductName = "PostmanClone" ?>
+  <?define ProductVersion = "1.0.0" ?>
+  <?define Manufacturer = "PostmanClone Team" ?>
+  <?define UpgradeCode = "{12345678-1234-1234-1234-123456789ABC}" ?>
+  
+  <Product Id="*" 
+           Name="$(var.ProductName)" 
+           Language="1033" 
+           Version="$(var.ProductVersion)" 
+           Manufacturer="$(var.Manufacturer)" 
+           UpgradeCode="$(var.UpgradeCode)">
+    
+    <Package InstallerVersion="500" 
+             Compressed="yes" 
+             InstallScope="perMachine"
+             Description="PostmanClone - API Testing Tool"
+             Comments="A cross-platform Postman clone for API testing" />
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    
+    <MediaTemplate EmbedCab="yes" />
+
+    <!-- Prerequisites -->
+    <PropertyGroup>
+      <PropertyRef Id="WIX_IS_NETFRAMEWORK_48_OR_LATER_INSTALLED"/>
+    </PropertyGroup>
+    
+    <Condition Message="This application requires .NET 10.0 or later. Please install .NET 10.0 Runtime from https://dotnet.microsoft.com/download">
+      <![CDATA[Installed OR WIX_IS_NETFRAMEWORK_48_OR_LATER_INSTALLED]]>
+    </Condition>
+
+    <!-- Features -->
+    <Feature Id="ProductFeature" 
+             Title="PostmanClone" 
+             Level="1"
+             Description="The main application files"
+             ConfigurableDirectory="INSTALLFOLDER">
+      <ComponentGroupRef Id="ProductComponents" />
+      <ComponentRef Id="ApplicationShortcut" />
+      <ComponentRef Id="DesktopShortcut" />
+    </Feature>
+
+    <!-- UI Reference -->
+    <UIRef Id="CustomUI" />
+    
+    <!-- Properties -->
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+    <Property Id="ARPPRODUCTICON" Value="ProductIcon" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/chris17453/api_rig" />
+    <Property Id="ARPHELPLINK" Value="https://github.com/chris17453/api_rig/issues" />
+    
+    <Icon Id="ProductIcon" SourceFile="Assets\logo.ico" />
+    
+  </Product>
+
+  <!-- Directory Structure -->
+  <Fragment>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFiles64Folder">
+        <Directory Id="INSTALLFOLDER" Name="PostmanClone">
+          <Directory Id="APPFOLDER" Name="App" />
+        </Directory>
+      </Directory>
+      
+      <!-- Start Menu -->
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ApplicationProgramsFolder" Name="PostmanClone"/>
+      </Directory>
+      
+      <!-- Desktop -->
+      <Directory Id="DesktopFolder" Name="Desktop" />
+    </Directory>
+  </Fragment>
+
+  <!-- Start Menu Shortcut -->
+  <Fragment>
+    <DirectoryRef Id="ApplicationProgramsFolder">
+      <Component Id="ApplicationShortcut" Guid="{ABCDEF01-2345-6789-ABCD-EF0123456789}">
+        <Shortcut Id="ApplicationStartMenuShortcut"
+                  Name="PostmanClone"
+                  Description="API Testing Tool"
+                  Target="[APPFOLDER]PostmanClone.App.exe"
+                  WorkingDirectory="APPFOLDER"
+                  Icon="ProductIcon" />
+        <RemoveFolder Id="CleanUpShortCut" Directory="ApplicationProgramsFolder" On="uninstall"/>
+        <RegistryValue Root="HKCU" 
+                       Key="Software\PostmanClone" 
+                       Name="installed" 
+                       Type="integer" 
+                       Value="1" 
+                       KeyPath="yes"/>
+      </Component>
+    </DirectoryRef>
+  </Fragment>
+
+  <!-- Desktop Shortcut -->
+  <Fragment>
+    <DirectoryRef Id="DesktopFolder">
+      <Component Id="DesktopShortcut" Guid="{FEDCBA98-7654-3210-FEDC-BA9876543210}">
+        <Shortcut Id="ApplicationDesktopShortcut"
+                  Name="PostmanClone"
+                  Description="API Testing Tool"
+                  Target="[APPFOLDER]PostmanClone.App.exe"
+                  WorkingDirectory="APPFOLDER"
+                  Icon="ProductIcon" />
+        <RegistryValue Root="HKCU" 
+                       Key="Software\PostmanClone" 
+                       Name="desktopShortcut" 
+                       Type="integer" 
+                       Value="1" 
+                       KeyPath="yes"/>
+      </Component>
+    </DirectoryRef>
+  </Fragment>
+
+</Wix>

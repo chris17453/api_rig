@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Fragment>
+    <UI Id="CustomUI">
+      <!-- Use the built-in WixUI_InstallDir dialog set -->
+      <UIRef Id="WixUI_InstallDir" />
+      <UIRef Id="WixUI_ErrorProgressText" />
+
+      <!-- License Agreement -->
+      <DialogRef Id="LicenseAgreementDlg" />
+      
+      <!-- Customize banner and dialog graphics -->
+      <Publish Dialog="ExitDialog"
+               Control="Finish"
+               Event="DoAction"
+               Value="LaunchApplication">WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 and NOT Installed</Publish>
+    </UI>
+
+    <!-- Launch application checkbox on exit dialog -->
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch PostmanClone" />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1" />
+    <Property Id="WixShellExecTarget" Value="[#PostmanClone.App.exe]" />
+    
+    <CustomAction Id="LaunchApplication"
+                  BinaryKey="WixCA"
+                  DllEntry="WixShellExec"
+                  Impersonate="yes" />
+
+    <!-- License file (RTF format) -->
+    <WixVariable Id="WixUILicenseRtf" Value="Assets\LICENSE.rtf" />
+    
+    <!-- Banner and dialog bitmaps (optional) -->
+    <!-- <WixVariable Id="WixUIBannerBmp" Value="Assets\banner.bmp" /> -->
+    <!-- <WixVariable Id="WixUIDialogBmp" Value="Assets\dialog.bmp" /> -->
+  </Fragment>
+</Wix>

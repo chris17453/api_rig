@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Fragment>
+    <ComponentGroup Id="ProductComponents" Directory="APPFOLDER">
+      <!-- 
+        This file will contain references to all the application files
+        It should be generated automatically using heat.exe tool or manually maintained
+        For now, we provide a placeholder that will be populated by the build script
+      -->
+      
+      <!-- Main executable -->
+      <Component Id="PostmanClone.App.exe" Guid="{11111111-2222-3333-4444-555555555555}">
+        <File Id="PostmanClone.App.exe" 
+              Source="$(var.PublishDir)\PostmanClone.App.exe" 
+              KeyPath="yes" 
+              Checksum="yes" />
+      </Component>
+
+      <!-- All DLLs and dependencies will be harvested by heat.exe -->
+      <!-- This is a simplified version - the build script will use WiX Heat to generate this automatically -->
+      
+    </ComponentGroup>
+  </Fragment>
+</Wix>

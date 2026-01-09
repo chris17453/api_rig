@@ -628,3 +628,59 @@ Console.WriteLine($"Errors: {result.all_errors.Count}");
 - Jint needs execution timeouts to prevent infinite loops
 - Single HttpClient instance for app lifetime
 - UI updates from background threads need dispatcher
+
+---
+
+## Building Installers
+
+PostmanClone supports creating installers and packages for Windows, Linux, and macOS.
+
+### Quick Start
+
+**Windows (.msi installer):**
+```powershell
+.\installer\build-installer.ps1
+```
+
+**Linux (.deb and .tar.gz):**
+```bash
+./installer/build-package.sh Release 1.0.0 linux-x64
+```
+
+**macOS (.app bundle and .dmg):**
+```bash
+./installer/build-package.sh Release 1.0.0 osx-x64
+```
+
+### Requirements
+
+- **Windows**: WiX Toolset 3.11+ ([download](https://wixtoolset.org/releases/))
+- **Linux**: dpkg-deb (for .deb packages)
+- **macOS**: Xcode Command Line Tools
+
+### Documentation
+
+See [installer/README.md](installer/README.md) for detailed build instructions and customization options.
+
+### Publish Profiles
+
+Pre-configured publish profiles are available for all platforms:
+
+- `win-x64` - Windows 64-bit (Intel/AMD)
+- `win-arm64` - Windows ARM64
+- `linux-x64` - Linux 64-bit (Intel/AMD)
+- `linux-arm64` - Linux ARM64
+- `osx-x64` - macOS Intel
+- `osx-arm64` - macOS Apple Silicon
+
+To publish using a profile:
+```bash
+dotnet publish src/PostmanClone.App/PostmanClone.App.csproj -p:PublishProfile=linux-x64
+```
+
+---
+
+## Installation
+
+See [INSTALL.md](INSTALL.md) for detailed installation instructions for all platforms.
+
