@@ -97,11 +97,8 @@ public partial class sidebar_view_model : ObservableObject
 
         try
         {
-            // Store expanded state before reloading
-            var expandedCollectionIds = Collections
-                .Where(c => c.IsExpanded)
-                .Select(c => c.Id)
-                .ToHashSet();
+            // Store expanded state before reloading (including all nested items)
+            var expandedIds = GetAllExpandedIds(Collections);
 
             // Load collections
             var collections = await _collection_repository.list_all_async(cancellation_token);
@@ -109,8 +106,8 @@ public partial class sidebar_view_model : ObservableObject
             foreach (var col in collections)
             {
                 var tree_item = map_collection_to_tree_item(col);
-                // Restore expanded state - set to true if it was expanded, false otherwise
-                tree_item.IsExpanded = expandedCollectionIds.Count == 0 || expandedCollectionIds.Contains(tree_item.Id);
+                // Restore expanded state for this item and all children
+                RestoreExpandedState(tree_item, expandedIds);
                 Collections.Add(tree_item);
             }
 
@@ -270,6 +267,40 @@ public partial class sidebar_view_model : ObservableObject
         return parent.Children.Any(child => child == target || contains_item(child, target));
     }
 
+    private HashSet<string> GetAllExpandedIds(IEnumerable<collection_tree_item_view_model> items)
+    {
+        var expandedIds = new HashSet<string>();
+        foreach (var item in items)
+        {
+            CollectExpandedIds(item, expandedIds);
+        }
+        return expandedIds;
+    }
+
+    private void CollectExpandedIds(collection_tree_item_view_model item, HashSet<string> expandedIds)
+    {
+        if (item.IsExpanded)
+        {
+            expandedIds.Add(item.Id);
+        }
+        foreach (var child in item.Children)
+        {
+            CollectExpandedIds(child, expandedIds);
+        }
+    }
+
+    private void RestoreExpandedState(collection_tree_item_view_model item, HashSet<string> expandedIds)
+    {
+        // Only expand if the ID was previously in the expanded set
+        // On initial load (empty expandedIds), all collections remain collapsed
+        item.IsExpanded = expandedIds.Contains(item.Id);
+        
+        foreach (var child in item.Children)
+        {
+            RestoreExpandedState(child, expandedIds);
+        }
+    }
+
     [RelayCommand]
     public async Task refresh_history_async(CancellationToken cancellation_token)
     {
@@ -413,7 +444,7 @@ public partial class collection_tree_item_view_model : ObservableObject
     private http_method? _method;
 
     [ObservableProperty]
-    private bool _isExpanded = true;
+    private bool _isExpanded = false;
 
     [ObservableProperty]
     private bool _isEditing = false;
