@@ -63,8 +63,22 @@
                             <!-- Icons and Name -->
                             <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                                 <TextBlock Text="📦" IsVisible="{Binding IsCollectionRoot}" FontSize="12"/>
-                                <TextBlock Text="📁" IsVisible="{Binding IsFolder}" FontSize="12"/>
-                                <TextBlock Text="📄" IsVisible="{Binding !IsFolder}" FontSize="12"/>
+                                <TextBlock Text="📁" FontSize="12">
+                                    <TextBlock.IsVisible>
+                                        <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                            <Binding Path="IsFolder"/>
+                                            <Binding Path="!IsCollectionRoot"/>
+                                        </MultiBinding>
+                                    </TextBlock.IsVisible>
+                                </TextBlock>
+                                <TextBlock Text="📄" FontSize="12">
+                                    <TextBlock.IsVisible>
+                                        <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                            <Binding Path="!IsFolder"/>
+                                            <Binding Path="!IsCollectionRoot"/>
+                                        </MultiBinding>
+                                    </TextBlock.IsVisible>
+                                </TextBlock>
                                 <Border Background="#238636" 
                                         CornerRadius="4" 
                                         Padding="6,2"
@@ -74,22 +88,38 @@
                                                FontSize="9"
                                                Foreground="#FFFFFF"/>
                                 </Border>
+                                <!-- Display mode: show name -->
                                 <TextBlock Text="{Binding Name}" 
                                            Foreground="#C9D1D9"
                                            FontSize="12"
-                                           VerticalAlignment="Center"/>
+                                           VerticalAlignment="Center"
+                                           IsVisible="{Binding !IsEditing}"
+                                           DoubleTapped="OnNameDoubleTapped"/>
+                                <!-- Edit mode: editable textbox -->
+                                <TextBox Text="{Binding Name}" 
+                                         Foreground="#C9D1D9"
+                                         FontSize="12"
+                                         VerticalAlignment="Center"
+                                         IsVisible="{Binding IsEditing}"
+                                         MinWidth="100"
+                                         BorderThickness="1"
+                                         BorderBrush="#58A6FF"
+                                         Background="#161B22"
+                                         Padding="4,2"
+                                         LostFocus="OnNameEditLostFocus"
+                                         KeyDown="OnNameEditKeyDown"/>
                             </StackPanel>
                             
                             <!-- Action Buttons -->
-                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4">
+                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
                                 <!-- Add Request Button (only for collections) -->
                                 <Button Command="{Binding $parent[TreeView].((vm:sidebar_view_model)DataContext).AddRequestToCollectionCommand}"
                                         CommandParameter="{Binding}"
-                                        Width="22"
-                                        Height="22"
+                                        Width="24"
+                                        Height="24"
                                         Padding="0"
                                         ToolTip.Tip="Add request to this collection"
-                                        IsVisible="{Binding IsCollectionRoot}">
+                                        IsVisible="{Binding IsCollectionRoot, FallbackValue=False}">
                                     <Button.Content>
                                         <TextBlock Text="+" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                     </Button.Content>
@@ -98,6 +128,7 @@
                                             <Setter Property="Background" Value="#1F6FEB"/>
                                             <Setter Property="Foreground" Value="White"/>
                                             <Setter Property="CornerRadius" Value="4"/>
+                                            <Setter Property="BorderThickness" Value="0"/>
                                         </Style>
                                         <Style Selector="Button:pointerover /template/ ContentPresenter">
                                             <Setter Property="Background" Value="#388BFD"/>
@@ -105,9 +136,9 @@
                                     </Button.Styles>
                                 </Button>
                                 
-                                <!-- Delete Button -->
-                                <Button Width="22"
-                                        Height="22"
+                                <!-- Delete Button (show for all items) -->
+                                <Button Width="24"
+                                        Height="24"
                                         Padding="0"
                                         ToolTip.Tip="Delete"
                                         Command="{Binding $parent[TreeView].((vm:sidebar_view_model)DataContext).DeleteItemCommand}"
@@ -120,6 +151,7 @@
                                             <Setter Property="Background" Value="#DA3633"/>
                                             <Setter Property="Foreground" Value="White"/>
                                             <Setter Property="CornerRadius" Value="4"/>
+                                            <Setter Property="BorderThickness" Value="0"/>
                                         </Style>
                                         <Style Selector="Button:pointerover /template/ ContentPresenter">
                                             <Setter Property="Background" Value="#F85149"/>

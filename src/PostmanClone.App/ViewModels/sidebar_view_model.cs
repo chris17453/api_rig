@@ -153,10 +153,22 @@ public partial class sidebar_view_model : ObservableObject
     [RelayCommand]
     public async Task CreateCollection(CancellationToken cancellation_token)
     {
+        // Find the highest collection number to increment
+        int maxNumber = 0;
+        foreach (var col in Collections)
+        {
+            // Parse collection names like "Collection#1", "Collection#2", etc.
+            if (col.Name.StartsWith("Collection#") && 
+                int.TryParse(col.Name.Substring("Collection#".Length), out int num))
+            {
+                maxNumber = Math.Max(maxNumber, num);
+            }
+        }
+
         var newCollection = new postman_collection_model
         {
             id = Guid.NewGuid().ToString(),
-            name = $"Collection {DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}",
+            name = $"Collection#{maxNumber + 1}",
             description = "New collection",
             items = new List<collection_item_model>()
         };
@@ -309,6 +321,66 @@ public partial class sidebar_view_model : ObservableObject
         }
     }
 
+    [RelayCommand]
+    public async Task RenameItem(collection_tree_item_view_model item, CancellationToken cancellation_token = default)
+    {
+        if (item == null || string.IsNullOrWhiteSpace(item.Name)) return;
+
+        if (item.IsCollectionRoot)
+        {
+            // Rename collection
+            var collection = await _collection_repository.get_by_id_async(item.Id, cancellation_token);
+            if (collection != null)
+            {
+                collection = collection with { name = item.Name };
+                await _collection_repository.save_async(collection, cancellation_token);
+                collection_changed?.Invoke(this, EventArgs.Empty);
+            }
+        }
+        else
+        {
+            // Rename request - find parent collection and update
+            var parentCollection = find_parent_collection(item);
+            if (parentCollection != null)
+            {
+                var collection = await _collection_repository.get_by_id_async(parentCollection.Id, cancellation_token);
+                if (collection != null)
+                {
+                    // Update the item's name in the collection
+                    var updatedItems = update_item_name_recursive(collection.items.ToList(), item.Id, item.Name);
+                    collection = collection with { items = updatedItems };
+                    await _collection_repository.save_async(collection, cancellation_token);
+                    collection_changed?.Invoke(this, EventArgs.Empty);
+                }
+            }
+        }
+
+        item.IsEditing = false;
+    }
+
+    private List<collection_item_model> update_item_name_recursive(List<collection_item_model> items, string itemId, string newName)
+    {
+        var result = new List<collection_item_model>();
+        foreach (var item in items)
+        {
+            if (item.id == itemId)
+            {
+                // Update the name - need to create new instance since it's a record
+                result.Add(item with { name = newName });
+            }
+            else if (item.children != null && item.children.Count > 0)
+            {
+                var updatedChildren = update_item_name_recursive(item.children.ToList(), itemId, newName);
+                result.Add(item with { children = updatedChildren });
+            }
+            else
+            {
+                result.Add(item);
+            }
+        }
+        return result;
+    }
+
     private static collection_tree_item_view_model map_collection_to_tree_item(postman_collection_model collection)
     {
         var root = new collection_tree_item_view_model
@@ -373,6 +445,9 @@ public partial class collection_tree_item_view_model : ObservableObject
 
     [ObservableProperty]
     private bool _isExpanded = true;
+
+    [ObservableProperty]
+    private bool _isEditing = false;
 
     public http_request_model? request { get; set; }
 
