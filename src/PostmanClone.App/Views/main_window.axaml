@@ -100,6 +100,10 @@
                             <TextBlock Text="Export"/>
                         </StackPanel>
                     </Button>
+                    <Button Classes="modern"
+                            Click="AboutButton_Click">
+                        <TextBlock Text="About"/>
+                    </Button>
                 </StackPanel>
                 
                 <!-- Environment Selector -->

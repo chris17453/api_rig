@@ -9,8 +9,10 @@
         Title="About API Rig"
         Width="650"
         Height="700"
+        MinWidth="500"
+        MinHeight="500"
         WindowStartupLocation="CenterOwner"
-        CanResize="False"
+        CanResize="True"
         Background="#1E1E1E">
 
     <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" Margin="25">
