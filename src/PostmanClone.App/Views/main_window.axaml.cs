@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Microsoft.Extensions.DependencyInjection;
 using PostmanClone.App.ViewModels;
 
 namespace PostmanClone.App.Views;
@@ -66,5 +67,23 @@ public partial class main_window : Window
         var aboutVm = new about_view_model();
         var dialog = new about_dialog { DataContext = aboutVm };
         await dialog.ShowDialog(this);
+    }
+
+    private async void RegistrationButton_Click(object? sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var registration_vm = App.services?.GetRequiredService<registration_view_model>();
+            if (registration_vm == null) return;
+
+            await registration_vm.load_existing_registration_async();
+            
+            var dialog = new registration_dialog { DataContext = registration_vm };
+            await dialog.ShowDialog(this);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error opening registration dialog: {ex.Message}");
+        }
     }
 }

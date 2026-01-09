@@ -100,6 +100,14 @@
                             <TextBlock Text="Export"/>
                         </StackPanel>
                     </Button>
+                    <Button Classes="modern"
+                            Click="RegistrationButton_Click"
+                            ToolTip.Tip="App Registration">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="⚙" FontSize="12"/>
+                            <TextBlock Text="Register"/>
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
                 
                 <!-- Environment Selector -->
