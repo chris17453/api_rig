@@ -1,11 +1,14 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Styling;
 using PostmanClone.App.ViewModels;
 
 namespace PostmanClone.App.Views;
 
 public partial class main_window : Window
 {
+    private bool _isDarkTheme = true;
+
     public main_window()
     {
         InitializeComponent();
@@ -75,6 +78,52 @@ public partial class main_window : Window
 
         var runnerVm = mainVm.CreateCollectionRunnerViewModel();
         var dialog = new collection_runner_dialog { DataContext = runnerVm };
+        await dialog.ShowDialog(this);
+    }
+
+    private void ThemeToggleButton_Click(object? sender, RoutedEventArgs e)
+    {
+        _isDarkTheme = !_isDarkTheme;
+        
+        if (Avalonia.Application.Current != null)
+        {
+            Avalonia.Application.Current.RequestedThemeVariant = _isDarkTheme 
+                ? ThemeVariant.Dark 
+                : ThemeVariant.Light;
+        }
+
+        // Update the icon
+        if (this.FindControl<TextBlock>("ThemeIcon") is TextBlock icon)
+        {
+            icon.Text = _isDarkTheme ? "☀" : "🌙";
+        }
+    }
+
+    private async void CodeButton_Click(object? sender, RoutedEventArgs e)
+    {
+        var mainVm = DataContext as main_view_model;
+        if (mainVm == null) return;
+
+        // Generate and show cURL code
+        mainVm.RequestEditor.GenerateCurlCommand.Execute(null);
+        
+        // Show code dialog with generated cURL
+        var dialog = new code_generator_dialog 
+        { 
+            DataContext = mainVm.RequestEditor 
+        };
+        await dialog.ShowDialog(this);
+    }
+
+    private async void ShortcutsButton_Click(object? sender, RoutedEventArgs e)
+    {
+        var dialog = new keyboard_shortcuts_dialog();
+        await dialog.ShowDialog(this);
+    }
+
+    private async void SettingsButton_Click(object? sender, RoutedEventArgs e)
+    {
+        var dialog = new settings_dialog();
         await dialog.ShowDialog(this);
     }
 }

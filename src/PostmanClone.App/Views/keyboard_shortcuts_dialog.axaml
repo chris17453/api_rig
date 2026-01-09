@@ -1,0 +1,166 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="600"
+        x:Class="PostmanClone.App.Views.keyboard_shortcuts_dialog"
+        Title="Keyboard Shortcuts"
+        Width="500" Height="600"
+        WindowStartupLocation="CenterOwner"
+        Background="#18181B"
+        CanResize="False">
+
+    <Window.Styles>
+        <Style Selector="TextBlock.shortcut-key">
+            <Setter Property="Background" Value="#27272A"/>
+            <Setter Property="Foreground" Value="#FAFAFA"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="FontFamily" Value="Consolas, monospace"/>
+            <Setter Property="FontSize" Value="11"/>
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <!-- Header -->
+        <Border Grid.Row="0" 
+                Background="#09090B"
+                Padding="20,16">
+            <StackPanel>
+                <TextBlock Text="⌨ Keyboard Shortcuts" 
+                           FontSize="18" 
+                           FontWeight="Bold"
+                           Foreground="#FAFAFA"/>
+                <TextBlock Text="Quick access to common actions"
+                           FontSize="12"
+                           Foreground="#71717A"
+                           Margin="0,4,0,0"/>
+            </StackPanel>
+        </Border>
+        
+        <!-- Shortcuts List -->
+        <ScrollViewer Grid.Row="1" Padding="20">
+            <StackPanel Spacing="24">
+                <!-- Request Section -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="REQUEST" 
+                               FontSize="11" 
+                               FontWeight="SemiBold"
+                               Foreground="#F97316"
+                               Margin="0,0,0,8"/>
+                    
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="Send Request" Foreground="#A1A1AA"/>
+                        <Border Grid.Column="1" Background="#27272A" CornerRadius="4" Padding="8,4">
+                            <TextBlock Text="Ctrl + Enter" FontFamily="Consolas" FontSize="11" Foreground="#FAFAFA"/>
+                        </Border>
+                    </Grid>
+                    
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="Save Request" Foreground="#A1A1AA"/>
+                        <Border Grid.Column="1" Background="#27272A" CornerRadius="4" Padding="8,4">
+                            <TextBlock Text="Ctrl + S" FontFamily="Consolas" FontSize="11" Foreground="#FAFAFA"/>
+                        </Border>
+                    </Grid>
+                </StackPanel>
+                
+                <!-- Navigation Section -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="NAVIGATION" 
+                               FontSize="11" 
+                               FontWeight="SemiBold"
+                               Foreground="#F97316"
+                               Margin="0,0,0,8"/>
+                    
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="New Tab" Foreground="#A1A1AA"/>
+                        <Border Grid.Column="1" Background="#27272A" CornerRadius="4" Padding="8,4">
+                            <TextBlock Text="Ctrl + N" FontFamily="Consolas" FontSize="11" Foreground="#FAFAFA"/>
+                        </Border>
+                    </Grid>
+                    
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="Close Tab" Foreground="#A1A1AA"/>
+                        <Border Grid.Column="1" Background="#27272A" CornerRadius="4" Padding="8,4">
+                            <TextBlock Text="Ctrl + W" FontFamily="Consolas" FontSize="11" Foreground="#FAFAFA"/>
+                        </Border>
+                    </Grid>
+                    
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="Toggle Sidebar" Foreground="#A1A1AA"/>
+                        <Border Grid.Column="1" Background="#27272A" CornerRadius="4" Padding="8,4">
+                            <TextBlock Text="Ctrl + B" FontFamily="Consolas" FontSize="11" Foreground="#FAFAFA"/>
+                        </Border>
+                    </Grid>
+                </StackPanel>
+                
+                <!-- Collections Section -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="COLLECTIONS" 
+                               FontSize="11" 
+                               FontWeight="SemiBold"
+                               Foreground="#F97316"
+                               Margin="0,0,0,8"/>
+                    
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="New Collection" Foreground="#A1A1AA"/>
+                        <Border Grid.Column="1" Background="#27272A" CornerRadius="4" Padding="8,4">
+                            <TextBlock Text="Ctrl + Shift + N" FontFamily="Consolas" FontSize="11" Foreground="#FAFAFA"/>
+                        </Border>
+                    </Grid>
+                    
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="Import Collection" Foreground="#A1A1AA"/>
+                        <Border Grid.Column="1" Background="#27272A" CornerRadius="4" Padding="8,4">
+                            <TextBlock Text="Ctrl + I" FontFamily="Consolas" FontSize="11" Foreground="#FAFAFA"/>
+                        </Border>
+                    </Grid>
+                    
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="Run Collection" Foreground="#A1A1AA"/>
+                        <Border Grid.Column="1" Background="#27272A" CornerRadius="4" Padding="8,4">
+                            <TextBlock Text="Ctrl + R" FontFamily="Consolas" FontSize="11" Foreground="#FAFAFA"/>
+                        </Border>
+                    </Grid>
+                </StackPanel>
+                
+                <!-- General Section -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="GENERAL" 
+                               FontSize="11" 
+                               FontWeight="SemiBold"
+                               Foreground="#F97316"
+                               Margin="0,0,0,8"/>
+                    
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="Toggle Console" Foreground="#A1A1AA"/>
+                        <Border Grid.Column="1" Background="#27272A" CornerRadius="4" Padding="8,4">
+                            <TextBlock Text="Ctrl + `" FontFamily="Consolas" FontSize="11" Foreground="#FAFAFA"/>
+                        </Border>
+                    </Grid>
+                    
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="Show Shortcuts" Foreground="#A1A1AA"/>
+                        <Border Grid.Column="1" Background="#27272A" CornerRadius="4" Padding="8,4">
+                            <TextBlock Text="Ctrl + ?" FontFamily="Consolas" FontSize="11" Foreground="#FAFAFA"/>
+                        </Border>
+                    </Grid>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+        
+        <!-- Footer -->
+        <Border Grid.Row="2" 
+                Background="#09090B"
+                Padding="20,12"
+                BorderBrush="#27272A"
+                BorderThickness="0,1,0,0">
+            <Button Content="Close"
+                    Click="CloseButton_Click"
+                    HorizontalAlignment="Right"
+                    Background="#27272A"
+                    Foreground="#FAFAFA"
+                    Padding="16,8"
+                    CornerRadius="6"/>
+        </Border>
+    </Grid>
+</Window>

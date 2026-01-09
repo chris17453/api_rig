@@ -53,6 +53,9 @@ public partial class main_view_model : ObservableObject
     [ObservableProperty]
     private bool _isSidebarVisible = true;
 
+    [ObservableProperty]
+    private bool _isConsoleVisible = false;
+
     private readonly request_orchestrator _requestOrchestrator;
 
     public main_view_model(
@@ -111,6 +114,12 @@ public partial class main_view_model : ObservableObject
     private void toggle_sidebar()
     {
         IsSidebarVisible = !IsSidebarVisible;
+    }
+
+    [RelayCommand]
+    private void ToggleConsole()
+    {
+        IsConsoleVisible = !IsConsoleVisible;
     }
 
     [RelayCommand]

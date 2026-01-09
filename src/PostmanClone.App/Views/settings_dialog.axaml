@@ -1,0 +1,184 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="500"
+        x:Class="PostmanClone.App.Views.settings_dialog"
+        Title="Settings"
+        Width="600" Height="500"
+        WindowStartupLocation="CenterOwner"
+        Background="#18181B"
+        CanResize="False">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <!-- Header -->
+        <Border Grid.Row="0" 
+                Background="#09090B"
+                Padding="20,16">
+            <StackPanel>
+                <TextBlock Text="⚙ Settings" 
+                           FontSize="18" 
+                           FontWeight="Bold"
+                           Foreground="#FAFAFA"/>
+                <TextBlock Text="Configure application preferences"
+                           FontSize="12"
+                           Foreground="#71717A"
+                           Margin="0,4,0,0"/>
+            </StackPanel>
+        </Border>
+        
+        <!-- Settings Content -->
+        <ScrollViewer Grid.Row="1" Padding="20">
+            <StackPanel Spacing="24">
+                <!-- General Section -->
+                <StackPanel Spacing="12">
+                    <TextBlock Text="GENERAL" 
+                               FontSize="11" 
+                               FontWeight="SemiBold"
+                               Foreground="#F97316"
+                               Margin="0,0,0,4"/>
+                    
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel>
+                            <TextBlock Text="Theme" Foreground="#FAFAFA" FontWeight="SemiBold"/>
+                            <TextBlock Text="Choose light or dark theme" Foreground="#71717A" FontSize="11"/>
+                        </StackPanel>
+                        <ComboBox Grid.Column="1"
+                                  SelectedIndex="0"
+                                  Background="#27272A"
+                                  BorderBrush="#3F3F46"
+                                  Foreground="#FAFAFA"
+                                  MinWidth="120">
+                            <ComboBoxItem Content="Dark"/>
+                            <ComboBoxItem Content="Light"/>
+                            <ComboBoxItem Content="System"/>
+                        </ComboBox>
+                    </Grid>
+                    
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel>
+                            <TextBlock Text="Font Size" Foreground="#FAFAFA" FontWeight="SemiBold"/>
+                            <TextBlock Text="Editor font size" Foreground="#71717A" FontSize="11"/>
+                        </StackPanel>
+                        <NumericUpDown Grid.Column="1"
+                                       Value="12"
+                                       Minimum="10"
+                                       Maximum="24"
+                                       Background="#27272A"
+                                       BorderBrush="#3F3F46"
+                                       Foreground="#FAFAFA"
+                                       MinWidth="100"/>
+                    </Grid>
+                    
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel>
+                            <TextBlock Text="Auto-save" Foreground="#FAFAFA" FontWeight="SemiBold"/>
+                            <TextBlock Text="Automatically save changes" Foreground="#71717A" FontSize="11"/>
+                        </StackPanel>
+                        <ToggleSwitch Grid.Column="1" IsChecked="True"/>
+                    </Grid>
+                </StackPanel>
+                
+                <!-- Request Section -->
+                <StackPanel Spacing="12">
+                    <TextBlock Text="REQUEST" 
+                               FontSize="11" 
+                               FontWeight="SemiBold"
+                               Foreground="#F97316"
+                               Margin="0,0,0,4"/>
+                    
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel>
+                            <TextBlock Text="Request Timeout" Foreground="#FAFAFA" FontWeight="SemiBold"/>
+                            <TextBlock Text="Timeout in milliseconds (0 = no timeout)" Foreground="#71717A" FontSize="11"/>
+                        </StackPanel>
+                        <NumericUpDown Grid.Column="1"
+                                       Value="30000"
+                                       Minimum="0"
+                                       Maximum="300000"
+                                       Increment="1000"
+                                       Background="#27272A"
+                                       BorderBrush="#3F3F46"
+                                       Foreground="#FAFAFA"
+                                       MinWidth="120"/>
+                    </Grid>
+                    
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel>
+                            <TextBlock Text="Follow Redirects" Foreground="#FAFAFA" FontWeight="SemiBold"/>
+                            <TextBlock Text="Automatically follow HTTP redirects" Foreground="#71717A" FontSize="11"/>
+                        </StackPanel>
+                        <ToggleSwitch Grid.Column="1" IsChecked="True"/>
+                    </Grid>
+                    
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel>
+                            <TextBlock Text="SSL Certificate Verification" Foreground="#FAFAFA" FontWeight="SemiBold"/>
+                            <TextBlock Text="Verify SSL certificates" Foreground="#71717A" FontSize="11"/>
+                        </StackPanel>
+                        <ToggleSwitch Grid.Column="1" IsChecked="True"/>
+                    </Grid>
+                </StackPanel>
+                
+                <!-- Editor Section -->
+                <StackPanel Spacing="12">
+                    <TextBlock Text="EDITOR" 
+                               FontSize="11" 
+                               FontWeight="SemiBold"
+                               Foreground="#F97316"
+                               Margin="0,0,0,4"/>
+                    
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel>
+                            <TextBlock Text="Syntax Highlighting" Foreground="#FAFAFA" FontWeight="SemiBold"/>
+                            <TextBlock Text="Enable syntax highlighting in code editors" Foreground="#71717A" FontSize="11"/>
+                        </StackPanel>
+                        <ToggleSwitch Grid.Column="1" IsChecked="True"/>
+                    </Grid>
+                    
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel>
+                            <TextBlock Text="Line Numbers" Foreground="#FAFAFA" FontWeight="SemiBold"/>
+                            <TextBlock Text="Show line numbers in code editors" Foreground="#71717A" FontSize="11"/>
+                        </StackPanel>
+                        <ToggleSwitch Grid.Column="1" IsChecked="True"/>
+                    </Grid>
+                    
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel>
+                            <TextBlock Text="Word Wrap" Foreground="#FAFAFA" FontWeight="SemiBold"/>
+                            <TextBlock Text="Wrap long lines" Foreground="#71717A" FontSize="11"/>
+                        </StackPanel>
+                        <ToggleSwitch Grid.Column="1" IsChecked="False"/>
+                    </Grid>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+        
+        <!-- Footer -->
+        <Border Grid.Row="2" 
+                Background="#09090B"
+                Padding="20,12"
+                BorderBrush="#27272A"
+                BorderThickness="0,1,0,0">
+            <Grid ColumnDefinitions="*,Auto,Auto">
+                <Button Grid.Column="1"
+                        Content="Save"
+                        Click="SaveButton_Click"
+                        Background="#F97316"
+                        Foreground="#FFFFFF"
+                        Padding="16,8"
+                        CornerRadius="6"
+                        Margin="0,0,12,0"/>
+                
+                <Button Grid.Column="2"
+                        Content="Cancel"
+                        Click="CancelButton_Click"
+                        Background="#27272A"
+                        Foreground="#FAFAFA"
+                        Padding="16,8"
+                        CornerRadius="6"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

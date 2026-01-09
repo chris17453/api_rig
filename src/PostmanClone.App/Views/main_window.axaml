@@ -10,7 +10,7 @@
         Title="{Binding Title}"
         Width="1400" Height="900"
         WindowStartupLocation="CenterScreen"
-        Background="#0D1117"
+        Background="#18181B"
         Icon="avares://PostmanClone.App/Assets/logo.webp">
 
     <!-- Keyboard Shortcuts -->
@@ -22,21 +22,35 @@
     </Window.KeyBindings>
 
     <Window.Styles>
-        <!-- Modern Button Style -->
-        <Style Selector="Button.modern">
-            <Setter Property="Background" Value="#21262D"/>
-            <Setter Property="Foreground" Value="#C9D1D9"/>
-            <Setter Property="BorderBrush" Value="#30363D"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="6"/>
-            <Setter Property="Padding" Value="12,6"/>
+        <!-- Header Button Style -->
+        <Style Selector="Button.header-btn">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#A1A1AA"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="10,6"/>
             <Setter Property="FontSize" Value="12"/>
+            <Setter Property="CornerRadius" Value="4"/>
         </Style>
-        <Style Selector="Button.modern:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="#30363D"/>
+        <Style Selector="Button.header-btn:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#27272A"/>
         </Style>
+        
+        <!-- Sidebar Button Style -->
+        <Style Selector="Button.sidebar-btn">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#A1A1AA"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="CornerRadius" Value="4"/>
+        </Style>
+        <Style Selector="Button.sidebar-btn:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#27272A"/>
+        </Style>
+        
+        <!-- Primary Button Style (Orange) -->
         <Style Selector="Button.primary">
-            <Setter Property="Background" Value="#238636"/>
+            <Setter Property="Background" Value="#F97316"/>
             <Setter Property="Foreground" Value="#FFFFFF"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="CornerRadius" Value="6"/>
@@ -44,139 +58,337 @@
             <Setter Property="FontWeight" Value="SemiBold"/>
         </Style>
         <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="#2EA043"/>
+            <Setter Property="Background" Value="#EA580C"/>
         </Style>
-        <Style Selector="Button.accent">
-            <Setter Property="Background" Value="#1F6FEB"/>
-            <Setter Property="Foreground" Value="#FFFFFF"/>
-            <Setter Property="BorderThickness" Value="0"/>
+        
+        <!-- Ghost Button Style -->
+        <Style Selector="Button.ghost">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#A1A1AA"/>
+            <Setter Property="BorderBrush" Value="#3F3F46"/>
+            <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="6"/>
-            <Setter Property="Padding" Value="14,8"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="FontSize" Value="12"/>
         </Style>
-        <Style Selector="Button.accent:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="#388BFD"/>
+        <Style Selector="Button.ghost:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#27272A"/>
+            <Setter Property="BorderBrush" Value="#52525B"/>
+        </Style>
+        
+        <!-- GridSplitter Style -->
+        <Style Selector="GridSplitter">
+            <Setter Property="Background" Value="#27272A"/>
+        </Style>
+        <Style Selector="GridSplitter:pointerover">
+            <Setter Property="Background" Value="#F97316"/>
         </Style>
     </Window.Styles>
 
-    <Grid ColumnDefinitions="280,*,320" Margin="0">
-        <!-- Sidebar -->
-        <Border Grid.Column="0" 
-                IsVisible="{Binding IsSidebarVisible}"
-                Background="#161B22"
-                BorderBrush="#21262D" 
-                BorderThickness="0,0,1,0">
-            <Grid RowDefinitions="Auto,Auto,Auto,*">
-                <!-- Logo and App Title -->
-                <Border Grid.Row="0" 
-                        Background="#0D1117"
-                        Padding="16,20,16,16">
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <Border CornerRadius="10" 
-                                ClipToBounds="True"
-                                Width="44" Height="44">
-                            <Image Source="avares://PostmanClone.App/Assets/logo.webp"/>
-                        </Border>
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="API Rig" 
-                                       FontSize="18" 
+    <Grid RowDefinitions="48,*,Auto">
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- HEADER BAR - 48px -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <Border Grid.Row="0" 
+                Background="#09090B"
+                BorderBrush="#27272A"
+                BorderThickness="0,0,0,1">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <!-- Left Side: Toggle + Logo -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- Sidebar Toggle -->
+                    <Button Classes="header-btn"
+                            Command="{Binding toggle_sidebarCommand}"
+                            ToolTip.Tip="Toggle Sidebar"
+                            Margin="8,0,0,0">
+                        <TextBlock Text="☰" FontSize="16"/>
+                    </Button>
+                    
+                    <!-- Logo -->
+                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="12,0">
+                        <Border CornerRadius="4" 
+                                Background="#F97316"
+                                Width="28" Height="28"
+                                VerticalAlignment="Center">
+                            <TextBlock Text="A" 
+                                       FontSize="16" 
                                        FontWeight="Bold"
-                                       Foreground="#F0F6FC"/>
-                            <TextBlock Text="REST Client"
-                                       FontSize="11"
-                                       Foreground="#8B949E"/>
-                        </StackPanel>
+                                       Foreground="White"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Text="API Rig" 
+                                   FontSize="14" 
+                                   FontWeight="SemiBold"
+                                   Foreground="#FAFAFA"
+                                   VerticalAlignment="Center"/>
                     </StackPanel>
-                </Border>
+                </StackPanel>
                 
-                <!-- Import/Export/Runner Buttons -->
-                <StackPanel Grid.Row="1" 
+                <!-- Center: Empty -->
+                <Border Grid.Column="1"/>
+                
+                <!-- Right Side: Action Buttons -->
+                <StackPanel Grid.Column="2" 
                             Orientation="Horizontal" 
-                            Margin="16,0,16,16"
-                            Spacing="8">
-                    <Button Classes="modern"
-                            Click="ImportButton_Click"
-                            ToolTip.Tip="Import Postman collection">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <TextBlock Text="↓" FontSize="12"/>
-                            <TextBlock Text="Import"/>
-                        </StackPanel>
-                    </Button>
-                    <Button Classes="modern"
-                            Click="ExportButton_Click"
-                            ToolTip.Tip="Export collection">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <TextBlock Text="↑" FontSize="12"/>
-                            <TextBlock Text="Export"/>
-                        </StackPanel>
-                    </Button>
-                    <Button Classes="modern"
+                            VerticalAlignment="Center"
+                            Margin="0,0,12,0"
+                            Spacing="4">
+                    <!-- Runner -->
+                    <Button Classes="header-btn"
                             Click="RunnerButton_Click"
-                            ToolTip.Tip="Run entire collection">
+                            ToolTip.Tip="Collection Runner">
                         <StackPanel Orientation="Horizontal" Spacing="6">
-                            <TextBlock Text="🏃" FontSize="12"/>
+                            <TextBlock Text="▶" FontSize="11"/>
                             <TextBlock Text="Runner"/>
                         </StackPanel>
                     </Button>
-                    <Button Classes="modern"
-                            Click="AboutButton_Click"
-                            ToolTip.Tip="About API Rig">
-                        <TextBlock Text="About"/>
+                    
+                    <!-- Code Generator -->
+                    <Button Classes="header-btn"
+                            Click="CodeButton_Click"
+                            ToolTip.Tip="Generate Code (cURL, etc.)">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="&lt;/&gt;" FontSize="11" FontFamily="Consolas"/>
+                            <TextBlock Text="Code"/>
+                        </StackPanel>
                     </Button>
+                    
+                    <!-- Keyboard Shortcuts -->
+                    <Button Classes="header-btn"
+                            Click="ShortcutsButton_Click"
+                            ToolTip.Tip="Keyboard Shortcuts">
+                        <TextBlock Text="⌨" FontSize="14"/>
+                    </Button>
+                    
+                    <!-- Theme Toggle -->
+                    <Button Classes="header-btn"
+                            x:Name="ThemeToggleButton"
+                            Click="ThemeToggleButton_Click"
+                            ToolTip.Tip="Toggle Theme">
+                        <TextBlock x:Name="ThemeIcon" Text="☀" FontSize="14"/>
+                    </Button>
+                    
+                    <!-- Settings -->
+                    <Button Classes="header-btn"
+                            Click="SettingsButton_Click"
+                            ToolTip.Tip="Settings">
+                        <TextBlock Text="⚙" FontSize="14"/>
+                    </Button>
+                    
+                    <!-- About -->
+                    <Button Classes="header-btn"
+                            Click="AboutButton_Click"
+                            ToolTip.Tip="About">
+                        <TextBlock Text="ℹ" FontSize="14"/>
+                    </Button>
+                    
+                    <!-- Separator -->
+                    <Border Width="1" Height="24" Background="#3F3F46" Margin="8,0"/>
+                    
+                    <!-- Environment Selector -->
+                    <views:environment_selector_view DataContext="{Binding EnvironmentSelector}"
+                                                     VerticalAlignment="Center"/>
                 </StackPanel>
-                
-                <!-- Environment Selector -->
-                <views:environment_selector_view Grid.Row="2" 
-                                                  DataContext="{Binding EnvironmentSelector}"
-                                                  Margin="16,0,16,16"/>
-                
-                <!-- Collections and History -->
-                <views:sidebar_view Grid.Row="3" 
-                                    DataContext="{Binding Sidebar}"/>
             </Grid>
         </Border>
         
-        <!-- Main Content Area -->
-        <Border Grid.Column="1" Background="#0D1117">
-            <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="0">
-                <!-- Tab Bar -->
-                <views:tab_bar_view Grid.Row="0" 
-                                    DataContext="{Binding Tabs}"/>
-                
-                <!-- Request Editor -->
-                <views:request_editor_view Grid.Row="1" 
-                                           DataContext="{Binding RequestEditor}"
-                                           Margin="20,16,20,0"/>
-                
-                <!-- Script Editor -->
-                <Border Grid.Row="2" 
-                        Margin="20,16,20,16" 
-                        MinHeight="220"
-                        Background="#161B22"
-                        CornerRadius="12"
-                        BorderBrush="#21262D"
-                        BorderThickness="1">
-                    <views:script_editor_view DataContext="{Binding ScriptEditor}"/>
-                </Border>
-                
-                <!-- Response Viewer -->
-                <Border Grid.Row="3"
-                        Margin="20,0,20,16"
-                        Background="#161B22"
-                        CornerRadius="12"
-                        BorderBrush="#21262D"
-                        BorderThickness="1">
-                    <views:response_viewer_view DataContext="{Binding ResponseViewer}"/>
-                </Border>
-            </Grid>
-        </Border>
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- MAIN CONTENT AREA -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <Grid Grid.Row="1" ColumnDefinitions="Auto,Auto,*,Auto,Auto">
+            <!-- SIDEBAR -->
+            <Border Grid.Column="0" 
+                    IsVisible="{Binding IsSidebarVisible}"
+                    Background="#09090B"
+                    BorderBrush="#27272A"
+                    BorderThickness="0,0,1,0"
+                    Width="288"
+                    MinWidth="200"
+                    MaxWidth="400">
+                <Grid RowDefinitions="Auto,*,Auto">
+                    <!-- Sidebar Header: Search + New Button -->
+                    <Border Grid.Row="0" Padding="12,12,12,8">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBox Grid.Column="0"
+                                     Text="{Binding Sidebar.HistorySearchText, Mode=TwoWay}"
+                                     Watermark="🔍 Search..."
+                                     Background="#18181B"
+                                     BorderBrush="#3F3F46"
+                                     Foreground="#FAFAFA"
+                                     FontSize="12"
+                                     Padding="8,6"
+                                     CornerRadius="4"/>
+                            <Button Grid.Column="1"
+                                    Classes="sidebar-btn"
+                                    Command="{Binding Sidebar.CreateCollectionCommand}"
+                                    ToolTip.Tip="New Collection"
+                                    Margin="8,0,0,0">
+                                <TextBlock Text="+" FontSize="16" FontWeight="Bold"/>
+                            </Button>
+                        </Grid>
+                    </Border>
+                    
+                    <!-- Collections/History Content -->
+                    <views:sidebar_view Grid.Row="1" 
+                                        DataContext="{Binding Sidebar}"/>
+                    
+                    <!-- Sidebar Footer: Import/Export -->
+                    <Border Grid.Row="2" 
+                            Background="#09090B"
+                            BorderBrush="#27272A"
+                            BorderThickness="0,1,0,0"
+                            Padding="12,8">
+                        <Grid ColumnDefinitions="*,*">
+                            <Button Grid.Column="0"
+                                    Classes="ghost"
+                                    Click="ImportButton_Click"
+                                    HorizontalAlignment="Stretch"
+                                    Margin="0,0,4,0">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <TextBlock Text="↓" FontSize="12"/>
+                                    <TextBlock Text="Import"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Grid.Column="1"
+                                    Classes="ghost"
+                                    Click="ExportButton_Click"
+                                    HorizontalAlignment="Stretch"
+                                    Margin="4,0,0,0">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <TextBlock Text="↑" FontSize="12"/>
+                                    <TextBlock Text="Export"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+            
+            <!-- Left Splitter -->
+            <GridSplitter Grid.Column="1" 
+                          Width="4"
+                          IsVisible="{Binding IsSidebarVisible}"
+                          ResizeDirection="Columns"
+                          ResizeBehavior="PreviousAndNext"/>
+            
+            <!-- MAIN CONTENT -->
+            <Border Grid.Column="2" Background="#18181B">
+                <Grid RowDefinitions="Auto,*">
+                    <!-- Tab Bar -->
+                    <views:tab_bar_view Grid.Row="0" 
+                                        DataContext="{Binding Tabs}"/>
+                    
+                    <!-- Request/Response Split -->
+                    <Grid Grid.Row="1" RowDefinitions="*,Auto,*">
+                        <!-- Request Panel -->
+                        <Border Grid.Row="0" Margin="16,12,16,0">
+                            <Grid RowDefinitions="Auto,*">
+                                <!-- URL Bar + Request Editor -->
+                                <views:request_editor_view Grid.Row="0" 
+                                                           DataContext="{Binding RequestEditor}"/>
+                                
+                                <!-- Script Editor -->
+                                <Border Grid.Row="1" 
+                                        Margin="0,12,0,0"
+                                        Background="#09090B"
+                                        CornerRadius="8"
+                                        BorderBrush="#27272A"
+                                        BorderThickness="1"
+                                        MinHeight="150">
+                                    <views:script_editor_view DataContext="{Binding ScriptEditor}"/>
+                                </Border>
+                            </Grid>
+                        </Border>
+                        
+                        <!-- Horizontal Splitter -->
+                        <GridSplitter Grid.Row="1" 
+                                      Height="4"
+                                      HorizontalAlignment="Stretch"
+                                      ResizeDirection="Rows"
+                                      ResizeBehavior="PreviousAndNext"
+                                      Margin="16,8"/>
+                        
+                        <!-- Response Panel -->
+                        <Border Grid.Row="2" 
+                                Margin="16,0,16,12"
+                                Background="#09090B"
+                                CornerRadius="8"
+                                BorderBrush="#27272A"
+                                BorderThickness="1">
+                            <views:response_viewer_view DataContext="{Binding ResponseViewer}"/>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+            
+            <!-- Right Splitter -->
+            <GridSplitter Grid.Column="3" 
+                          Width="4"
+                          ResizeDirection="Columns"
+                          ResizeBehavior="PreviousAndNext"/>
+            
+            <!-- RIGHT PANEL - Test Results -->
+            <Border Grid.Column="4" 
+                    Background="#09090B"
+                    BorderBrush="#27272A"
+                    BorderThickness="1,0,0,0"
+                    Width="280"
+                    MinWidth="200"
+                    MaxWidth="400">
+                <views:test_results_view DataContext="{Binding TestResults}"/>
+            </Border>
+        </Grid>
         
-        <!-- Right Panel - Test Results -->
-        <Border Grid.Column="2" 
-                Background="#161B22"
-                BorderBrush="#21262D"
-                BorderThickness="1,0,0,0">
-            <views:test_results_view DataContext="{Binding TestResults}"/>
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- CONSOLE (Bottom Panel - Collapsible) -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <Border Grid.Row="2" 
+                Background="#09090B"
+                BorderBrush="#27272A"
+                BorderThickness="0,1,0,0"
+                IsVisible="{Binding IsConsoleVisible}"
+                Height="180">
+            <Grid RowDefinitions="Auto,*">
+                <!-- Console Header -->
+                <Border Grid.Row="0" 
+                        Background="#09090B"
+                        Padding="12,8">
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="▸" FontSize="12" Foreground="#A1A1AA"/>
+                            <TextBlock Text="Console" 
+                                       FontSize="12" 
+                                       FontWeight="SemiBold"
+                                       Foreground="#FAFAFA"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4">
+                            <Button Classes="sidebar-btn"
+                                    Command="{Binding ScriptEditor.ClearConsoleCommand}"
+                                    ToolTip.Tip="Clear Console">
+                                <TextBlock Text="🗑" FontSize="12"/>
+                            </Button>
+                            <Button Classes="sidebar-btn"
+                                    Command="{Binding ToggleConsoleCommand}"
+                                    ToolTip.Tip="Close Console">
+                                <TextBlock Text="▼" FontSize="10"/>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+                
+                <!-- Console Output -->
+                <ScrollViewer Grid.Row="1" 
+                              HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Auto"
+                              Padding="12,0">
+                    <TextBlock Text="{Binding ScriptEditor.ConsoleOutput}"
+                               FontFamily="Consolas, Courier New, monospace"
+                               FontSize="11"
+                               Foreground="#A1A1AA"
+                               TextWrapping="Wrap"/>
+                </ScrollViewer>
+            </Grid>
         </Border>
     </Grid>
 </Window>

@@ -1,0 +1,98 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:PostmanClone.App.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="500"
+        x:Class="PostmanClone.App.Views.code_generator_dialog"
+        x:DataType="vm:request_editor_view_model"
+        Title="Code Snippet"
+        Width="700" Height="500"
+        WindowStartupLocation="CenterOwner"
+        Background="#18181B"
+        CanResize="True">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <!-- Header -->
+        <Border Grid.Row="0" 
+                Background="#09090B"
+                Padding="20,16">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel>
+                    <TextBlock Text="&lt;/&gt; Code Snippet" 
+                               FontSize="18" 
+                               FontWeight="Bold"
+                               Foreground="#FAFAFA"/>
+                    <TextBlock Text="Copy generated code for your request"
+                               FontSize="12"
+                               Foreground="#71717A"
+                               Margin="0,4,0,0"/>
+                </StackPanel>
+                
+                <!-- Language Selector -->
+                <ComboBox Grid.Column="1"
+                          SelectedIndex="0"
+                          Background="#27272A"
+                          BorderBrush="#3F3F46"
+                          Foreground="#FAFAFA"
+                          MinWidth="150">
+                    <ComboBoxItem Content="cURL"/>
+                    <ComboBoxItem Content="JavaScript - Fetch"/>
+                    <ComboBoxItem Content="Python - Requests"/>
+                    <ComboBoxItem Content="C# - HttpClient"/>
+                    <ComboBoxItem Content="Node.js - Axios"/>
+                </ComboBox>
+            </Grid>
+        </Border>
+        
+        <!-- Code Preview -->
+        <Border Grid.Row="1" 
+                Margin="20"
+                Background="#09090B"
+                CornerRadius="8"
+                BorderBrush="#27272A"
+                BorderThickness="1">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollBarVisibility="Auto"
+                          Padding="16">
+                <TextBlock Text="{Binding GeneratedCurlCommand}"
+                           FontFamily="Consolas, Courier New, monospace"
+                           FontSize="12"
+                           Foreground="#22C55E"
+                           TextWrapping="Wrap"/>
+            </ScrollViewer>
+        </Border>
+        
+        <!-- Footer -->
+        <Border Grid.Row="2" 
+                Background="#09090B"
+                Padding="20,12"
+                BorderBrush="#27272A"
+                BorderThickness="0,1,0,0">
+            <Grid ColumnDefinitions="*,Auto,Auto">
+                <TextBlock x:Name="CopyFeedback"
+                           Text=""
+                           Foreground="#22C55E"
+                           VerticalAlignment="Center"
+                           FontSize="12"/>
+                
+                <Button Grid.Column="1"
+                        Content="Copy to Clipboard"
+                        Click="CopyButton_Click"
+                        Background="#F97316"
+                        Foreground="#FFFFFF"
+                        Padding="16,8"
+                        CornerRadius="6"
+                        Margin="0,0,12,0"/>
+                
+                <Button Grid.Column="2"
+                        Content="Close"
+                        Click="CloseButton_Click"
+                        Background="#27272A"
+                        Foreground="#FAFAFA"
+                        Padding="16,8"
+                        CornerRadius="6"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
