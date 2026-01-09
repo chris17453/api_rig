@@ -1,0 +1,133 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:PostmanClone.App.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="650" d:DesignHeight="600"
+        x:Class="PostmanClone.App.Views.registration_dialog"
+        x:DataType="vm:registration_view_model"
+        Title="Enrta App Registration"
+        Width="650"
+        Height="600"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        Background="#1E1E1E">
+
+    <Grid RowDefinitions="Auto,*,Auto" Margin="25">
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+            <StackPanel Orientation="Horizontal" Spacing="15" Margin="0,0,0,15">
+                <Border Background="#FF6C37" CornerRadius="10" Padding="10">
+                    <TextBlock Text="📝" FontSize="32"/>
+                </Border>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="Welcome to API Rig" 
+                               FontSize="24" 
+                               FontWeight="Bold"
+                               Foreground="#FFFFFF"/>
+                    <TextBlock Text="Optional Registration for Enrta"
+                               FontSize="14"
+                               Foreground="#888"/>
+                </StackPanel>
+            </StackPanel>
+
+            <Border Background="#2D2D2D" 
+                    CornerRadius="8" 
+                    Padding="15">
+                <TextBlock TextWrapping="Wrap" 
+                           FontSize="13"
+                           Foreground="#CCCCCC"
+                           LineHeight="20">
+                    Register your API Rig usage with Enrta to help us improve the application and stay updated with new features. All information is optional and will be stored locally. You can skip this step and use the application without registering.
+                </TextBlock>
+            </Border>
+        </StackPanel>
+
+        <!-- Form -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="20">
+                <!-- User Name -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Name (Optional)" 
+                               FontSize="13" 
+                               FontWeight="SemiBold"
+                               Foreground="#FFFFFF"/>
+                    <TextBox Text="{Binding UserName}"
+                             Watermark="Your name"
+                             Padding="10"
+                             Background="#2D2D2D"
+                             Foreground="#FFFFFF"
+                             BorderBrush="#404040"/>
+                </StackPanel>
+
+                <!-- Email -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Email (Optional)" 
+                               FontSize="13" 
+                               FontWeight="SemiBold"
+                               Foreground="#FFFFFF"/>
+                    <TextBox Text="{Binding UserEmail}"
+                             Watermark="your.email@example.com"
+                             Padding="10"
+                             Background="#2D2D2D"
+                             Foreground="#FFFFFF"
+                             BorderBrush="#404040"/>
+                </StackPanel>
+
+                <!-- Organization -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Organization (Optional)" 
+                               FontSize="13" 
+                               FontWeight="SemiBold"
+                               Foreground="#FFFFFF"/>
+                    <TextBox Text="{Binding Organization}"
+                             Watermark="Your company or organization"
+                             Padding="10"
+                             Background="#2D2D2D"
+                             Foreground="#FFFFFF"
+                             BorderBrush="#404040"/>
+                </StackPanel>
+
+                <!-- Opt-in Checkbox -->
+                <Border Background="#252526" 
+                        CornerRadius="8" 
+                        Padding="15">
+                    <CheckBox IsChecked="{Binding OptedIn}"
+                              Content="I agree to share usage data with Enrta to help improve API Rig"
+                              Foreground="#CCCCCC"/>
+                </Border>
+
+                <!-- Status Message -->
+                <Border Background="#2D2D2D" 
+                        CornerRadius="5" 
+                        Padding="10"
+                        IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                    <TextBlock Text="{Binding StatusMessage}" 
+                               FontSize="12"
+                               Foreground="#FF6C37"
+                               TextWrapping="Wrap"/>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Footer Buttons -->
+        <Grid Grid.Row="2" ColumnDefinitions="*,Auto,Auto" Margin="0,20,0,0">
+            <Button Grid.Column="1"
+                    Content="Skip"
+                    Click="SkipButton_Click"
+                    Padding="25,10"
+                    Margin="0,0,10,0"
+                    Background="#404040"
+                    Foreground="#FFFFFF"
+                    FontWeight="SemiBold"/>
+            <Button Grid.Column="2"
+                    Content="Register"
+                    Click="RegisterButton_Click"
+                    Padding="25,10"
+                    Background="#FF6C37"
+                    Foreground="#FFFFFF"
+                    FontWeight="SemiBold"
+                    IsEnabled="{Binding !IsSaving}"/>
+        </Grid>
+    </Grid>
+</Window>

@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +15,7 @@ using PostmanClone.Data.Stores;
 using PostmanClone.Http.Services;
 using PostmanClone.Scripting;
 using System;
+using System.Threading.Tasks;
 
 namespace PostmanClone.App;
 
@@ -42,9 +44,39 @@ public partial class App : Application
             {
                 DataContext = services.GetRequiredService<main_view_model>()
             };
+
+            // Check if user has registered and show registration dialog if not
+            desktop.MainWindow.Opened += async (s, e) => await check_and_show_registration_dialog_async(desktop.MainWindow);
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private async Task check_and_show_registration_dialog_async(Window main_window)
+    {
+        try
+        {
+            using var scope = services!.CreateScope();
+            var registration_store = scope.ServiceProvider.GetRequiredService<i_app_registration_store>();
+            
+            var is_registered = await registration_store.is_registered_async();
+            
+            if (!is_registered)
+            {
+                var registration_vm = scope.ServiceProvider.GetRequiredService<registration_view_model>();
+                var registration_dialog = new registration_dialog
+                {
+                    DataContext = registration_vm
+                };
+                
+                await registration_dialog.ShowDialog(main_window);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log error but don't prevent app from starting
+            System.Diagnostics.Debug.WriteLine($"Error checking registration: {ex.Message}");
+        }
     }
 
     private void configure_services(IServiceCollection services)
@@ -65,6 +97,7 @@ public partial class App : Application
         services.AddScoped<i_environment_store, environment_store>();
         services.AddScoped<i_history_repository, history_repository>();
         services.AddScoped<i_collection_repository, collection_repository>();
+        services.AddScoped<i_app_registration_store, app_registration_store>();
 
         // ViewModels
         services.AddTransient<main_view_model>();
@@ -74,5 +107,6 @@ public partial class App : Application
         services.AddTransient<environment_selector_view_model>();
         services.AddTransient<script_editor_view_model>();
         services.AddTransient<test_results_view_model>();
+        services.AddTransient<registration_view_model>();
     }
 }

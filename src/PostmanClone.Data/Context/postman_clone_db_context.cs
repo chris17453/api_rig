@@ -15,6 +15,7 @@ public class postman_clone_db_context : DbContext
     public DbSet<collection_item_entity> collection_items => Set<collection_item_entity>();
     public DbSet<environment_entity> environments => Set<environment_entity>();
     public DbSet<environment_variable_entity> environment_variables => Set<environment_variable_entity>();
+    public DbSet<app_registration_entity> app_registrations => Set<app_registration_entity>();
 
     protected override void OnModelCreating(ModelBuilder model_builder)
     {
@@ -25,6 +26,7 @@ public class postman_clone_db_context : DbContext
         configure_collection_item(model_builder);
         configure_environment(model_builder);
         configure_environment_variable(model_builder);
+        configure_app_registration(model_builder);
     }
 
     private static void configure_history_entry(ModelBuilder model_builder)
@@ -229,6 +231,30 @@ public class postman_clone_db_context : DbContext
 
             entity.HasIndex(e => new { e.environment_id, e.key })
                 .IsUnique();
+        });
+    }
+
+    private static void configure_app_registration(ModelBuilder model_builder)
+    {
+        model_builder.Entity<app_registration_entity>(entity =>
+        {
+            entity.ToTable("app_registrations");
+            entity.HasKey(e => e.id);
+
+            entity.Property(e => e.id)
+                .HasMaxLength(50);
+
+            entity.Property(e => e.user_email)
+                .HasMaxLength(500);
+
+            entity.Property(e => e.user_name)
+                .HasMaxLength(200);
+
+            entity.Property(e => e.organization)
+                .HasMaxLength(500);
+
+            entity.Property(e => e.registered_at)
+                .IsRequired();
         });
     }
 }
