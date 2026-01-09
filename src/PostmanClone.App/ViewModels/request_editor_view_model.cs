@@ -562,7 +562,7 @@ public partial class request_editor_view_model : ObservableObject, IDisposable
 
             var enabledParams = QueryParams
                 .Where(p => p.IsEnabled && !string.IsNullOrWhiteSpace(p.Key))
-                .Select(p => $"{WebUtility.UrlEncode(p.Key)}={(p.Value is { Length: > 0 } ? WebUtility.UrlEncode(p.Value) : string.Empty)}")
+                .Select(p => $"{WebUtility.UrlEncode(p.Key)}={WebUtility.UrlEncode(p.Value ?? string.Empty)}")
                 .ToList();
 
             var newUrl = enabledParams.Count > 0
