@@ -11,6 +11,7 @@ public partial class sidebar_view_model : ObservableObject
 {
     private readonly i_collection_repository _collection_repository;
     private readonly i_history_repository _history_repository;
+    private List<history_item_view_model> _allHistory = new();
 
     [ObservableProperty]
     private ObservableCollection<collection_tree_item_view_model> _collections = new();
@@ -26,6 +27,49 @@ public partial class sidebar_view_model : ObservableObject
 
     [ObservableProperty]
     private bool _isLoading;
+
+    [ObservableProperty]
+    private string _historySearchText = string.Empty;
+
+    [ObservableProperty]
+    private http_method? _historyMethodFilter;
+
+    public IReadOnlyList<http_method?> available_method_filters { get; } = 
+        new http_method?[] { null }.Concat(Enum.GetValues<http_method>().Cast<http_method?>()).ToList();
+
+    partial void OnHistorySearchTextChanged(string value) => ApplyHistoryFilter();
+    partial void OnHistoryMethodFilterChanged(http_method? value) => ApplyHistoryFilter();
+
+    private void ApplyHistoryFilter()
+    {
+        var filtered = _allHistory.AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(HistorySearchText))
+        {
+            var search = HistorySearchText.ToLowerInvariant();
+            filtered = filtered.Where(h => 
+                (h.RequestName?.ToLowerInvariant().Contains(search) ?? false) ||
+                (h.Url?.ToLowerInvariant().Contains(search) ?? false));
+        }
+
+        if (HistoryMethodFilter.HasValue)
+        {
+            filtered = filtered.Where(h => h.Method == HistoryMethodFilter.Value);
+        }
+
+        History.Clear();
+        foreach (var item in filtered)
+        {
+            History.Add(item);
+        }
+    }
+
+    [RelayCommand]
+    private void ClearHistoryFilter()
+    {
+        HistorySearchText = string.Empty;
+        HistoryMethodFilter = null;
+    }
 
     /// <summary>
     /// Gets the currently selected collection model for export.
@@ -113,10 +157,11 @@ public partial class sidebar_view_model : ObservableObject
 
             // Load history
             var history_entries = await _history_repository.get_recent_async(50, cancellation_token);
+            _allHistory.Clear();
             History.Clear();
             foreach (var entry in history_entries)
             {
-                History.Add(new history_item_view_model
+                var item = new history_item_view_model
                 {
                     Id = entry.id,
                     RequestName = entry.request_name,
@@ -125,7 +170,15 @@ public partial class sidebar_view_model : ObservableObject
                     StatusCode = entry.status_code,
                     ExecutedAt = entry.executed_at,
                     request_snapshot = entry.request_snapshot
-                });
+                };
+                _allHistory.Add(item);
+                History.Add(item);
+            }
+            
+            // Apply any existing filter
+            if (!string.IsNullOrWhiteSpace(HistorySearchText) || HistoryMethodFilter.HasValue)
+            {
+                ApplyHistoryFilter();
             }
         }
         finally

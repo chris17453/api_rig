@@ -13,6 +13,14 @@
         Background="#0D1117"
         Icon="avares://PostmanClone.App/Assets/logo.webp">
 
+    <!-- Keyboard Shortcuts -->
+    <Window.KeyBindings>
+        <KeyBinding Gesture="Ctrl+Return" Command="{Binding RequestEditor.SendRequestCommand}"/>
+        <KeyBinding Gesture="Ctrl+S" Command="{Binding SaveCurrentRequestCommand}"/>
+        <KeyBinding Gesture="Ctrl+N" Command="{Binding NewRequestCommand}"/>
+        <KeyBinding Gesture="Ctrl+Shift+N" Command="{Binding NewCollectionCommand}"/>
+    </Window.KeyBindings>
+
     <Window.Styles>
         <!-- Modern Button Style -->
         <Style Selector="Button.modern">
@@ -81,27 +89,38 @@
                     </StackPanel>
                 </Border>
                 
-                <!-- Import/Export Buttons -->
+                <!-- Import/Export/Runner Buttons -->
                 <StackPanel Grid.Row="1" 
                             Orientation="Horizontal" 
                             Margin="16,0,16,16"
                             Spacing="8">
                     <Button Classes="modern"
-                            Click="ImportButton_Click">
+                            Click="ImportButton_Click"
+                            ToolTip.Tip="Import Postman collection">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <TextBlock Text="↓" FontSize="12"/>
                             <TextBlock Text="Import"/>
                         </StackPanel>
                     </Button>
                     <Button Classes="modern"
-                            Click="ExportButton_Click">
+                            Click="ExportButton_Click"
+                            ToolTip.Tip="Export collection">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <TextBlock Text="↑" FontSize="12"/>
                             <TextBlock Text="Export"/>
                         </StackPanel>
                     </Button>
                     <Button Classes="modern"
-                            Click="AboutButton_Click">
+                            Click="RunnerButton_Click"
+                            ToolTip.Tip="Run entire collection">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="🏃" FontSize="12"/>
+                            <TextBlock Text="Runner"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="modern"
+                            Click="AboutButton_Click"
+                            ToolTip.Tip="About API Rig">
                         <TextBlock Text="About"/>
                     </Button>
                 </StackPanel>

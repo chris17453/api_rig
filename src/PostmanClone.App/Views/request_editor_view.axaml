@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:PostmanClone.App.ViewModels"
+             xmlns:models="using:PostmanClone.Core.Models"
              xmlns:AvaloniaEdit="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
              xmlns:converters="using:PostmanClone.App.Converters"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="200"
@@ -156,7 +157,7 @@
             </Grid>
         </Border>
 
-        <!-- Tabs for Headers/Body -->
+        <!-- Tabs for Headers/Query Params/Body/Auth -->
         <TabControl Grid.Row="3" Grid.RowSpan="2" MinHeight="150">
             <!-- Headers Tab -->
             <TabItem Header="Headers">
@@ -190,21 +191,119 @@
                     </ScrollViewer>
                 </Grid>
             </TabItem>
+
+            <!-- Query Params Tab -->
+            <TabItem Header="Params">
+                <Grid RowDefinitions="Auto,*">
+                    <Button Grid.Row="0" 
+                            Command="{Binding AddQueryParamCommand}"
+                            Content="+ Add Parameter"
+                            HorizontalAlignment="Left"
+                            Margin="0,5"/>
+                    
+                    <ScrollViewer Grid.Row="1" Margin="0,5">
+                        <ItemsControl ItemsSource="{Binding QueryParams}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:key_value_pair_view_model">
+                                    <Grid ColumnDefinitions="Auto,*,*,Auto" Margin="0,2">
+                                        <CheckBox Grid.Column="0" 
+                                                  IsChecked="{Binding IsEnabled}"
+                                                  Margin="0,0,10,0"/>
+                                        <TextBox Grid.Column="1" 
+                                                 Text="{Binding Key, Mode=TwoWay}"
+                                                 Watermark="Key"
+                                                 Margin="0,0,5,0"/>
+                                        <TextBox Grid.Column="2" 
+                                                 Text="{Binding Value, Mode=TwoWay}"
+                                                 Watermark="Value"
+                                                 Margin="5,0,0,0"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+
+            <!-- Auth Tab -->
+            <TabItem Header="Auth">
+                <ScrollViewer Margin="10">
+                    <StackPanel Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="Type:" VerticalAlignment="Center" Foreground="#8B949E"/>
+                            <ComboBox ItemsSource="{Binding available_auth_types}"
+                                      SelectedItem="{Binding SelectedAuthType}"
+                                      MinWidth="200"/>
+                        </StackPanel>
+
+                        <!-- Basic Auth -->
+                        <StackPanel IsVisible="{Binding SelectedAuthType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:auth_type.basic}}" Spacing="8">
+                            <TextBlock Text="Basic Authentication" FontWeight="SemiBold" Foreground="#C9D1D9"/>
+                            <Grid ColumnDefinitions="100,*" RowDefinitions="Auto,Auto" Margin="0,5,0,0">
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Username:" VerticalAlignment="Center" Foreground="#8B949E"/>
+                                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding AuthUsername}" Watermark="Enter username" Margin="0,0,0,8"/>
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Password:" VerticalAlignment="Center" Foreground="#8B949E"/>
+                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding AuthPassword}" Watermark="Enter password" PasswordChar="●"/>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Bearer Auth -->
+                        <StackPanel IsVisible="{Binding SelectedAuthType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:auth_type.bearer}}" Spacing="8">
+                            <TextBlock Text="Bearer Token" FontWeight="SemiBold" Foreground="#C9D1D9"/>
+                            <Grid ColumnDefinitions="100,*" Margin="0,5,0,0">
+                                <TextBlock Grid.Column="0" Text="Token:" VerticalAlignment="Center" Foreground="#8B949E"/>
+                                <TextBox Grid.Column="1" Text="{Binding AuthToken}" Watermark="Enter bearer token"/>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- API Key Auth -->
+                        <StackPanel IsVisible="{Binding SelectedAuthType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:auth_type.api_key}}" Spacing="8">
+                            <TextBlock Text="API Key" FontWeight="SemiBold" Foreground="#C9D1D9"/>
+                            <Grid ColumnDefinitions="100,*" RowDefinitions="Auto,Auto,Auto" Margin="0,5,0,0">
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Key:" VerticalAlignment="Center" Foreground="#8B949E"/>
+                                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding AuthApiKeyName}" Watermark="Header name (e.g., X-API-Key)" Margin="0,0,0,8"/>
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Value:" VerticalAlignment="Center" Foreground="#8B949E"/>
+                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding AuthApiKey}" Watermark="API key value" Margin="0,0,0,8"/>
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Add to:" VerticalAlignment="Center" Foreground="#8B949E"/>
+                                <ComboBox Grid.Row="2" Grid.Column="1" ItemsSource="{Binding available_api_key_locations}" SelectedItem="{Binding AuthApiKeyLocation}"/>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- OAuth2 Client Credentials -->
+                        <StackPanel IsVisible="{Binding SelectedAuthType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:auth_type.oauth2_client_credentials}}" Spacing="8">
+                            <TextBlock Text="OAuth 2.0 Client Credentials" FontWeight="SemiBold" Foreground="#C9D1D9"/>
+                            <Grid ColumnDefinitions="120,*" RowDefinitions="Auto,Auto,Auto,Auto" Margin="0,5,0,0">
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Token URL:" VerticalAlignment="Center" Foreground="#8B949E"/>
+                                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding AuthOAuth2TokenUrl}" Watermark="https://auth.example.com/oauth/token" Margin="0,0,0,8"/>
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Client ID:" VerticalAlignment="Center" Foreground="#8B949E"/>
+                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding AuthOAuth2ClientId}" Watermark="Your client ID" Margin="0,0,0,8"/>
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Client Secret:" VerticalAlignment="Center" Foreground="#8B949E"/>
+                                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding AuthOAuth2ClientSecret}" Watermark="Your client secret" PasswordChar="●" Margin="0,0,0,8"/>
+                                <TextBlock Grid.Row="3" Grid.Column="0" Text="Scope:" VerticalAlignment="Center" Foreground="#8B949E"/>
+                                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding AuthOAuth2Scope}" Watermark="Optional scope"/>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- No Auth Message -->
+                        <TextBlock IsVisible="{Binding SelectedAuthType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:auth_type.none}}"
+                                   Text="This request does not use any authentication."
+                                   Foreground="#8B949E"
+                                   FontStyle="Italic"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
             
             <!-- Body Tab -->
             <TabItem Header="Body">
                 <Grid RowDefinitions="Auto,*,Auto" Margin="12">
-                    <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,12">
-                        <Border Grid.Column="0" 
-                                Background="#21262D" 
-                                CornerRadius="6" 
-                                Padding="10,6"
-                                HorizontalAlignment="Left">
-                            <TextBlock Text="application/json" 
-                                       FontSize="11" 
-                                       Foreground="#8B949E"
-                                       FontFamily="JetBrains Mono, Consolas, monospace"/>
-                        </Border>
+                    <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto,Auto" Margin="0,0,0,12">
+                        <!-- Body Type Selector -->
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="Type:" VerticalAlignment="Center" Foreground="#8B949E"/>
+                            <ComboBox ItemsSource="{Binding available_body_types}"
+                                      SelectedItem="{Binding SelectedBodyType}"
+                                      MinWidth="150"/>
+                        </StackPanel>
 
                         <Button Grid.Column="2"
                                 Command="{Binding FormatJsonCommand}"
@@ -214,7 +313,25 @@
                                 Background="#21262D"
                                 Foreground="#C9D1D9"
                                 BorderBrush="#30363D"
-                                BorderThickness="1">
+                                BorderThickness="1"
+                                IsVisible="{Binding SelectedBodyType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:request_body_type.json}}">
+                            <Button.Styles>
+                                <Style Selector="Button:pointerover /template/ ContentPresenter">
+                                    <Setter Property="Background" Value="#30363D"/>
+                                </Style>
+                            </Button.Styles>
+                        </Button>
+
+                        <Button Grid.Column="3"
+                                Command="{Binding CopyCurlToClipboardCommand}"
+                                Content="📋 Copy as cURL"
+                                FontSize="11"
+                                Padding="8,4"
+                                Background="#21262D"
+                                Foreground="#C9D1D9"
+                                BorderBrush="#30363D"
+                                BorderThickness="1"
+                                Margin="8,0,0,0">
                             <Button.Styles>
                                 <Style Selector="Button:pointerover /template/ ContentPresenter">
                                     <Setter Property="Background" Value="#30363D"/>
@@ -222,22 +339,99 @@
                             </Button.Styles>
                         </Button>
                     </Grid>
-                    
+
+                    <!-- Raw/JSON Body Editor -->
                     <Border Grid.Row="1" 
                             Background="#0D1117"
                             BorderBrush="{Binding IsJsonValid, Converter={StaticResource JsonValidityToBrushConverter}}"
                             BorderThickness="1"
                             CornerRadius="8"
-                            Padding="1">
-                        <AvaloniaEdit:TextEditor Name="BodyEditor"
-                                                 FontFamily="JetBrains Mono, Consolas, monospace"
-                                                 FontSize="13"
-                                                 Background="Transparent"
-                                                 Foreground="#C9D1D9"
-                                                 ShowLineNumbers="True"
-                                                 HorizontalScrollBarVisibility="Auto"
-                                                 VerticalScrollBarVisibility="Visible"/>
+                            Padding="1"
+                            IsVisible="{Binding SelectedBodyType, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={x:Static models:request_body_type.form_data}}">
+                        <Grid>
+                            <AvaloniaEdit:TextEditor Name="BodyEditor"
+                                                     FontFamily="JetBrains Mono, Consolas, monospace"
+                                                     FontSize="13"
+                                                     Background="Transparent"
+                                                     Foreground="#C9D1D9"
+                                                     ShowLineNumbers="True"
+                                                     HorizontalScrollBarVisibility="Auto"
+                                                     VerticalScrollBarVisibility="Visible"
+                                                     IsVisible="{Binding SelectedBodyType, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={x:Static models:request_body_type.none}}"/>
+                            <TextBlock Text="Select a body type to add content"
+                                       IsVisible="{Binding SelectedBodyType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:request_body_type.none}}"
+                                       Foreground="#8B949E"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Center"
+                                       FontStyle="Italic"/>
+                        </Grid>
                     </Border>
+
+                    <!-- Form Data Editor -->
+                    <Grid Grid.Row="1" 
+                          RowDefinitions="Auto,*"
+                          IsVisible="{Binding SelectedBodyType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:request_body_type.form_data}}">
+                        <Button Grid.Row="0" 
+                                Command="{Binding AddFormDataParamCommand}"
+                                Content="+ Add Field"
+                                HorizontalAlignment="Left"
+                                Margin="0,5"/>
+                        
+                        <ScrollViewer Grid.Row="1" Margin="0,5">
+                            <ItemsControl ItemsSource="{Binding FormDataParams}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:key_value_pair_view_model">
+                                        <Grid ColumnDefinitions="Auto,*,*,Auto" Margin="0,2">
+                                            <CheckBox Grid.Column="0" 
+                                                      IsChecked="{Binding IsEnabled}"
+                                                      Margin="0,0,10,0"/>
+                                            <TextBox Grid.Column="1" 
+                                                     Text="{Binding Key, Mode=TwoWay}"
+                                                     Watermark="Key"
+                                                     Margin="0,0,5,0"/>
+                                            <TextBox Grid.Column="2" 
+                                                     Text="{Binding Value, Mode=TwoWay}"
+                                                     Watermark="Value"
+                                                     Margin="5,0,0,0"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+
+                    <!-- URL Encoded Form Data Editor -->
+                    <Grid Grid.Row="1" 
+                          RowDefinitions="Auto,*"
+                          IsVisible="{Binding SelectedBodyType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:request_body_type.x_www_form_urlencoded}}">
+                        <Button Grid.Row="0" 
+                                Command="{Binding AddFormDataParamCommand}"
+                                Content="+ Add Field"
+                                HorizontalAlignment="Left"
+                                Margin="0,5"/>
+                        
+                        <ScrollViewer Grid.Row="1" Margin="0,5">
+                            <ItemsControl ItemsSource="{Binding FormDataParams}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:key_value_pair_view_model">
+                                        <Grid ColumnDefinitions="Auto,*,*,Auto" Margin="0,2">
+                                            <CheckBox Grid.Column="0" 
+                                                      IsChecked="{Binding IsEnabled}"
+                                                      Margin="0,0,10,0"/>
+                                            <TextBox Grid.Column="1" 
+                                                     Text="{Binding Key, Mode=TwoWay}"
+                                                     Watermark="Key"
+                                                     Margin="0,0,5,0"/>
+                                            <TextBox Grid.Column="2" 
+                                                     Text="{Binding Value, Mode=TwoWay}"
+                                                     Watermark="Value"
+                                                     Margin="5,0,0,0"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
 
                     <TextBlock Grid.Row="2"
                                Text="{Binding JsonValidationError}"

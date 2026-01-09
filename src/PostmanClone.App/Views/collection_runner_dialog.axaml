@@ -1,0 +1,206 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:PostmanClone.App.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+        x:Class="PostmanClone.App.Views.collection_runner_dialog"
+        x:DataType="vm:collection_runner_view_model"
+        Title="Collection Runner"
+        Width="900"
+        Height="700"
+        MinWidth="600"
+        MinHeight="500"
+        WindowStartupLocation="CenterOwner"
+        Background="#0D1117">
+
+    <Window.Styles>
+        <Style Selector="Button.primary">
+            <Setter Property="Background" Value="#238636"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#2EA043"/>
+        </Style>
+        <Style Selector="Button.danger">
+            <Setter Property="Background" Value="#DA3633"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style Selector="Button.danger:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#F85149"/>
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" Margin="20">
+        <!-- Title -->
+        <TextBlock Grid.Row="0" 
+                   Text="🏃 Collection Runner" 
+                   FontSize="24" 
+                   FontWeight="Bold"
+                   Foreground="#F0F6FC"
+                   Margin="0,0,0,20"/>
+
+        <!-- Configuration -->
+        <Border Grid.Row="1" 
+                Background="#161B22" 
+                CornerRadius="12" 
+                Padding="20"
+                Margin="0,0,0,16">
+            <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="150,*,100,100">
+                <!-- Collection Selector -->
+                <TextBlock Grid.Row="0" Grid.Column="0" 
+                           Text="Collection:" 
+                           VerticalAlignment="Center"
+                           Margin="0,0,0,12"
+                           Foreground="#8B949E"/>
+                <ComboBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3"
+                          ItemsSource="{Binding Collections}"
+                          SelectedItem="{Binding SelectedCollection}"
+                          IsEnabled="{Binding !IsRunning}"
+                          Margin="0,0,0,12"
+                          Background="#0D1117"
+                          BorderBrush="#30363D">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding name}" Foreground="#C9D1D9"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
+                <!-- Iterations -->
+                <TextBlock Grid.Row="1" Grid.Column="0" 
+                           Text="Iterations:" 
+                           VerticalAlignment="Center"
+                           Foreground="#8B949E"/>
+                <NumericUpDown Grid.Row="1" Grid.Column="1"
+                               Value="{Binding Iterations}"
+                               Minimum="1"
+                               Maximum="100"
+                               IsEnabled="{Binding !IsRunning}"
+                               Background="#0D1117"
+                               BorderBrush="#30363D"
+                               Foreground="#C9D1D9"/>
+                
+                <!-- Delay -->
+                <TextBlock Grid.Row="1" Grid.Column="2" 
+                           Text="Delay (ms):" 
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Right"
+                           Margin="10,0"
+                           Foreground="#8B949E"/>
+                <NumericUpDown Grid.Row="1" Grid.Column="3"
+                               Value="{Binding DelayBetweenRequests}"
+                               Minimum="0"
+                               Maximum="10000"
+                               Increment="100"
+                               IsEnabled="{Binding !IsRunning}"
+                               Background="#0D1117"
+                               BorderBrush="#30363D"
+                               Foreground="#C9D1D9"/>
+
+                <!-- Action Buttons -->
+                <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" 
+                            Orientation="Horizontal" 
+                            Spacing="12"
+                            HorizontalAlignment="Right">
+                    <Button Classes="primary"
+                            Command="{Binding StartRunCommand}"
+                            IsVisible="{Binding !IsRunning}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="▶"/>
+                            <TextBlock Text="Run Collection"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="danger"
+                            Command="{Binding StopRunCommand}"
+                            IsVisible="{Binding IsRunning}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="■"/>
+                            <TextBlock Text="Stop"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Progress -->
+        <Border Grid.Row="2" 
+                Background="#161B22" 
+                CornerRadius="12" 
+                Padding="20"
+                Margin="0,0,0,16">
+            <StackPanel Spacing="12">
+                <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto">
+                    <TextBlock Grid.Column="0" 
+                               Text="{Binding StatusMessage}" 
+                               Foreground="#8B949E"/>
+                    <TextBlock Grid.Column="1" 
+                               Text="{Binding CompletedRequests, StringFormat='Completed: {0}'}" 
+                               Foreground="#8B949E"
+                               Margin="20,0"/>
+                    <TextBlock Grid.Column="2" 
+                               Text="{Binding PassedRequests, StringFormat='✓ {0}'}" 
+                               Foreground="#7EE787"
+                               Margin="10,0"/>
+                    <TextBlock Grid.Column="3" 
+                               Text="{Binding FailedRequests, StringFormat='✗ {0}'}" 
+                               Foreground="#FF7B72"
+                               Margin="10,0"/>
+                    <TextBlock Grid.Column="4" 
+                               Text="{Binding TotalRequests, StringFormat='/ {0}'}" 
+                               Foreground="#8B949E"/>
+                </Grid>
+                <ProgressBar Value="{Binding Progress}" 
+                             Maximum="100"
+                             Height="8"
+                             Background="#21262D"
+                             Foreground="#238636"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Results -->
+        <Border Grid.Row="3" 
+                Background="#161B22" 
+                CornerRadius="12"
+                Padding="4">
+            <DataGrid ItemsSource="{Binding RunResults}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      Background="Transparent"
+                      GridLinesVisibility="Horizontal"
+                      BorderThickness="0"
+                      HeadersVisibility="Column">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="80"/>
+                    <DataGridTextColumn Header="Method" Binding="{Binding Method}" Width="70"/>
+                    <DataGridTextColumn Header="Name" Binding="{Binding RequestName}" Width="150"/>
+                    <DataGridTextColumn Header="URL" Binding="{Binding Url}" Width="*"/>
+                    <DataGridTextColumn Header="Code" Binding="{Binding StatusCode}" Width="60"/>
+                    <DataGridTextColumn Header="Time" Binding="{Binding ElapsedMs, StringFormat='{}{0}ms'}" Width="80"/>
+                    <DataGridTextColumn Header="Tests" Binding="{Binding TestsPassed, StringFormat='✓{0}'}" Width="50"/>
+                    <DataGridTextColumn Header="Fails" Binding="{Binding TestsFailed, StringFormat='✗{0}'}" Width="50"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <!-- Close Button -->
+        <Button Grid.Row="4" 
+                Content="Close"
+                HorizontalAlignment="Right"
+                Margin="0,16,0,0"
+                Padding="20,10"
+                Background="#21262D"
+                Foreground="#C9D1D9"
+                BorderBrush="#30363D"
+                CornerRadius="6"
+                Click="CloseButton_Click"/>
+    </Grid>
+</Window>

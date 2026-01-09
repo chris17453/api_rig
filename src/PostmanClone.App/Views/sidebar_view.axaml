@@ -166,17 +166,59 @@
             </TreeView.ItemTemplate>
         </TreeView>
 
-        <!-- History Header -->
+        <!-- History Header with Search -->
         <Border Grid.Row="2" 
-                Padding="16,12"
+                Padding="16,12,16,8"
                 BorderBrush="#21262D"
                 BorderThickness="0,1,0,0">
-            <StackPanel Orientation="Horizontal" Spacing="8">
-                <TextBlock Text="🕐" FontSize="14"/>
-                <TextBlock Text="History" 
-                           FontWeight="SemiBold" 
-                           FontSize="13"
-                           Foreground="#F0F6FC"/>
+            <StackPanel Spacing="8">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="🕐" FontSize="14"/>
+                    <TextBlock Text="History" 
+                               FontWeight="SemiBold" 
+                               FontSize="13"
+                               Foreground="#F0F6FC"/>
+                </StackPanel>
+                <!-- Search Box -->
+                <TextBox Text="{Binding HistorySearchText}"
+                         Watermark="🔍 Search history..."
+                         FontSize="11"
+                         Background="#0D1117"
+                         BorderBrush="#30363D"
+                         Foreground="#C9D1D9"
+                         Padding="8,6"/>
+                <!-- Method Filter -->
+                <Grid ColumnDefinitions="*,Auto">
+                    <ComboBox Grid.Column="0"
+                              ItemsSource="{Binding available_method_filters}"
+                              SelectedItem="{Binding HistoryMethodFilter}"
+                              FontSize="11"
+                              Background="#0D1117"
+                              BorderBrush="#30363D"
+                              Foreground="#C9D1D9"
+                              HorizontalAlignment="Stretch">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding, TargetNullValue='All Methods'}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <Button Grid.Column="1"
+                            Command="{Binding ClearHistoryFilterCommand}"
+                            Content="Clear"
+                            FontSize="10"
+                            Padding="8,4"
+                            Margin="4,0,0,0"
+                            Background="#21262D"
+                            Foreground="#C9D1D9"
+                            BorderBrush="#30363D">
+                        <Button.Styles>
+                            <Style Selector="Button:pointerover /template/ ContentPresenter">
+                                <Setter Property="Background" Value="#30363D"/>
+                            </Style>
+                        </Button.Styles>
+                    </Button>
+                </Grid>
             </StackPanel>
         </Border>
         

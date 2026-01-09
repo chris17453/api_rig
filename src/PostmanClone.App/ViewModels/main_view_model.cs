@@ -53,9 +53,12 @@ public partial class main_view_model : ObservableObject
     [ObservableProperty]
     private bool _isSidebarVisible = true;
 
+    private readonly request_orchestrator _requestOrchestrator;
+
     public main_view_model(
         MainViewDependencies dependencies,
-        i_collection_repository collection_repository)
+        i_collection_repository collection_repository,
+        request_orchestrator requestOrchestrator)
     {
         _requestEditor = dependencies.request_editor;
         _responseViewer = dependencies.response_viewer;
@@ -65,6 +68,7 @@ public partial class main_view_model : ObservableObject
         _testResults = dependencies.test_results;
         _tabs = dependencies.tabs;
         _collection_repository = collection_repository;
+        _requestOrchestrator = requestOrchestrator;
 
         // Wire up events
         _requestEditor.execution_started += (_, _) => on_execution_started();
@@ -119,6 +123,27 @@ public partial class main_view_model : ObservableObject
     private async Task OpenExportDialog()
     {
         // Dialog will be shown from the view
+    }
+
+    [RelayCommand]
+    private async Task SaveCurrentRequest()
+    {
+        // Trigger save on the request editor
+        await RequestEditor.SaveRequestCommand.ExecuteAsync(null);
+    }
+
+    [RelayCommand]
+    private async Task NewRequest()
+    {
+        // Create a new unsaved request tab
+        Tabs.CreateNewTab();
+    }
+
+    [RelayCommand]
+    private async Task NewCollection()
+    {
+        // Trigger creating a new collection via sidebar
+        await Sidebar.CreateCollectionCommand.ExecuteAsync(null);
     }
 
     private void on_execution_started()
@@ -336,5 +361,10 @@ public partial class main_view_model : ObservableObject
     public import_export_view_model CreateImportExportViewModel()
     {
         return new import_export_view_model(_collection_repository);
+    }
+
+    public collection_runner_view_model CreateCollectionRunnerViewModel()
+    {
+        return new collection_runner_view_model(_requestOrchestrator, _collection_repository);
     }
 }

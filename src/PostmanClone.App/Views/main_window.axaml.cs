@@ -67,4 +67,14 @@ public partial class main_window : Window
         var dialog = new about_dialog { DataContext = aboutVm };
         await dialog.ShowDialog(this);
     }
+
+    private async void RunnerButton_Click(object? sender, RoutedEventArgs e)
+    {
+        var mainVm = DataContext as main_view_model;
+        if (mainVm == null) return;
+
+        var runnerVm = mainVm.CreateCollectionRunnerViewModel();
+        var dialog = new collection_runner_dialog { DataContext = runnerVm };
+        await dialog.ShowDialog(this);
+    }
 }
