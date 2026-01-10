@@ -30,9 +30,32 @@ public partial class vault_panel_view_model : ObservableObject
     public event EventHandler? unlock_vault_requested;
     public event EventHandler? lock_vault_requested;
 
+    /// <summary>
+    /// Raised when vault setup is needed (first time use). Handler should show setup dialog.
+    /// </summary>
+    public event EventHandler<TaskCompletionSource<string?>>? vault_setup_requested;
+
+    /// <summary>
+    /// Raised when vault unlock is needed. Handler should show unlock dialog.
+    /// </summary>
+    public event EventHandler<TaskCompletionSource<string?>>? vault_unlock_requested;
+
     public vault_panel_view_model(i_vault_store vaultStore)
     {
         _vaultStore = vaultStore;
+    }
+
+    /// <summary>
+    /// Gets the vault store for dialog operations.
+    /// </summary>
+    public i_vault_store VaultStore => _vaultStore;
+
+    /// <summary>
+    /// Checks if the vault is initialized (has been set up with a key).
+    /// </summary>
+    public async Task<bool> CheckVaultInitializedAsync()
+    {
+        return await _vaultStore.is_vault_initialized_async();
     }
 
     private bool _suppressSelectionEvent;
@@ -132,16 +155,71 @@ public partial class vault_panel_view_model : ObservableObject
     [RelayCommand]
     private async Task UnlockVaultAsync()
     {
-        // For now, just unlock without password. In a real implementation,
-        // you would prompt for a master password and decrypt the vault.
-        IsUnlocked = true;
-        await LoadSecretsAsync();
-        unlock_vault_requested?.Invoke(this, EventArgs.Empty);
+        try
+        {
+            IsLoading = true;
+
+            // Check if vault needs initialization (first time setup)
+            var isInitialized = await _vaultStore.is_vault_initialized_async();
+
+            if (!isInitialized)
+            {
+                // First time - need to set up vault
+                var setupTcs = new TaskCompletionSource<string?>();
+                vault_setup_requested?.Invoke(this, setupTcs);
+
+                var vaultKey = await setupTcs.Task;
+                if (string.IsNullOrEmpty(vaultKey))
+                {
+                    // User cancelled setup
+                    return;
+                }
+
+                // Save the verification token for this key
+                await _vaultStore.initialize_vault_async(vaultKey);
+
+                // Unlock with the key
+                var setupSuccess = await _vaultStore.try_unlock_async(vaultKey);
+                if (!setupSuccess)
+                {
+                    return;
+                }
+            }
+            else
+            {
+                // Vault exists - prompt for key
+                var unlockTcs = new TaskCompletionSource<string?>();
+                vault_unlock_requested?.Invoke(this, unlockTcs);
+
+                var vaultKey = await unlockTcs.Task;
+                if (string.IsNullOrEmpty(vaultKey))
+                {
+                    // User cancelled
+                    return;
+                }
+
+                var unlockSuccess = await _vaultStore.try_unlock_async(vaultKey);
+                if (!unlockSuccess)
+                {
+                    // Key verification failed - dialog should have shown error
+                    return;
+                }
+            }
+
+            IsUnlocked = true;
+            await LoadSecretsAsync();
+            unlock_vault_requested?.Invoke(this, EventArgs.Empty);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
     }
 
     [RelayCommand]
     private void LockVault()
     {
+        _vaultStore.lock_vault();
         IsUnlocked = false;
         Secrets.Clear();
         SelectedSecret = null;

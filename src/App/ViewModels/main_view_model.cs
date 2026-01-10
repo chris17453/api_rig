@@ -38,6 +38,7 @@ public partial class main_view_model : ObservableObject
 
     private readonly i_collection_repository _collection_repository;
     private readonly i_environment_store _environment_store;
+    private readonly i_workspace_store _workspace_store;
 
     [ObservableProperty]
     private request_editor_view_model _requestEditor;
@@ -101,7 +102,8 @@ public partial class main_view_model : ObservableObject
     public main_view_model(
         MainViewDependencies dependencies,
         i_collection_repository collection_repository,
-        i_environment_store environment_store)
+        i_environment_store environment_store,
+        i_workspace_store workspace_store)
     {
         _requestEditor = dependencies.request_editor;
         _responseViewer = dependencies.response_viewer;
@@ -121,6 +123,10 @@ public partial class main_view_model : ObservableObject
         _vaultPanel = dependencies.vault_panel;
         _collection_repository = collection_repository;
         _environment_store = environment_store;
+        _workspace_store = workspace_store;
+
+        // Set workspace store on top bar so it can manage workspaces
+        _topBar.SetWorkspaceStore(workspace_store);
 
         // Wire up the side panel to use all sub-panels
         _sidePanel.CollectionsPanel = _sidebar;
@@ -212,6 +218,7 @@ public partial class main_view_model : ObservableObject
         await EnvironmentSelector.load_environments_async(cancellation_token);
         await RequestEditor.LoadCollectionsAsync(cancellation_token);
         await _environmentsPanel.LoadEnvironmentsAsync(cancellation_token);
+        await TopBar.LoadWorkspacesCommand.ExecuteAsync(null);
     }
 
     [RelayCommand]

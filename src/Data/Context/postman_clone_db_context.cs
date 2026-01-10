@@ -17,6 +17,7 @@ public class postman_clone_db_context : DbContext
     public DbSet<environment_variable_entity> environment_variables => Set<environment_variable_entity>();
     public DbSet<vault_secret_entity> vault_secrets => Set<vault_secret_entity>();
     public DbSet<workspace_entity> workspaces => Set<workspace_entity>();
+    public DbSet<app_setting_entity> app_settings => Set<app_setting_entity>();
 
     protected override void OnModelCreating(ModelBuilder model_builder)
     {
@@ -29,6 +30,7 @@ public class postman_clone_db_context : DbContext
         configure_environment_variable(model_builder);
         configure_vault_secret(model_builder);
         configure_workspace(model_builder);
+        configure_app_setting(model_builder);
     }
 
     private static void configure_history_entry(ModelBuilder model_builder)
@@ -303,6 +305,24 @@ public class postman_clone_db_context : DbContext
 
             entity.HasIndex(e => e.is_active);
             entity.HasIndex(e => e.name);
+        });
+    }
+
+    private static void configure_app_setting(ModelBuilder model_builder)
+    {
+        model_builder.Entity<app_setting_entity>(entity =>
+        {
+            entity.ToTable("app_settings");
+            entity.HasKey(e => e.key);
+
+            entity.Property(e => e.key)
+                .HasMaxLength(100);
+
+            entity.Property(e => e.value)
+                .HasColumnType("TEXT");
+
+            entity.Property(e => e.updated_at)
+                .IsRequired();
         });
     }
 }

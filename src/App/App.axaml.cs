@@ -131,6 +131,7 @@ public partial class App : Application
         services.AddScoped<i_environment_store, environment_store>();
         services.AddScoped<i_history_repository, history_repository>();
         services.AddScoped<i_collection_repository, collection_repository>();
+        services.AddSingleton<vault_encryption_service>(); // Singleton so key stays in memory
         services.AddScoped<i_vault_store, vault_store>();
         services.AddScoped<i_workspace_store, workspace_store>();
 

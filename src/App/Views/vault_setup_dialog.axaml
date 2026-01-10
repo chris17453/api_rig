@@ -1,0 +1,109 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="400"
+        x:Class="App.Views.vault_setup_dialog"
+        Title="Vault Setup"
+        Width="500"
+        Height="400"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False">
+
+    <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" Margin="25">
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock Text="Vault Key Generated"
+                       FontSize="22"
+                       FontWeight="Bold"
+                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+            <TextBlock Text="Save this key - you'll need it to unlock your vault"
+                       FontSize="13"
+                       Foreground="{DynamicResource TextSecondaryBrush}"
+                       Margin="0,8,0,0"/>
+        </StackPanel>
+
+        <!-- Warning -->
+        <Border Grid.Row="1"
+                Background="#3DFF6B6B"
+                Padding="15"
+                CornerRadius="6"
+                Margin="0,0,0,20">
+            <StackPanel Spacing="8">
+                <TextBlock Text="Important!"
+                           FontWeight="Bold"
+                           Foreground="#FFFF6B6B"/>
+                <TextBlock TextWrapping="Wrap"
+                           Foreground="{DynamicResource TextPrimaryBrush}"
+                           FontSize="12"
+                           LineHeight="18">
+                    <Run>This key cannot be recovered if lost. Store it in a safe place like a password manager.</Run>
+                    <LineBreak/>
+                    <Run>Without this key, you will not be able to access your vault secrets.</Run>
+                </TextBlock>
+            </StackPanel>
+        </Border>
+
+        <!-- Vault Key Display -->
+        <Grid Grid.Row="2" RowDefinitions="Auto,Auto,Auto" Margin="0,0,0,15">
+            <TextBlock Grid.Row="0"
+                       Text="Your Vault Key:"
+                       FontWeight="SemiBold"
+                       Foreground="{DynamicResource TextSecondaryBrush}"
+                       Margin="0,0,0,8"/>
+            <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto">
+                <TextBox Grid.Column="0"
+                         Name="VaultKeyTextBox"
+                         IsReadOnly="True"
+                         FontFamily="Consolas, Courier New, monospace"
+                         FontSize="13"
+                         Background="{DynamicResource ButtonBackgroundBrush}"
+                         Foreground="{DynamicResource TextPrimaryBrush}"
+                         Padding="12"/>
+                <Button Grid.Column="1"
+                        Content="Copy"
+                        Click="CopyButton_Click"
+                        Margin="10,0,0,0"
+                        Padding="15,10"/>
+                <Button Grid.Column="2"
+                        Content="Save to File"
+                        Click="SaveToFileButton_Click"
+                        Margin="10,0,0,0"
+                        Padding="15,10"/>
+            </Grid>
+        </Grid>
+
+        <!-- Confirmation Checkbox -->
+        <StackPanel Grid.Row="3" VerticalAlignment="Top" Margin="0,10,0,0">
+            <CheckBox Name="ConfirmCheckbox"
+                      Foreground="{DynamicResource TextPrimaryBrush}">
+                <TextBlock TextWrapping="Wrap" FontSize="13">
+                    I have saved my vault key in a secure location
+                </TextBlock>
+            </CheckBox>
+        </StackPanel>
+
+        <!-- Buttons -->
+        <StackPanel Grid.Row="4"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Spacing="10">
+            <Button Content="Cancel"
+                    Click="CancelButton_Click"
+                    Padding="20,10"/>
+            <Button Name="ContinueButton"
+                    Content="Continue"
+                    Click="ContinueButton_Click"
+                    IsEnabled="False"
+                    Padding="20,10"
+                    Background="{DynamicResource AccentBrush}"
+                    Foreground="White">
+                <Button.Styles>
+                    <Style Selector="Button:disabled">
+                        <Setter Property="Opacity" Value="0.5"/>
+                    </Style>
+                </Button.Styles>
+            </Button>
+        </StackPanel>
+    </Grid>
+</Window>

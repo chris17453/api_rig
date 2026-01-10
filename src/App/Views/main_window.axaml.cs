@@ -26,6 +26,10 @@ public partial class main_window : Window
 
             // Wire up tab close confirmation
             mainVm.Tabs.close_confirmation_requested += OnCloseConfirmationRequested;
+
+            // Wire up vault dialogs
+            mainVm.SidePanel.VaultPanel.vault_setup_requested += OnVaultSetupRequested;
+            mainVm.SidePanel.VaultPanel.vault_unlock_requested += OnVaultUnlockRequested;
         }
     }
 
@@ -35,8 +39,74 @@ public partial class main_window : Window
         e.Confirmation.TrySetResult(result == ConfirmResult.Discard);
     }
 
+    private async void OnVaultSetupRequested(object? sender, TaskCompletionSource<string?> tcs)
+    {
+        var mainVm = DataContext as main_view_model;
+        if (mainVm == null)
+        {
+            tcs.TrySetResult(null);
+            return;
+        }
+
+        // Generate the vault key (not saved yet - will be saved if user confirms)
+        var vaultKey = mainVm.SidePanel.VaultPanel.VaultStore.generate_new_vault_key();
+
+        var dialog = new vault_setup_dialog();
+        dialog.SetVaultKey(vaultKey);
+
+        var result = await dialog.ShowDialog<bool?>(this);
+
+        if (result == true && dialog.WasConfirmed)
+        {
+            tcs.TrySetResult(vaultKey);
+        }
+        else
+        {
+            tcs.TrySetResult(null);
+        }
+    }
+
+    private async void OnVaultUnlockRequested(object? sender, TaskCompletionSource<string?> tcs)
+    {
+        var mainVm = DataContext as main_view_model;
+        if (mainVm == null)
+        {
+            tcs.TrySetResult(null);
+            return;
+        }
+
+        var vaultStore = mainVm.SidePanel.VaultPanel.VaultStore;
+        var dialog = new vault_unlock_dialog(key =>
+        {
+            // Synchronously verify the key
+            var task = vaultStore.try_unlock_async(key);
+            task.Wait();
+            var unlocked = task.Result;
+            // If successful, lock it again - we just want to verify
+            if (unlocked)
+            {
+                vaultStore.lock_vault();
+            }
+            return unlocked;
+        });
+
+        var result = await dialog.ShowDialog<bool?>(this);
+
+        if (result == true && dialog.WasConfirmed && !string.IsNullOrEmpty(dialog.EnteredKey))
+        {
+            tcs.TrySetResult(dialog.EnteredKey);
+        }
+        else
+        {
+            tcs.TrySetResult(null);
+        }
+    }
+
+    private bool _forceClose = false;
+
     private async void OnWindowClosing(object? sender, WindowClosingEventArgs e)
     {
+        if (_forceClose) return;
         if (DataContext is not main_view_model mainVm) return;
 
         // Check if there are unsaved changes
@@ -50,7 +120,7 @@ public partial class main_window : Window
             if (result == ConfirmResult.Discard)
             {
                 // User confirmed, close without saving
-                mainVm.Tabs.close_confirmation_requested -= OnCloseConfirmationRequested;
+                _forceClose = true;
                 Close();
             }
             // If Cancel, do nothing (window stays open)
@@ -87,15 +157,20 @@ public partial class main_window : Window
         var mainVm = DataContext as main_view_model;
         if (mainVm == null) return;
 
+        var exportVm = mainVm.CreateImportExportViewModel();
+        await exportVm.LoadCollectionsForExportAsync();
+
+        // Pre-select the currently selected collection if there is one
         var selectedCollection = mainVm.Sidebar.SelectedCollection;
-        if (selectedCollection == null)
+        if (selectedCollection != null)
         {
-            // Show message to select a collection first
-            return;
+            var item = exportVm.CollectionsForExport.FirstOrDefault(c => c.Collection.id == selectedCollection.id);
+            if (item != null)
+            {
+                item.IsSelected = true;
+            }
         }
 
-        var exportVm = mainVm.CreateImportExportViewModel();
-        exportVm.SelectedCollectionForExport = selectedCollection;
         var dialog = new export_dialog { DataContext = exportVm };
 
         exportVm.export_completed += (s, args) =>

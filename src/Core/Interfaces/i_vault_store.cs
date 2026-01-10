@@ -8,6 +8,36 @@ namespace Core.Interfaces;
 public interface i_vault_store
 {
     /// <summary>
+    /// Checks if the vault has been set up (has a verification token).
+    /// </summary>
+    Task<bool> is_vault_initialized_async(CancellationToken cancellation_token = default);
+
+    /// <summary>
+    /// Generates a new vault key without saving it.
+    /// </summary>
+    string generate_new_vault_key();
+
+    /// <summary>
+    /// Initializes the vault with the provided key. Saves the verification token.
+    /// </summary>
+    Task initialize_vault_async(string vault_key, CancellationToken cancellation_token = default);
+
+    /// <summary>
+    /// Attempts to unlock the vault with the provided key.
+    /// </summary>
+    Task<bool> try_unlock_async(string vault_key, CancellationToken cancellation_token = default);
+
+    /// <summary>
+    /// Locks the vault, clearing the encryption key from memory.
+    /// </summary>
+    void lock_vault();
+
+    /// <summary>
+    /// Returns true if the vault is currently unlocked.
+    /// </summary>
+    bool is_unlocked { get; }
+
+    /// <summary>
     /// Gets all secrets from the vault.
     /// </summary>
     Task<IReadOnlyList<vault_secret_model>> get_all_async(CancellationToken cancellation_token = default);
