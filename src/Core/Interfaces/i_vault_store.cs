@@ -18,6 +18,16 @@ public interface i_vault_store
     Task<vault_secret_model?> get_by_id_async(string id, CancellationToken cancellation_token = default);
 
     /// <summary>
+    /// Gets a secret by its name.
+    /// </summary>
+    Task<vault_secret_model?> get_by_name_async(string name, CancellationToken cancellation_token = default);
+
+    /// <summary>
+    /// Gets the decrypted value of a secret by name. Returns null if not found or vault is locked.
+    /// </summary>
+    Task<string?> get_secret_value_async(string name, CancellationToken cancellation_token = default);
+
+    /// <summary>
     /// Searches secrets by name or tags.
     /// </summary>
     Task<IReadOnlyList<vault_secret_model>> search_async(string query, CancellationToken cancellation_token = default);

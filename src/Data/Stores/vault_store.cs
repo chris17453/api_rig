@@ -35,6 +35,32 @@ public class vault_store : i_vault_store
         return entity is null ? null : map_to_model(entity);
     }
 
+    public async Task<vault_secret_model?> get_by_name_async(string name, CancellationToken cancellation_token = default)
+    {
+        var entity = await _context.vault_secrets
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.name == name, cancellation_token);
+
+        return entity is null ? null : map_to_model(entity);
+    }
+
+    public async Task<string?> get_secret_value_async(string name, CancellationToken cancellation_token = default)
+    {
+        var entity = await _context.vault_secrets
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.name == name, cancellation_token);
+
+        if (entity is null)
+            return null;
+
+        // Mark as used (fire and forget - don't block on this)
+        _ = mark_used_async(entity.id, CancellationToken.None);
+
+        // TODO: Add actual decryption here when encryption is implemented
+        // For now, return the value directly
+        return entity.encrypted_value;
+    }
+
     public async Task<IReadOnlyList<vault_secret_model>> search_async(string query, CancellationToken cancellation_token = default)
     {
         var lowerQuery = query.ToLowerInvariant();

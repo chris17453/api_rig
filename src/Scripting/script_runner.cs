@@ -61,6 +61,10 @@ public class script_runner : i_script_runner
             var console = new ConsoleInterop(test_collector);
             engine.SetValue("console", console);
 
+            // Add vault API for accessing secrets from scripts
+            var vault = new vault_api(context.vault_store, context.is_vault_unlocked);
+            engine.SetValue("vault", vault);
+
             engine.Execute(script);
 
             stopwatch.Stop();
