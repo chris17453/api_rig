@@ -1,6 +1,6 @@
-# PostmanClone
+# API RIG
 
-PostmanClone is a powerful, cross-platform desktop application built with .NET 10 and Avalonia UI. It provides a comprehensive environment for developing, testing, and managing HTTP requests, mimicking the core functionality of Postman with a focus on performance and extensibility.
+API RIG is a powerful, cross-platform desktop application built with .NET 10 and Avalonia UI. It provides a comprehensive environment for developing, testing, and managing HTTP requests, mimicking the core functionality of Postman with a focus on performance and extensibility.
 
 ## Features
 
@@ -16,22 +16,22 @@ PostmanClone is a powerful, cross-platform desktop application built with .NET 1
 
 The solution is organized into modular projects to ensure separation of concerns and maintainability:
 
-- **PostmanClone.App**: The main UI layer built with Avalonia UI, implementing the MVVM pattern.
-- **PostmanClone.Core**: Contains shared models, interfaces, and core abstractions used across the solution.
-- **PostmanClone.Http**: Responsible for request execution and authentication handling using `HttpClient`.
-- **PostmanClone.Data**: Manages data persistence using EF Core and SQLite, including collection parsing and environment management.
-- **PostmanClone.Scripting**: Encapsulates the JavaScript execution environment and the `pm.*` API implementation.
+- **App**: The main UI layer built with Avalonia UI, implementing the MVVM pattern.
+- **Core**: Contains shared models, interfaces, and core abstractions used across the solution.
+- **Http**: Responsible for request execution and authentication handling using `HttpClient`.
+- **Data**: Manages data persistence using EF Core and SQLite, including collection parsing and environment management.
+- **Scripting**: Encapsulates the JavaScript execution environment and the `pm.*` API implementation.
 
 ## Architecture
 
 The following diagram shows the project dependencies and how the different modules communicate:
 
-```mermaid
+```mermaid 
 graph TD
-    App[PostmanClone.App] --> Core[PostmanClone.Core]
-    App --> Data[PostmanClone.Data]
-    App --> Http[PostmanClone.Http]
-    App --> Scripting[PostmanClone.Scripting]
+    App[App] --> Core[Core]
+    App --> Data[Data]
+    App --> Http[Http]
+    App --> Scripting[Scripting]
     
     Data --> Core
     Http --> Core
@@ -114,7 +114,7 @@ dotnet test -c Release
 To run the desktop application in Release mode:
 
 ```bash
-dotnet run --project src/PostmanClone.App/PostmanClone.App.csproj -c Release
+dotnet run --project src/App/App.csproj -c Release
 ```
 
 ### Run All Tests with Verbose Output

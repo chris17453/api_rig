@@ -1,0 +1,205 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:App.ViewModels"
+        xmlns:views="using:App.Views"
+        xmlns:converters="using:App.Converters"
+        mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="900"
+        x:Class="App.Views.main_window"
+        x:DataType="vm:main_view_model"
+        Title="{Binding Title}"
+        Width="1400" Height="900"
+        WindowStartupLocation="CenterScreen"
+        Icon="avares://App/Assets/logo.webp">
+
+    <Window.Resources>
+        <converters:theme_icon_converter x:Key="ThemeIconConverter"/>
+    </Window.Resources>
+
+    <Window.Styles>
+        <!-- Modern Button Style -->
+        <Style Selector="Button.modern">
+            <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+        <Style Selector="Button.modern:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ButtonHoverBrush}"/>
+        </Style>
+        <Style Selector="Button.primary">
+            <Setter Property="Background" Value="{DynamicResource SuccessBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource SuccessHoverBrush}"/>
+        </Style>
+        <Style Selector="Button.accent">
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="14,8"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style Selector="Button.accent:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource AccentHoverBrush}"/>
+        </Style>
+    </Window.Styles>
+
+    <Grid ColumnDefinitions="280,*,320" Margin="0">
+        <!-- Sidebar -->
+        <Border Grid.Column="0" 
+                IsVisible="{Binding IsSidebarVisible}"
+                Background="{DynamicResource SidebarBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" 
+                BorderThickness="0,0,1,0">
+            <Grid RowDefinitions="Auto,Auto,Auto,*,Auto">
+                <!-- Logo and App Title -->
+                <Border Grid.Row="0" 
+                        Background="{DynamicResource PanelBackgroundBrush}"
+                        Padding="16,20,16,16">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Border CornerRadius="10" 
+                                ClipToBounds="True"
+                                Width="44" Height="44">
+                            <Image Source="avares://App/Assets/logo.webp"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="API Rig" 
+                                       FontSize="18" 
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Text="REST Client"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+                
+                <!-- Import/Export Buttons -->
+                <StackPanel Grid.Row="1" 
+                            Orientation="Horizontal" 
+                            Spacing="8"
+                            Margin="16,0,16,16">
+                    <Button Classes="modern"
+                            Click="ImportButton_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="↓" FontSize="12"/>
+                            <TextBlock Text="Import"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="modern"
+                            Click="ExportButton_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="↑" FontSize="12"/>
+                            <TextBlock Text="Export"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="modern"
+                            Click="AboutButton_Click">
+                        <TextBlock Text="About"/>
+                    </Button>
+                </StackPanel>
+                
+                <!-- Environment Selector -->
+                <views:environment_selector_view Grid.Row="2" 
+                                                  DataContext="{Binding EnvironmentSelector}"
+                                                  Margin="16,0,16,16"/>
+                
+                <!-- Collections and History -->
+                <views:sidebar_view Grid.Row="3" 
+                                    DataContext="{Binding Sidebar}"/>
+                
+                <!-- Sidebar Footer -->
+                <Border Grid.Row="4"
+                        Background="{DynamicResource PanelBackgroundBrush}"
+                        BorderBrush="{DynamicResource BorderBrush}"
+                        BorderThickness="0,1,0,0"
+                        Padding="16,12">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Grid.Column="0"
+                                   Text="v1.0.0"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   VerticalAlignment="Center"/>
+                        <StackPanel Grid.Column="1" 
+                                    Orientation="Horizontal" 
+                                    Spacing="8">
+                            <!-- Theme Toggle Button -->
+                            <Button Classes="modern"
+                                    Command="{Binding ToggleThemeCommand}"
+                                    ToolTip.Tip="Toggle Light/Dark Theme"
+                                    Width="36"
+                                    Height="36"
+                                    Padding="0">
+                                <TextBlock Text="{Binding IsDarkTheme, Converter={StaticResource ThemeIconConverter}}"
+                                           FontSize="16"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
+        
+        <!-- Main Content Area -->
+        <Border Grid.Column="1" Background="{DynamicResource AppBackgroundBrush}">
+            <Grid RowDefinitions="Auto,*" Margin="0">
+                <!-- Tab Bar -->
+                <views:tab_bar_view Grid.Row="0" 
+                                    DataContext="{Binding Tabs}"/>
+                
+                <!-- Scrollable Content -->
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Spacing="0">
+                        <!-- Request Editor -->
+                        <views:request_editor_view DataContext="{Binding RequestEditor}"
+                                                   Margin="20,16,20,0"/>
+                        
+                        <!-- Script Editor -->
+                        <Expander Header="Scripts &amp; Console" 
+                                  Classes="modern-card"
+                                  IsExpanded="True" 
+                                  Margin="20,16,20,0">
+                            <Border MinHeight="220"
+                                    Background="{DynamicResource CardBackgroundBrush}"
+                                    CornerRadius="0,0,12,12"
+                                    BorderBrush="{DynamicResource BorderBrush}"
+                                    BorderThickness="1">
+                                <views:script_editor_view DataContext="{Binding ScriptEditor}"/>
+                            </Border>
+                        </Expander>
+                        
+                        <!-- Response Viewer -->
+                        <Border Margin="20,16,20,16"
+                                Background="{DynamicResource CardBackgroundBrush}"
+                                CornerRadius="12"
+                                BorderBrush="{DynamicResource BorderBrush}"
+                                BorderThickness="1"
+                                MinHeight="300">
+                            <views:response_viewer_view DataContext="{Binding ResponseViewer}"/>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+        
+        <!-- Right Panel - Test Results -->
+        <Border Grid.Column="2" 
+                Background="{DynamicResource CardBackgroundBrush}"
+                BorderBrush="{DynamicResource ButtonBackgroundBrush}"
+                BorderThickness="1,0,0,0">
+            <views:test_results_view DataContext="{Binding TestResults}"/>
+        </Border>
+    </Grid>
+</Window>

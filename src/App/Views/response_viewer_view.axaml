@@ -1,0 +1,173 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:App.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="400"
+             x:Class="App.Views.response_viewer_view"
+             x:DataType="vm:response_viewer_view_model">
+
+    <Grid RowDefinitions="Auto,*">
+        <!-- Status Bar -->
+        <Border Grid.Row="0" 
+                Padding="16,12"
+                Background="{DynamicResource ButtonBackgroundBrush}"
+                CornerRadius="8,8,0,0"
+                Margin="12,12,12,0"
+                IsVisible="{Binding HasResponse}">
+            <StackPanel Orientation="Horizontal" Spacing="16">
+                <!-- Status Badge -->
+                <Border Background="{DynamicResource SuccessBrush}" 
+                        CornerRadius="6" 
+                        Padding="12,6">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="{Binding StatusCode}"
+                                   FontWeight="Bold"
+                                   FontSize="14"
+                                   Foreground="White"/>
+                        <TextBlock Text="{Binding StatusDescription}" 
+                                   Foreground="White"
+                                   Opacity="0.8"
+                                   FontSize="12"/>
+                    </StackPanel>
+                </Border>
+                
+                <!-- Time -->
+                <Border Background="{DynamicResource InputBackgroundBrush}" 
+                        CornerRadius="6" 
+                        Padding="12,6,16,6">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="⏱" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        <TextBlock Text="{Binding ElapsedMs, StringFormat={}{0} ms}"
+                                   Foreground="{DynamicResource ButtonTextBrush}"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="NoWrap"
+                                   TextTrimming="None"
+                                   ClipToBounds="False"
+                                   MaxWidth="Infinity"/>
+                    </StackPanel>
+                </Border>
+                
+                <!-- Size -->
+                <Border Background="{DynamicResource InputBackgroundBrush}" 
+                        CornerRadius="6" 
+                        Padding="12,6,16,6">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="📦" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        <TextBlock Text="{Binding SizeBytes, StringFormat={}{0} B}"
+                                   Foreground="{DynamicResource ButtonTextBrush}"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="NoWrap"
+                                   TextTrimming="None"
+                                   ClipToBounds="False"
+                                   MaxWidth="Infinity"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+
+        <!-- Error Message -->
+        <Border Grid.Row="0" 
+                Padding="16,12"
+                Background="{DynamicResource CardBackgroundBrush}"
+                CornerRadius="8"
+                Margin="12"
+                BorderBrush="{DynamicResource ErrorTextBrush}"
+                BorderThickness="1"
+                IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+            <StackPanel Orientation="Horizontal" Spacing="10">
+                <TextBlock Text="⚠" FontSize="16" Foreground="{DynamicResource ErrorTextBrush}"/>
+                <TextBlock Text="{Binding ErrorMessage}" 
+                           Foreground="{DynamicResource ErrorTextBrush}"
+                           TextWrapping="Wrap"
+                           VerticalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Response Content -->
+        <Border Grid.Row="1" 
+                IsVisible="{Binding HasResponse}"
+                Background="{DynamicResource PanelBackgroundBrush}"
+                CornerRadius="0,0,8,8"
+                BorderBrush="{DynamicResource BorderLightBrush}"
+                BorderThickness="1,0,1,1"
+                Margin="12,0,12,12">
+            <TabControl Background="Transparent" Padding="8">
+                <TabControl.Styles>
+                    <Style Selector="TabItem">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                        <Setter Property="Padding" Value="16,10"/>
+                        <Setter Property="FontSize" Value="13"/>
+                    </Style>
+                    <Style Selector="TabItem:selected">
+                        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                    </Style>
+                </TabControl.Styles>
+                
+                <!-- Body Tab -->
+                <TabItem Header="Body">
+                    <ScrollViewer Margin="8">
+                        <TextBox Text="{Binding FormattedBody, Mode=OneWay}"
+                                 IsReadOnly="True"
+                                 FontFamily="JetBrains Mono, Consolas, monospace"
+                                 FontSize="12"
+                                 TextWrapping="NoWrap"
+                                 AcceptsReturn="True"
+                                 Background="Transparent"
+                                 Foreground="{DynamicResource ButtonTextBrush}"
+                                 BorderThickness="0"
+                                 Padding="8"/>
+                    </ScrollViewer>
+                </TabItem>
+
+                <!-- Headers Tab -->
+                <TabItem Header="Headers">
+                    <ScrollViewer Margin="8">
+                        <TextBox Text="{Binding HeadersText, Mode=OneWay}"
+                                 IsReadOnly="True"
+                                 FontFamily="JetBrains Mono, Consolas, monospace"
+                                 FontSize="12"
+                                 TextWrapping="NoWrap"
+                                 AcceptsReturn="True"
+                                 Background="Transparent"
+                                 Foreground="{DynamicResource ButtonTextBrush}"
+                                 BorderThickness="0"
+                                 Padding="8"/>
+                    </ScrollViewer>
+                </TabItem>
+            </TabControl>
+        </Border>
+
+        <!-- No Response Placeholder -->
+        <Border Grid.Row="1" 
+                IsVisible="{Binding !HasResponse}"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Margin="12">
+            <StackPanel HorizontalAlignment="Center" Spacing="16">
+                <Border Background="{DynamicResource ButtonBackgroundBrush}" 
+                        CornerRadius="50" 
+                        Width="80" Height="80"
+                        HorizontalAlignment="Center">
+                    <TextBlock Text="📡" 
+                               FontSize="32" 
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Border>
+                <TextBlock Text="No Response Yet" 
+                           FontSize="18" 
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           HorizontalAlignment="Center"/>
+                <TextBlock Text="Send a request to see the response here" 
+                           Foreground="{DynamicResource TextTertiaryBrush}"
+                           FontSize="13"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

@@ -2,15 +2,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Run PostmanClone App",
+            "name": "Run API RIG",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/src/PostmanClone.App/bin/Debug/net10.0/PostmanClone.App.dll",
+            "program": "${workspaceFolder}/src/App/bin/Debug/net10.0/App.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/src/PostmanClone.App",
+            "cwd": "${workspaceFolder}/src/App",
             "console": "internalConsole",
-            "stopAtEntry": false
+            "stopAtEntry": false,
+            "env": {
+                "AVALONIA_IM_MODULE": "none"
+            }
         },
         {
             "name": ".NET Core Attach",
@@ -18,14 +21,14 @@
             "request": "attach"
         },
         {
-            "name": "Run PostmanClone.Core Tests",
+            "name": "Run Core Tests",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
             "program": "dotnet",
             "args": [
                 "test",
-                "${workspaceFolder}/tests/PostmanClone.Core.Tests/PostmanClone.Core.Tests.csproj"
+                "${workspaceFolder}/tests/Core.Tests/Core.Tests.csproj"
             ],
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",
@@ -39,7 +42,7 @@
             "program": "dotnet",
             "args": [
                 "test",
-                "${workspaceFolder}/PostmanClone.slnx"
+                "${workspaceFolder}/API_RIG.slnx"
             ],
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",

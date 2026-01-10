@@ -1,0 +1,241 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:App.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="250" d:DesignHeight="600"
+             x:Class="App.Views.sidebar_view"
+             x:DataType="vm:sidebar_view_model">
+
+    <Grid RowDefinitions="Auto,*,Auto,*" Background="{DynamicResource SidebarBackgroundBrush}">
+        <!-- Collections Header with + Button -->
+        <Border Grid.Row="0" Padding="16,12">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="📁" FontSize="14"/>
+                    <TextBlock Text="Collections" 
+                               FontWeight="SemiBold" 
+                               FontSize="13"
+                               Foreground="{DynamicResource TextPrimaryBrush}"/>
+                </StackPanel>
+                <Button Grid.Column="1"
+                        Command="{Binding CreateCollectionCommand}"
+                        Content="+"
+                        Width="28"
+                        Height="28"
+                        FontSize="16"
+                        FontWeight="Bold"
+                        Padding="0"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        ToolTip.Tip="Create new collection">
+                    <Button.Styles>
+                        <Style Selector="Button">
+                            <Setter Property="Background" Value="{DynamicResource SuccessBrush}"/>
+                            <Setter Property="Foreground" Value="White"/>
+                            <Setter Property="CornerRadius" Value="6"/>
+                        </Style>
+                        <Style Selector="Button:pointerover /template/ ContentPresenter">
+                            <Setter Property="Background" Value="{DynamicResource SuccessHoverBrush}"/>
+                        </Style>
+                    </Button.Styles>
+                </Button>
+            </Grid>
+        </Border>
+        
+        <!-- Collections Tree -->
+        <TreeView Grid.Row="1" 
+                  ItemsSource="{Binding Collections}"
+                  SelectedItem="{Binding SelectedCollectionItem}"
+                  Background="Transparent"
+                  Margin="8,0">
+            <TreeView.Styles>
+                <Style Selector="TreeViewItem">
+                    <Setter Property="Padding" Value="8,6"/>
+                    <Setter Property="IsExpanded" Value="{ReflectionBinding IsExpanded, Mode=TwoWay}"/>
+                </Style>
+            </TreeView.Styles>
+            <TreeView.ItemTemplate>
+                <TreeDataTemplate ItemsSource="{Binding Children}">
+                    <Border Background="Transparent" 
+                            CornerRadius="6" 
+                            Padding="8,6">
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                            <!-- Icons and Name -->
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <TextBlock Text="📦" IsVisible="{Binding IsCollectionRoot}" FontSize="12"/>
+                                <TextBlock Text="📁" FontSize="12">
+                                    <TextBlock.IsVisible>
+                                        <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                            <Binding Path="IsFolder"/>
+                                            <Binding Path="!IsCollectionRoot"/>
+                                        </MultiBinding>
+                                    </TextBlock.IsVisible>
+                                </TextBlock>
+                                <TextBlock Text="📄" FontSize="12">
+                                    <TextBlock.IsVisible>
+                                        <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                            <Binding Path="!IsFolder"/>
+                                            <Binding Path="!IsCollectionRoot"/>
+                                        </MultiBinding>
+                                    </TextBlock.IsVisible>
+                                </TextBlock>
+                                <Border Background="{DynamicResource SuccessBrush}" 
+                                        CornerRadius="4" 
+                                        Padding="6,2"
+                                        IsVisible="{Binding Method, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                    <TextBlock Text="{Binding Method}" 
+                                               FontWeight="Bold"
+                                               FontSize="9"
+                                               Foreground="White"/>
+                                </Border>
+                                <!-- Display mode: show name -->
+                                <TextBlock Text="{Binding Name}" 
+                                           Foreground="{DynamicResource ButtonTextBrush}"
+                                           FontSize="12"
+                                           VerticalAlignment="Center"
+                                           IsVisible="{Binding !IsEditing}"
+                                           DoubleTapped="OnNameDoubleTapped"/>
+                                <!-- Edit mode: editable textbox -->
+                                <TextBox Text="{Binding Name}" 
+                                         Foreground="{DynamicResource ButtonTextBrush}"
+                                         FontSize="12"
+                                         VerticalAlignment="Center"
+                                         IsVisible="{Binding IsEditing}"
+                                         MinWidth="100"
+                                         BorderThickness="1"
+                                         BorderBrush="{DynamicResource AccentHoverBrush}"
+                                         Background="{DynamicResource CardBackgroundBrush}"
+                                         Padding="4,2"
+                                         LostFocus="OnNameEditLostFocus"
+                                         KeyDown="OnNameEditKeyDown"/>
+                            </StackPanel>
+                            
+                            <!-- Action Buttons -->
+                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                <!-- Add Request Button (only for collections) -->
+                                <Button Command="{Binding $parent[TreeView].((vm:sidebar_view_model)DataContext).AddRequestToCollectionCommand}"
+                                        CommandParameter="{Binding}"
+                                        Width="24"
+                                        Height="24"
+                                        Padding="0"
+                                        ToolTip.Tip="Add request to this collection"
+                                        IsVisible="{Binding IsCollectionRoot, FallbackValue=False}">
+                                    <Button.Content>
+                                        <TextBlock Text="+" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                    </Button.Content>
+                                    <Button.Styles>
+                                        <Style Selector="Button">
+                                            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                            <Setter Property="Foreground" Value="White"/>
+                                            <Setter Property="CornerRadius" Value="4"/>
+                                            <Setter Property="BorderThickness" Value="0"/>
+                                        </Style>
+                                        <Style Selector="Button:pointerover /template/ ContentPresenter">
+                                            <Setter Property="Background" Value="{DynamicResource AccentHoverBrush}"/>
+                                        </Style>
+                                    </Button.Styles>
+                                </Button>
+                                
+                                <!-- Delete Button (show for all items) -->
+                                <Button Width="24"
+                                        Height="24"
+                                        Padding="0"
+                                        ToolTip.Tip="Delete"
+                                        Command="{Binding $parent[TreeView].((vm:sidebar_view_model)DataContext).DeleteItemCommand}"
+                                        CommandParameter="{Binding}">
+                                    <Button.Content>
+                                        <TextBlock Text="×" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                    </Button.Content>
+                                    <Button.Styles>
+                                        <Style Selector="Button">
+                                            <Setter Property="Background" Value="{DynamicResource ErrorTextBrush}"/>
+                                            <Setter Property="Foreground" Value="White"/>
+                                            <Setter Property="CornerRadius" Value="4"/>
+                                            <Setter Property="BorderThickness" Value="0"/>
+                                        </Style>
+                                        <Style Selector="Button:pointerover /template/ ContentPresenter">
+                                            <Setter Property="Background" Value="{DynamicResource ErrorTextBrush}"/>
+                                        </Style>
+                                    </Button.Styles>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </TreeDataTemplate>
+            </TreeView.ItemTemplate>
+        </TreeView>
+
+        <!-- History Header -->
+        <Border Grid.Row="2" 
+                Padding="16,12"
+                BorderBrush="{DynamicResource ButtonBackgroundBrush}"
+                BorderThickness="0,1,0,0">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="🕐" FontSize="14"/>
+                <TextBlock Text="History" 
+                           FontWeight="SemiBold" 
+                           FontSize="13"
+                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+            </StackPanel>
+        </Border>
+        
+        <!-- History List -->
+        <ListBox Grid.Row="3" 
+                 ItemsSource="{Binding History}"
+                 SelectedItem="{Binding SelectedHistoryItem}"
+                 Background="Transparent"
+                 Margin="8,0,8,8">
+            <ListBox.Styles>
+                <Style Selector="ListBoxItem">
+                    <Setter Property="Padding" Value="0"/>
+                    <Setter Property="Margin" Value="0,0,0,4"/>
+                </Style>
+                <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+                    <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
+                </Style>
+            </ListBox.Styles>
+            <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="vm:history_item_view_model">
+                    <Border Background="{DynamicResource PanelBackgroundBrush}" 
+                            CornerRadius="8" 
+                            Padding="12,10"
+                            BorderBrush="{DynamicResource ButtonBackgroundBrush}"
+                            BorderThickness="1">
+                        <Grid RowDefinitions="Auto,Auto,Auto">
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8">
+                                <Border Background="{DynamicResource SuccessBrush}" 
+                                        CornerRadius="4" 
+                                        Padding="6,2">
+                                    <TextBlock Text="{Binding Method}" 
+                                               FontWeight="Bold"
+                                               FontSize="9"
+                                               Foreground="White"/>
+                                </Border>
+                                <Border Background="{DynamicResource AccentBrush}" 
+                                        CornerRadius="4" 
+                                        Padding="6,2">
+                                    <TextBlock Text="{Binding StatusCode}" 
+                                               FontSize="9"
+                                               FontWeight="SemiBold"
+                                               Foreground="White"/>
+                                </Border>
+                            </StackPanel>
+                            <TextBlock Grid.Row="1" 
+                                       Text="{Binding Url}" 
+                                       FontSize="11"
+                                       TextTrimming="CharacterEllipsis"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       Margin="0,6,0,4"
+                                       FontFamily="JetBrains Mono, Consolas, monospace"/>
+                            <TextBlock Grid.Row="2"
+                                       Text="{Binding ExecutedAt, StringFormat={}{0:g}}" 
+                                       FontSize="10"
+                                       Foreground="{DynamicResource TextTertiaryBrush}"/>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
+</UserControl>

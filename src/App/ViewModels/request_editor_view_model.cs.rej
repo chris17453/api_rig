@@ -1,0 +1,116 @@
+--- src/App/ViewModels/request_editor_view_model.cs
++++ src/App/ViewModels/request_editor_view_model.cs
+@@ -1,14 +1,17 @@
+ using CommunityToolkit.Mvvm.ComponentModel;
+ using CommunityToolkit.Mvvm.Input;
+ using Microsoft.Extensions.Logging;
++using Newtonsoft.Json;
+ using Core.Interfaces;
+ using Core.Models;
+ using Data.Services;
+ using System.Collections.ObjectModel;
++using System.Reactive.Linq;
++using System.Reactive.Subjects;
+ 
+ namespace App.ViewModels;
+ 
+-public partial class request_editor_view_model : ObservableObject
++public partial class request_editor_view_model : ObservableObject, IDisposable
+ {
+     private readonly request_orchestrator _request_orchestrator;
+     private readonly i_history_repository _history_repository;
+@@ -27,6 +30,15 @@ public partial class request_editor_view_model : ObservableObject
+     [ObservableProperty]
+     private string _requestBody = string.Empty;
+ 
++    [ObservableProperty]
++    private string _jsonValidationError = string.Empty;
++
++    [ObservableProperty]
++    private bool _isJsonValid = true;
++
++    private readonly Subject<string> _bodyChangedSubject = new();
++    private IDisposable? _debounceSubscription;
++
+     [ObservableProperty]
+     private bool _isSending;
+ 
+@@ -68,6 +80,10 @@ public partial class request_editor_view_model : ObservableObject
+         _collection_repository = collection_repository;
+         _logger = logger;
+         
++        _debounceSubscription = _bodyChangedSubject
++            .Throttle(TimeSpan.FromMilliseconds(500))
++            .Subscribe(ValidateJson);
++
+         // Add default empty header row
+         _headers.Add(new key_value_pair_view_model());
+     }
+@@ -308,6 +324,54 @@ public partial class request_editor_view_model : ObservableObject
+         SaveRequestCommand.NotifyCanExecuteChanged();
+     }
+ 
++    partial void OnRequestBodyChanged(string value)
++    {
++        _bodyChangedSubject.OnNext(value);
++    }
++
++    private void ValidateJson(string json)
++    {
++        if (string.IsNullOrWhiteSpace(json))
++        {
++            IsJsonValid = true;
++            JsonValidationError = string.Empty;
++            return;
++        }
++
++        try
++        {
++            JsonConvert.DeserializeObject(json);
++            IsJsonValid = true;
++            JsonValidationError = string.Empty;
++        }
++        catch (JsonReaderException ex)
++        {
++            IsJsonValid = false;
++            JsonValidationError = $"Invalid JSON: {ex.Message}";
++        }
++        catch (Exception ex)
++        {
++            IsJsonValid = false;
++            JsonValidationError = $"Error: {ex.Message}";
++        }
++    }
++
++    [RelayCommand]
++    private void FormatJson()
++    {
++        if (string.IsNullOrWhiteSpace(RequestBody)) return;
++
++        try
++        {
++            var obj = JsonConvert.DeserializeObject(RequestBody);
++            RequestBody = JsonConvert.SerializeObject(obj, Formatting.Indented);
++        }
++        catch (Exception ex)
++        {
++            JsonValidationError = $"Cannot format: {ex.Message}";
++        }
++    }
++
+     [RelayCommand]
+     private void AddHeader()
+     {
+@@ -320,6 +384,12 @@ public partial class request_editor_view_model : ObservableObject
+         Headers.Remove(header);
+     }
+ 
++    public void Dispose()
++    {
++        _debounceSubscription?.Dispose();
++        _bodyChangedSubject.Dispose();
++    }
++
+     public void load_request(http_request_model request, string? collectionId = null, string? collectionItemId = null)
+     {
+         _logger.LogInformation("Loading request '{RequestName}' with CollectionId='{CollectionId}', CollectionItemId='{CollectionItemId}'", 

@@ -1,0 +1,16 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Core/Core.csproj" />
+    <Project Path="src/Data/Data.csproj" />
+    <Project Path="src/Http/Http.csproj" />
+    <Project Path="src/Playground/Playground.csproj" />
+    <Project Path="src/Scripting/Scripting.csproj" />
+    <Project Path="src/App/App.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Core.Tests/Core.Tests.csproj" />
+    <Project Path="tests/Data.Tests/Data.Tests.csproj" />
+    <Project Path="tests/Http.Tests/Http.Tests.csproj" />
+    <Project Path="tests/Scripting.Tests/Scripting.Tests.csproj" />
+  </Folder>
+</Solution>
