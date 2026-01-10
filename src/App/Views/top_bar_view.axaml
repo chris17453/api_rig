@@ -1,0 +1,344 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:App.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="48"
+             x:Class="App.Views.top_bar_view"
+             x:DataType="vm:top_bar_view_model">
+
+    <Border Background="{DynamicResource PanelBackgroundBrush}"
+            BorderBrush="{DynamicResource BorderBrush}"
+            BorderThickness="0,0,0,1"
+            Height="48">
+        <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto,Auto,Auto">
+            <!-- Logo -->
+            <Border Grid.Column="0"
+                    Margin="12,6"
+                    CornerRadius="6"
+                    ClipToBounds="True"
+                    Width="32" Height="32">
+                <Image Source="avares://App/Assets/logo.webp"/>
+            </Border>
+
+            <!-- App Name -->
+            <TextBlock Grid.Column="1"
+                       Text="API Rig"
+                       FontSize="14"
+                       FontWeight="Bold"
+                       Foreground="{DynamicResource TextPrimaryBrush}"
+                       VerticalAlignment="Center"
+                       Margin="4,0,16,0"/>
+
+            <!-- Workspace Selector with Dropdown -->
+            <Panel Grid.Column="2" HorizontalAlignment="Left" Margin="0,8">
+                <Button Classes="workspace-btn"
+                        Command="{Binding ToggleWorkspaceSelectorCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="{Binding CurrentWorkspace, FallbackValue='Default Workspace'}"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                   FontSize="12"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Text="▼"
+                                   FontSize="8"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+                <!-- Workspace Dropdown -->
+                <Popup IsOpen="{Binding IsWorkspaceSelectorOpen}"
+                       Placement="Bottom"
+                       HorizontalOffset="-4"
+                       VerticalOffset="4">
+                    <Border Background="{DynamicResource CardBackgroundBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            MinWidth="240"
+                            MaxHeight="300"
+                            Padding="4">
+                        <StackPanel>
+                            <!-- Workspace List -->
+                            <ItemsControl ItemsSource="{Binding Workspaces}"
+                                          IsVisible="{Binding !IsCreatingWorkspace}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:workspace_item">
+                                        <Button Classes="workspace-item"
+                                                Command="{Binding $parent[ItemsControl].((vm:top_bar_view_model)DataContext).SelectWorkspaceCommand}"
+                                                CommandParameter="{Binding}">
+                                            <Grid ColumnDefinitions="Auto,*,Auto">
+                                                <Border Grid.Column="0"
+                                                        Width="8" Height="8"
+                                                        CornerRadius="4"
+                                                        Background="{Binding Color}"
+                                                        VerticalAlignment="Center"
+                                                        Margin="0,0,8,0"/>
+                                                <TextBlock Grid.Column="1"
+                                                           Text="{Binding Name}"
+                                                           FontSize="12"
+                                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                                           VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="2"
+                                                           Text="✓"
+                                                           IsVisible="{Binding IsActive}"
+                                                           FontSize="12"
+                                                           Foreground="{DynamicResource SuccessBrush}"
+                                                           VerticalAlignment="Center"
+                                                           Margin="8,0,0,0"/>
+                                            </Grid>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!-- Separator -->
+                            <Border Height="1"
+                                    Background="{DynamicResource BorderBrush}"
+                                    Margin="4,4"
+                                    IsVisible="{Binding !IsCreatingWorkspace}"/>
+
+                            <!-- Create New Workspace Button -->
+                            <Button Classes="workspace-item"
+                                    Command="{Binding ShowCreateWorkspaceCommand}"
+                                    IsVisible="{Binding !IsCreatingWorkspace}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="+" FontSize="14" FontWeight="Bold"/>
+                                    <TextBlock Text="Create Workspace" FontSize="12"/>
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Create Workspace Form -->
+                            <StackPanel IsVisible="{Binding IsCreatingWorkspace}" Spacing="8" Margin="4">
+                                <TextBlock Text="New Workspace"
+                                           FontSize="12"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBox Text="{Binding NewWorkspaceName, Mode=TwoWay}"
+                                         Watermark="Workspace name..."
+                                         Background="{DynamicResource InputBackgroundBrush}"
+                                         FontSize="12"/>
+                                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                                    <Button Classes="workspace-item"
+                                            Command="{Binding CancelCreateWorkspaceCommand}"
+                                            Content="Cancel"/>
+                                    <Button Classes="primary-small"
+                                            Command="{Binding CreateWorkspaceCommand}"
+                                            Content="Create"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </Popup>
+            </Panel>
+
+            <!-- Spacer -->
+            <Panel Grid.Column="3"/>
+
+            <!-- Import/Export -->
+            <StackPanel Grid.Column="4"
+                        Orientation="Horizontal"
+                        Spacing="4"
+                        Margin="8,0">
+                <Button Classes="topbar-btn"
+                        ToolTip.Tip="Import Collection"
+                        Command="{Binding ImportCommand}">
+                    <TextBlock Text="Import" FontSize="11"/>
+                </Button>
+                <Button Classes="topbar-btn"
+                        ToolTip.Tip="Export Collection"
+                        Command="{Binding ExportCommand}">
+                    <TextBlock Text="Export" FontSize="11"/>
+                </Button>
+            </StackPanel>
+
+            <!-- Notifications -->
+            <Panel Grid.Column="5" Margin="4,0">
+                <Button Classes="topbar-btn"
+                        ToolTip.Tip="Notifications"
+                        Command="{Binding ToggleNotificationsCommand}">
+                    <Panel>
+                        <TextBlock Text="Alerts" FontSize="11"/>
+                        <!-- Notification badge -->
+                        <Border Background="{DynamicResource ErrorTextBrush}"
+                                CornerRadius="6"
+                                Width="12" Height="12"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Top"
+                                Margin="0,-4,-4,0"
+                                IsVisible="{Binding HasNotifications}">
+                            <TextBlock Text="{Binding NotificationCount}"
+                                       FontSize="8"
+                                       Foreground="White"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Border>
+                    </Panel>
+                </Button>
+
+                <!-- Notifications Popup -->
+                <Popup IsOpen="{Binding IsNotificationsPanelOpen}"
+                       Placement="Bottom"
+                       HorizontalOffset="-180"
+                       VerticalOffset="4">
+                    <Border Background="{DynamicResource CardBackgroundBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Width="300"
+                            MaxHeight="400"
+                            Padding="0">
+                        <Grid RowDefinitions="Auto,*,Auto">
+                            <!-- Header -->
+                            <Border Grid.Row="0"
+                                    Background="{DynamicResource PanelHeaderBrush}"
+                                    Padding="12,8"
+                                    CornerRadius="8,8,0,0">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="Notifications"
+                                               FontWeight="SemiBold"
+                                               FontSize="13"/>
+                                    <Button Grid.Column="1"
+                                            Classes="workspace-item"
+                                            Content="Clear All"
+                                            FontSize="11"
+                                            Padding="6,2"/>
+                                </Grid>
+                            </Border>
+
+                            <!-- Notifications List -->
+                            <ScrollViewer Grid.Row="1"
+                                          VerticalScrollBarVisibility="Auto"
+                                          MaxHeight="300">
+                                <StackPanel>
+                                    <!-- Empty state -->
+                                    <TextBlock Text="No notifications"
+                                               FontSize="12"
+                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                               HorizontalAlignment="Center"
+                                               Margin="0,24"
+                                               IsVisible="{Binding !HasNotifications}"/>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Grid>
+                    </Border>
+                </Popup>
+            </Panel>
+
+            <!-- Settings -->
+            <Panel Grid.Column="6" Margin="4,0,12,0">
+                <Button Classes="topbar-btn"
+                        ToolTip.Tip="Settings"
+                        Command="{Binding SettingsCommand}">
+                    <TextBlock Text="Settings" FontSize="11"/>
+                </Button>
+
+                <!-- Settings Popup -->
+                <Popup IsOpen="{Binding IsSettingsPanelOpen}"
+                       Placement="Bottom"
+                       HorizontalOffset="-280"
+                       VerticalOffset="4">
+                    <Border Background="{DynamicResource CardBackgroundBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Width="320"
+                            Padding="16">
+                        <StackPanel Spacing="12">
+                            <!-- Header -->
+                            <TextBlock Text="Settings"
+                                       FontWeight="SemiBold"
+                                       FontSize="14"/>
+
+                            <!-- Theme -->
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock Text="Dark Theme"
+                                           FontSize="12"
+                                           VerticalAlignment="Center"/>
+                                <ToggleSwitch Grid.Column="1"
+                                              IsChecked="{Binding $parent[Window].((vm:main_view_model)DataContext).IsDarkTheme}"
+                                              OnContent=""
+                                              OffContent=""/>
+                            </Grid>
+
+                            <Border Height="1" Background="{DynamicResource BorderBrush}"/>
+
+                            <!-- Request Settings -->
+                            <TextBlock Text="Request Settings"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
+
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                                <TextBlock Grid.Row="0" Text="Follow Redirects" FontSize="12" VerticalAlignment="Center"/>
+                                <ToggleSwitch Grid.Row="0" Grid.Column="1" OnContent="" OffContent="" IsChecked="True"/>
+
+                                <TextBlock Grid.Row="1" Text="Validate SSL Certificates" FontSize="12" VerticalAlignment="Center"/>
+                                <ToggleSwitch Grid.Row="1" Grid.Column="1" OnContent="" OffContent="" IsChecked="True"/>
+                            </Grid>
+
+                            <Border Height="1" Background="{DynamicResource BorderBrush}"/>
+
+                            <!-- Close Button -->
+                            <Button Classes="primary-small"
+                                    Content="Close"
+                                    HorizontalAlignment="Right"
+                                    Command="{Binding CloseSettingsCommand}"/>
+                        </StackPanel>
+                    </Border>
+                </Popup>
+            </Panel>
+        </Grid>
+    </Border>
+
+    <UserControl.Styles>
+        <Style Selector="Button.topbar-btn">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+        </Style>
+        <Style Selector="Button.topbar-btn:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
+        </Style>
+
+        <Style Selector="Button.workspace-btn">
+            <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="Button.workspace-btn:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ButtonHoverBrush}"/>
+        </Style>
+
+        <Style Selector="Button.workspace-item">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+        </Style>
+        <Style Selector="Button.workspace-item:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ListItemHoverBrush}"/>
+        </Style>
+
+        <Style Selector="Button.primary-small">
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="12,4"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+        <Style Selector="Button.primary-small:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource AccentHoverBrush}"/>
+        </Style>
+    </UserControl.Styles>
+</UserControl>

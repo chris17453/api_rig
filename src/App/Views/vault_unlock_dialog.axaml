@@ -1,0 +1,83 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="450" d:DesignHeight="280"
+        x:Class="App.Views.vault_unlock_dialog"
+        Title="Unlock Vault"
+        Width="450"
+        Height="280"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False">
+
+    <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" Margin="25">
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock Text="Unlock Vault"
+                       FontSize="22"
+                       FontWeight="Bold"
+                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+            <TextBlock Text="Enter your vault key to access secrets"
+                       FontSize="13"
+                       Foreground="{DynamicResource TextSecondaryBrush}"
+                       Margin="0,8,0,0"/>
+        </StackPanel>
+
+        <!-- Vault Key Input -->
+        <Grid Grid.Row="1" RowDefinitions="Auto,Auto" Margin="0,0,0,10">
+            <TextBlock Grid.Row="0"
+                       Text="Vault Key:"
+                       FontWeight="SemiBold"
+                       Foreground="{DynamicResource TextSecondaryBrush}"
+                       Margin="0,0,0,8"/>
+            <Grid Grid.Row="1" ColumnDefinitions="*,Auto">
+                <TextBox Grid.Column="0"
+                         Name="VaultKeyInput"
+                         PasswordChar="*"
+                         FontFamily="Consolas, Courier New, monospace"
+                         FontSize="13"
+                         Background="{DynamicResource ButtonBackgroundBrush}"
+                         Foreground="{DynamicResource TextPrimaryBrush}"
+                         Watermark="Enter your vault key..."
+                         Padding="12"/>
+                <Button Grid.Column="1"
+                        Content="Load from File"
+                        Click="LoadFromFileButton_Click"
+                        Margin="10,0,0,0"
+                        Padding="15,10"/>
+            </Grid>
+        </Grid>
+
+        <!-- Error Message -->
+        <Border Grid.Row="2"
+                Name="ErrorBorder"
+                Background="#3DFF6B6B"
+                Padding="12"
+                CornerRadius="4"
+                Margin="0,5,0,0"
+                IsVisible="False">
+            <TextBlock Name="ErrorMessage"
+                       Foreground="#FFFF6B6B"
+                       FontSize="12"/>
+        </Border>
+
+        <!-- Spacer -->
+        <Panel Grid.Row="3"/>
+
+        <!-- Buttons -->
+        <StackPanel Grid.Row="4"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Spacing="10">
+            <Button Content="Cancel"
+                    Click="CancelButton_Click"
+                    Padding="20,10"/>
+            <Button Name="UnlockButton"
+                    Content="Unlock"
+                    Click="UnlockButton_Click"
+                    Padding="20,10"
+                    Background="{DynamicResource AccentBrush}"
+                    Foreground="White"/>
+        </StackPanel>
+    </Grid>
+</Window>

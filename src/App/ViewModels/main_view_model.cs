@@ -19,7 +19,17 @@ public record MainViewDependencies(
     environment_selector_view_model environment_selector,
     script_editor_view_model script_editor,
     test_results_view_model test_results,
-    tabs_view_model tabs);
+    tabs_view_model tabs,
+    top_bar_view_model top_bar,
+    icon_bar_view_model icon_bar,
+    side_panel_view_model side_panel,
+    bottom_bar_view_model bottom_bar,
+    environment_editor_view_model environment_editor,
+    console_panel_view_model console,
+    vault_editor_view_model vault_editor,
+    environments_panel_view_model environments_panel,
+    history_panel_view_model history_panel,
+    vault_panel_view_model vault_panel);
 
 public partial class main_view_model : ObservableObject
 {
@@ -27,6 +37,8 @@ public partial class main_view_model : ObservableObject
     private const string light_separator = "───────────────────────────────────────";
 
     private readonly i_collection_repository _collection_repository;
+    private readonly i_environment_store _environment_store;
+    private readonly i_workspace_store _workspace_store;
 
     [ObservableProperty]
     private request_editor_view_model _requestEditor;
@@ -50,6 +62,30 @@ public partial class main_view_model : ObservableObject
     private tabs_view_model _tabs;
 
     [ObservableProperty]
+    private top_bar_view_model _topBar;
+
+    [ObservableProperty]
+    private icon_bar_view_model _iconBar;
+
+    [ObservableProperty]
+    private side_panel_view_model _sidePanel;
+
+    [ObservableProperty]
+    private bottom_bar_view_model _bottomBar;
+
+    [ObservableProperty]
+    private environment_editor_view_model _environmentEditor;
+
+    [ObservableProperty]
+    private console_panel_view_model _consolePanel;
+
+    [ObservableProperty]
+    private vault_editor_view_model _vaultEditor;
+
+    private readonly environments_panel_view_model _environmentsPanel;
+    private readonly vault_panel_view_model _vaultPanel;
+
+    [ObservableProperty]
     private string _title = "API RIG";
 
     [ObservableProperty]
@@ -58,9 +94,16 @@ public partial class main_view_model : ObservableObject
     [ObservableProperty]
     private bool _isDarkTheme = true;
 
+    public event EventHandler? import_requested;
+    public event EventHandler? export_requested;
+    public event EventHandler? about_requested;
+    public event EventHandler? settings_requested;
+
     public main_view_model(
         MainViewDependencies dependencies,
-        i_collection_repository collection_repository)
+        i_collection_repository collection_repository,
+        i_environment_store environment_store,
+        i_workspace_store workspace_store)
     {
         _requestEditor = dependencies.request_editor;
         _responseViewer = dependencies.response_viewer;
@@ -69,14 +112,34 @@ public partial class main_view_model : ObservableObject
         _scriptEditor = dependencies.script_editor;
         _testResults = dependencies.test_results;
         _tabs = dependencies.tabs;
+        _topBar = dependencies.top_bar;
+        _iconBar = dependencies.icon_bar;
+        _sidePanel = dependencies.side_panel;
+        _bottomBar = dependencies.bottom_bar;
+        _environmentEditor = dependencies.environment_editor;
+        _consolePanel = dependencies.console;
+        _vaultEditor = dependencies.vault_editor;
+        _environmentsPanel = dependencies.environments_panel;
+        _vaultPanel = dependencies.vault_panel;
         _collection_repository = collection_repository;
+        _environment_store = environment_store;
+        _workspace_store = workspace_store;
+
+        // Set workspace store on top bar so it can manage workspaces
+        _topBar.SetWorkspaceStore(workspace_store);
+
+        // Wire up the side panel to use all sub-panels
+        _sidePanel.CollectionsPanel = _sidebar;
+        _sidePanel.EnvironmentsPanel = _environmentsPanel;
+        _sidePanel.HistoryPanel = dependencies.history_panel;
+        _sidePanel.VaultPanel = _vaultPanel;
 
         // Wire up events
         _requestEditor.execution_started += (_, _) => on_execution_started();
         _requestEditor.execution_completed += async (_, result) => await on_execution_completed(result);
         _requestEditor.request_saved += async (_, _) => await on_request_saved_async();
         _sidebar.request_selected += (_, data) => on_request_selected(data);
-        
+
         // Sync scripts from ScriptEditor to RequestEditor when they change
         _scriptEditor.PropertyChanged += (_, e) =>
         {
@@ -101,6 +164,44 @@ public partial class main_view_model : ObservableObject
         // Wire up request editor property changes to track unsaved changes
         _requestEditor.PropertyChanged += (_, e) => on_request_editor_property_changed(e);
 
+        // Wire up icon bar events for panel switching
+        _iconBar.panel_changed += (_, panelType) => _sidePanel.SwitchPanel(panelType);
+        _iconBar.theme_toggled += (_, _) => ToggleTheme();
+        _iconBar.about_requested += (_, _) => about_requested?.Invoke(this, EventArgs.Empty);
+
+        // Wire up top bar events
+        _topBar.import_requested += (_, _) => import_requested?.Invoke(this, EventArgs.Empty);
+        _topBar.export_requested += (_, _) => export_requested?.Invoke(this, EventArgs.Empty);
+        _topBar.settings_requested += (_, _) => settings_requested?.Invoke(this, EventArgs.Empty);
+
+        // Wire up environments panel events
+        _environmentsPanel.create_environment_requested += (_, _) => on_create_environment_requested();
+        _environmentsPanel.environment_selected += (_, env) => on_environment_selected(env);
+
+        // Wire up environment editor save to refresh the list and update tab title
+        _environmentEditor.environment_saved += async (_, _) =>
+        {
+            await _environmentsPanel.LoadEnvironmentsAsync();
+            // Update tab title to match the saved environment name
+            if (Tabs.ActiveTab?.ContentType == TabContentType.Environment)
+            {
+                Tabs.ActiveTab.Title = _environmentEditor.EnvironmentName;
+            }
+        };
+
+        // Wire up vault panel events
+        _vaultPanel.create_secret_requested += (_, _) => on_create_secret_requested();
+        _vaultPanel.secret_selected += (_, secret) => on_secret_selected(secret);
+
+        // Wire up vault editor save to refresh the list
+        _vaultEditor.secret_saved += async (_, _) =>
+        {
+            await _vaultPanel.LoadSecretsCommand.ExecuteAsync(null);
+        };
+
+        // Wire up history panel events
+        dependencies.history_panel.history_entry_selected += (_, entry) => on_history_entry_selected(entry);
+
         // IMPORTANT: Load the initial tab immediately so CurrentTabId is set BEFORE any user action
         // This must happen synchronously in the constructor, not in async initialization
         if (_tabs.ActiveTab != null)
@@ -116,6 +217,8 @@ public partial class main_view_model : ObservableObject
         await Sidebar.load_data_async(cancellation_token);
         await EnvironmentSelector.load_environments_async(cancellation_token);
         await RequestEditor.LoadCollectionsAsync(cancellation_token);
+        await _environmentsPanel.LoadEnvironmentsAsync(cancellation_token);
+        await TopBar.LoadWorkspacesCommand.ExecuteAsync(null);
     }
 
     [RelayCommand]
@@ -283,10 +386,10 @@ public partial class main_view_model : ObservableObject
         load_tab_into_editor(tab);
     }
 
-    private void on_request_with_collection_selected((http_request_model request, string collectionId, string collectionItemId) data)
+    private void on_request_with_collection_selected((http_request_model request, string collectionId, string collectionItemId, string collectionName) data)
     {
         // Open in a new tab or activate existing tab - no sourceTabId since this comes from collections
-        var tab = Tabs.open_request(data.request, null, data.collectionId, data.collectionItemId);
+        var tab = Tabs.open_request(data.request, null, data.collectionId, data.collectionItemId, data.collectionName);
         load_tab_into_editor(tab);
     }
 
@@ -350,30 +453,110 @@ public partial class main_view_model : ObservableObject
     
     private void load_tab_into_editor(tab_state tab)
     {
-        Console.WriteLine($"[MAIN] load_tab_into_editor: tab.Id={tab.Id}, CollectionId={tab.CollectionId ?? "null"}, CollectionItemId={tab.CollectionItemId ?? "null"}");
-        var request = tab.to_request_model();
-        // Pass the tab ID so history entries can reference back to this tab
-        RequestEditor.load_request(request, tab.CollectionId, tab.CollectionItemId, tab.Id);
-        ScriptEditor.LoadScriptsFromRequest(request);
+        Console.WriteLine($"[MAIN] load_tab_into_editor: tab.Id={tab.Id}, ContentType={tab.ContentType}, CollectionId={tab.CollectionId ?? "null"}");
 
-        // Sync sidebar selection to highlight the correct collection item
-        Sidebar.SelectItemById(tab.CollectionId, tab.CollectionItemId);
+        // Clear selections in all panels first, then select the appropriate one
+        Sidebar.SelectItemById(null, null);
+        _environmentsPanel.SelectById(null);
+        _vaultPanel.SelectById(null);
 
-        // Load response if available
-        if (tab.LastResponse != null)
+        switch (tab.ContentType)
         {
-            ResponseViewer.load_response(tab.LastResponse);
-        }
-        else
-        {
-            ResponseViewer.clear();
-        }
+            case TabContentType.Request:
+                var request = tab.to_request_model();
+                // Pass the tab ID so history entries can reference back to this tab
+                RequestEditor.load_request(request, tab.CollectionId, tab.CollectionItemId, tab.Id, tab.CollectionName);
+                ScriptEditor.LoadScriptsFromRequest(request);
 
-        TestResults.ClearResultsCommand.Execute(null);
+                // Sync sidebar selection to highlight the correct collection item
+                Sidebar.SelectItemById(tab.CollectionId, tab.CollectionItemId);
+
+                // Load response if available
+                if (tab.LastResponse != null)
+                {
+                    ResponseViewer.load_response(tab.LastResponse);
+                }
+                else
+                {
+                    ResponseViewer.clear();
+                }
+
+                TestResults.ClearResultsCommand.Execute(null);
+                break;
+
+            case TabContentType.Environment:
+                if (tab.Environment != null)
+                {
+                    EnvironmentEditor.LoadFromEnvironment(tab.Environment);
+                }
+                // Sync environment panel selection
+                _environmentsPanel.SelectById(tab.EnvironmentId);
+                break;
+
+            case TabContentType.VaultSecret:
+                // Sync vault panel selection
+                _vaultPanel.SelectById(tab.VaultSecretId);
+                break;
+
+            case TabContentType.Settings:
+                // Settings editor not implemented yet
+                break;
+        }
     }
 
     public import_export_view_model CreateImportExportViewModel()
     {
         return new import_export_view_model(_collection_repository);
+    }
+
+    private void on_create_environment_requested()
+    {
+        // Create a new environment and open it in a tab
+        var newEnv = new environment_model
+        {
+            id = Guid.NewGuid().ToString(),
+            name = "New Environment",
+            variables = new Dictionary<string, string>()
+        };
+
+        // Open in environment editor tab
+        var tab = Tabs.open_environment(newEnv);
+        EnvironmentEditor.LoadFromEnvironment(newEnv);
+    }
+
+    private async void on_environment_selected(environment_list_item env)
+    {
+        // Fetch full environment from store
+        var environment = await _environment_store.get_by_id_async(env.Id, CancellationToken.None);
+        if (environment == null) return;
+
+        // Open in environment editor tab
+        var tab = Tabs.open_environment(environment);
+        EnvironmentEditor.LoadFromEnvironment(environment);
+    }
+
+    private void on_create_secret_requested()
+    {
+        // Create a new secret tab
+        Tabs.CreateNewVaultSecretTab();
+        VaultEditor.CreateNew();
+    }
+
+    private void on_secret_selected(vault_secret_item secret)
+    {
+        // Load secret into editor tab
+        var model = secret.ToModel();
+        Tabs.CreateNewVaultSecretTab();
+        VaultEditor.LoadFromSecret(model);
+    }
+
+    private void on_history_entry_selected(history_entry_model entry)
+    {
+        // Load the request from history into a new tab
+        if (entry.request_snapshot != null)
+        {
+            var tab = Tabs.open_request(entry.request_snapshot, entry.source_tab_id, entry.collection_id, entry.collection_item_id);
+            load_tab_into_editor(tab);
+        }
     }
 }

@@ -35,11 +35,38 @@ public class collection_repository : i_collection_repository
 
     public async Task<postman_collection_model> import_from_json_async(string json_content, CancellationToken cancellation_token)
     {
+        var trimmed = json_content.TrimStart();
+
+        // Handle array of collections (from multi-export) - import first one
+        if (trimmed.StartsWith('['))
+        {
+            var json_array = JArray.Parse(json_content);
+            if (json_array.Count == 0)
+            {
+                throw new InvalidOperationException("Empty collection array");
+            }
+
+            // Import all collections from the array
+            postman_collection_model? firstCollection = null;
+            foreach (var item in json_array)
+            {
+                if (item is JObject obj)
+                {
+                    var collection = parse_postman_collection(obj);
+                    await save_async(collection, cancellation_token);
+                    firstCollection ??= collection;
+                }
+            }
+
+            return firstCollection ?? throw new InvalidOperationException("No valid collections in array");
+        }
+
+        // Standard single collection object
         var json_obj = JObject.Parse(json_content);
-        var collection = parse_postman_collection(json_obj);
-        
-        await save_async(collection, cancellation_token);
-        return collection;
+        var singleCollection = parse_postman_collection(json_obj);
+
+        await save_async(singleCollection, cancellation_token);
+        return singleCollection;
     }
 
     public async Task<IReadOnlyList<postman_collection_model>> list_all_async(CancellationToken cancellation_token)

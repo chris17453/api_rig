@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Core.Interfaces;
@@ -37,9 +38,52 @@ public partial class import_export_view_model : ObservableObject
     [ObservableProperty]
     private postman_collection_model? _selectedCollectionForExport;
 
+    // Multi-collection export support
+    [ObservableProperty]
+    private ObservableCollection<export_collection_item> _collectionsForExport = new();
+
+    [ObservableProperty]
+    private bool _exportAll;
+
+    [ObservableProperty]
+    private bool _exportToSingleFile = true;
+
+    public bool HasSelectedCollections => CollectionsForExport.Any(c => c.IsSelected);
+
+    public int SelectedCollectionCount => CollectionsForExport.Count(c => c.IsSelected);
+
     public import_export_view_model(i_collection_repository collection_repository)
     {
         _collection_repository = collection_repository;
+    }
+
+    public async Task LoadCollectionsForExportAsync()
+    {
+        CollectionsForExport.Clear();
+        var collections = await _collection_repository.list_all_async(CancellationToken.None);
+
+        foreach (var collection in collections)
+        {
+            var item = new export_collection_item
+            {
+                Collection = collection,
+                IsSelected = false
+            };
+            item.PropertyChanged += (_, _) =>
+            {
+                OnPropertyChanged(nameof(HasSelectedCollections));
+                OnPropertyChanged(nameof(SelectedCollectionCount));
+            };
+            CollectionsForExport.Add(item);
+        }
+    }
+
+    partial void OnExportAllChanged(bool value)
+    {
+        foreach (var item in CollectionsForExport)
+        {
+            item.IsSelected = value;
+        }
     }
 
     public event EventHandler<postman_collection_model>? collection_imported;
@@ -84,9 +128,18 @@ public partial class import_export_view_model : ObservableObject
     [RelayCommand]
     private async Task ExportCollection()
     {
-        if (SelectedCollectionForExport is null)
+        // Support for both single collection (legacy) and multi-collection export
+        var selectedCollections = CollectionsForExport.Where(c => c.IsSelected).Select(c => c.Collection).ToList();
+
+        // If no multi-select items, fall back to single selection
+        if (selectedCollections.Count == 0 && SelectedCollectionForExport != null)
         {
-            StatusMessage = "Please select a collection to export.";
+            selectedCollections.Add(SelectedCollectionForExport);
+        }
+
+        if (selectedCollections.Count == 0)
+        {
+            StatusMessage = "Please select at least one collection to export.";
             HasError = true;
             return;
         }
@@ -104,13 +157,38 @@ public partial class import_export_view_model : ObservableObject
 
         try
         {
-            // Use real collection exporter
             var exporter = new collection_exporter();
-            await Task.Run(() => exporter.export_to_file(SelectedCollectionForExport, ExportFilePath));
 
-            StatusMessage = $"Successfully exported '{SelectedCollectionForExport.name}' to {ExportFilePath}";
+            if (selectedCollections.Count == 1)
+            {
+                // Single collection - export directly to file
+                await Task.Run(() => exporter.export_to_file(selectedCollections[0], ExportFilePath));
+                StatusMessage = $"Successfully exported '{selectedCollections[0].name}' to {ExportFilePath}";
+            }
+            else if (ExportToSingleFile)
+            {
+                // Multiple collections to single file - export as array
+                await Task.Run(() => exporter.export_multiple_to_file(selectedCollections, ExportFilePath));
+                StatusMessage = $"Successfully exported {selectedCollections.Count} collections to {ExportFilePath}";
+            }
+            else
+            {
+                // Multiple collections to separate files
+                var directory = Path.GetDirectoryName(ExportFilePath) ?? ".";
+                var extension = Path.GetExtension(ExportFilePath);
+                var baseName = Path.GetFileNameWithoutExtension(ExportFilePath);
+
+                foreach (var collection in selectedCollections)
+                {
+                    var safeName = string.Join("_", collection.name.Split(Path.GetInvalidFileNameChars()));
+                    var filePath = Path.Combine(directory, $"{safeName}{extension}");
+                    await Task.Run(() => exporter.export_to_file(collection, filePath));
+                }
+
+                StatusMessage = $"Successfully exported {selectedCollections.Count} collections to {directory}";
+            }
+
             HasError = false;
-
             export_completed?.Invoke(this, EventArgs.Empty);
         }
         catch (Exception ex)
@@ -157,6 +235,19 @@ public partial class import_export_view_model : ObservableObject
         HasError = false;
         import_cancelled?.Invoke(this, EventArgs.Empty);
     }
+}
 
+/// <summary>
+/// Wrapper for collections in export dialog with selection state.
+/// </summary>
+public partial class export_collection_item : ObservableObject
+{
+    [ObservableProperty]
+    private postman_collection_model _collection = null!;
 
+    [ObservableProperty]
+    private bool _isSelected;
+
+    public string Name => Collection?.name ?? string.Empty;
+    public int ItemCount => Collection?.items?.Count ?? 0;
 }

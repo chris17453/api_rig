@@ -41,14 +41,53 @@ public class collection_exporter
     public void export_to_file(postman_collection_model collection, string file_path)
     {
         var json = export(collection);
-        
+
         var directory = Path.GetDirectoryName(file_path);
         if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
         {
             Directory.CreateDirectory(directory);
         }
-        
+
         File.WriteAllText(file_path, json);
+    }
+
+    public void export_multiple_to_file(IList<postman_collection_model> collections, string file_path)
+    {
+        var array = new JArray();
+
+        foreach (var collection in collections)
+        {
+            var postman_obj = new JObject
+            {
+                ["info"] = create_info_object(collection),
+                ["item"] = convert_items_to_postman_format(collection.items)
+            };
+
+            if (collection.auth is not null)
+            {
+                postman_obj["auth"] = convert_auth_to_postman_format(collection.auth);
+            }
+
+            if (collection.variables.Count > 0)
+            {
+                postman_obj["variable"] = JArray.FromObject(collection.variables.Select(v => new
+                {
+                    key = v.key,
+                    value = v.value,
+                    disabled = !v.enabled
+                }));
+            }
+
+            array.Add(postman_obj);
+        }
+
+        var directory = Path.GetDirectoryName(file_path);
+        if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        File.WriteAllText(file_path, array.ToString(Formatting.Indented));
     }
 
     private static JObject create_info_object(postman_collection_model collection)

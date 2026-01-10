@@ -130,4 +130,10 @@
     <SolidColorBrush x:Key="HttpHeadBrush" Color="{DynamicResource HttpHeadColor}"/>
     <SolidColorBrush x:Key="HttpOptionsBrush" Color="{DynamicResource HttpOptionsColor}"/>
 
+    <!-- Panel Header Brush -->
+    <SolidColorBrush x:Key="PanelHeaderBrush" Color="{DynamicResource SidebarBackgroundColor}"/>
+
+    <!-- List Item Hover Brush -->
+    <SolidColorBrush x:Key="ListItemHoverBrush" Color="{DynamicResource ButtonHoverColor}"/>
+
 </ResourceDictionary>

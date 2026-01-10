@@ -94,7 +94,7 @@ public partial class sidebar_view_model : ObservableObject
     /// <summary>
     /// Event fired when a collection item (request) is selected.
     /// </summary>
-    public event EventHandler<(http_request_model request, string collectionId, string collectionItemId)>? request_with_collection_selected;
+    public event EventHandler<(http_request_model request, string collectionId, string collectionItemId, string collectionName)>? request_with_collection_selected;
     public event EventHandler? collection_changed;
 
     [RelayCommand]
@@ -168,16 +168,18 @@ public partial class sidebar_view_model : ObservableObject
         collection_changed?.Invoke(this, EventArgs.Empty);
     }
 
+    private bool _suppressSelectionEvent;
+
     partial void OnSelectedCollectionItemChanged(collection_tree_item_view_model? value)
     {
-        if (value?.request != null)
+        if (value?.request != null && !_suppressSelectionEvent)
         {
             // Find the collection that contains this request
             var parentCollection = find_parent_collection(value);
             if (parentCollection != null)
             {
-                // Pass the collection item ID (value.Id) not the request ID
-                request_with_collection_selected?.Invoke(this, (value.request, parentCollection.Id, value.Id));
+                // Pass the collection item ID (value.Id) not the request ID, plus the collection name
+                request_with_collection_selected?.Invoke(this, (value.request, parentCollection.Id, value.Id, parentCollection.Name));
             }
         }
     }
@@ -260,9 +262,9 @@ public partial class sidebar_view_model : ObservableObject
             collection = collection with { items = items };
             await _collection_repository.save_async(collection, cancellation_token);
             await load_data_async(cancellation_token);
-            
-            // Trigger request selection to load it in the editor with collection ID and collection item ID
-            request_with_collection_selected?.Invoke(this, (newRequest, collection.id, newCollectionItem.id));
+
+            // Trigger request selection to load it in the editor with collection ID, collection item ID, and collection name
+            request_with_collection_selected?.Invoke(this, (newRequest, collection.id, newCollectionItem.id, collection.name));
             collection_changed?.Invoke(this, EventArgs.Empty);
         }
     }
@@ -281,26 +283,35 @@ public partial class sidebar_view_model : ObservableObject
 
     /// <summary>
     /// Selects an item in the tree by its collection item ID. Expands parent if needed.
+    /// Does not trigger the open tab event - used for syncing selection when switching tabs.
     /// </summary>
     public void SelectItemById(string? collectionId, string? collectionItemId)
     {
-        if (string.IsNullOrEmpty(collectionItemId))
+        _suppressSelectionEvent = true;
+        try
         {
-            SelectedCollectionItem = null;
-            return;
+            if (string.IsNullOrEmpty(collectionItemId))
+            {
+                SelectedCollectionItem = null;
+                return;
+            }
+
+            // Find the collection first
+            var collection = Collections.FirstOrDefault(c => c.Id == collectionId);
+            if (collection == null) return;
+
+            // Find the item within the collection
+            var item = FindItemById(collection, collectionItemId);
+            if (item != null)
+            {
+                // Expand the parent collection so the item is visible
+                collection.IsExpanded = true;
+                SelectedCollectionItem = item;
+            }
         }
-
-        // Find the collection first
-        var collection = Collections.FirstOrDefault(c => c.Id == collectionId);
-        if (collection == null) return;
-
-        // Find the item within the collection
-        var item = FindItemById(collection, collectionItemId);
-        if (item != null)
+        finally
         {
-            // Expand the parent collection so the item is visible
-            collection.IsExpanded = true;
-            SelectedCollectionItem = item;
+            _suppressSelectionEvent = false;
         }
     }
 

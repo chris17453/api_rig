@@ -61,6 +61,9 @@ public partial class request_editor_view_model : ObservableObject, IDisposable
     private string? _currentCollectionId;
 
     [ObservableProperty]
+    private string? _currentCollectionName;
+
+    [ObservableProperty]
     private string? _currentTabId;
 
     [ObservableProperty]
@@ -194,6 +197,7 @@ public partial class request_editor_view_model : ObservableObject, IDisposable
                     response_size_bytes = result.response.size_bytes,
                     collection_id = CurrentCollectionId,
                     collection_item_id = CurrentRequestId,
+                    collection_name = CurrentCollectionName,
                     source_tab_id = CurrentTabId,
                     executed_at = DateTime.UtcNow,
                     error_message = result.response.error_message,
@@ -432,6 +436,7 @@ public partial class request_editor_view_model : ObservableObject, IDisposable
 
         CurrentRequestId = itemId;
         CurrentCollectionId = collection.id;
+        CurrentCollectionName = collection.name;
 
         StatusMessage = $"✓ Request '{RequestName}' saved successfully";
         request_saved?.Invoke(this, EventArgs.Empty);
@@ -551,7 +556,7 @@ public partial class request_editor_view_model : ObservableObject, IDisposable
         }
     }
 
-    public void load_request(http_request_model request, string? collectionId = null, string? collectionItemId = null, string? tabId = null)
+    public void load_request(http_request_model request, string? collectionId = null, string? collectionItemId = null, string? tabId = null, string? collectionName = null)
     {
         _isSyncingParamsFromUrl = true;
         try
@@ -563,6 +568,7 @@ public partial class request_editor_view_model : ObservableObject, IDisposable
             // Use the collection item ID for tracking, not the request ID
             CurrentRequestId = collectionItemId ?? request.id;
             CurrentCollectionId = collectionId;
+            CurrentCollectionName = collectionName;
             CurrentTabId = tabId;
 
             // Update the collection picker to match
