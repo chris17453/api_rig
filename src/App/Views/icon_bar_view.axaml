@@ -1,0 +1,98 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:App.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="48" d:DesignHeight="600"
+             x:Class="App.Views.icon_bar_view"
+             x:DataType="vm:icon_bar_view_model">
+
+    <Border Background="{DynamicResource SidebarBackgroundBrush}"
+            BorderBrush="{DynamicResource BorderBrush}"
+            BorderThickness="0,0,1,0"
+            Width="48">
+        <Grid RowDefinitions="*,Auto">
+            <!-- Top Icons -->
+            <StackPanel Grid.Row="0" Spacing="4" Margin="6,8">
+                <!-- Collections -->
+                <Button Classes="icon-btn"
+                        Classes.selected="{Binding IsCollectionsSelected}"
+                        Command="{Binding SelectPanelCommand}"
+                        CommandParameter="collections"
+                        ToolTip.Tip="Collections">
+                    <TextBlock Text="📁" FontSize="18"/>
+                </Button>
+
+                <!-- Environments -->
+                <Button Classes="icon-btn"
+                        Classes.selected="{Binding IsEnvironmentsSelected}"
+                        Command="{Binding SelectPanelCommand}"
+                        CommandParameter="environments"
+                        ToolTip.Tip="Environments">
+                    <TextBlock Text="🌍" FontSize="18"/>
+                </Button>
+
+                <!-- History -->
+                <Button Classes="icon-btn"
+                        Classes.selected="{Binding IsHistorySelected}"
+                        Command="{Binding SelectPanelCommand}"
+                        CommandParameter="history"
+                        ToolTip.Tip="History">
+                    <TextBlock Text="📜" FontSize="18"/>
+                </Button>
+
+                <Separator Background="{DynamicResource BorderBrush}"
+                           Height="1"
+                           Margin="4,8"/>
+
+                <!-- Vault -->
+                <Button Classes="icon-btn"
+                        Classes.selected="{Binding IsVaultSelected}"
+                        Command="{Binding SelectPanelCommand}"
+                        CommandParameter="vault"
+                        ToolTip.Tip="Vault (Secrets)">
+                    <TextBlock Text="🔐" FontSize="18"/>
+                </Button>
+            </StackPanel>
+
+            <!-- Bottom Icons -->
+            <StackPanel Grid.Row="1" Spacing="4" Margin="6,8">
+                <!-- Theme Toggle -->
+                <Button Classes="icon-btn"
+                        Command="{Binding ToggleThemeCommand}"
+                        ToolTip.Tip="Toggle Theme">
+                    <TextBlock Text="{Binding ThemeIcon}" FontSize="18"/>
+                </Button>
+
+                <!-- About -->
+                <Button Classes="icon-btn"
+                        Command="{Binding AboutCommand}"
+                        ToolTip.Tip="About">
+                    <TextBlock Text="ℹ️" FontSize="18"/>
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Border>
+
+    <UserControl.Styles>
+        <Style Selector="Button.icon-btn">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Width" Value="36"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Button.icon-btn:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
+        </Style>
+        <Style Selector="Button.icon-btn.selected /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+        </Style>
+        <Style Selector="Button.icon-btn.selected:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource AccentHoverBrush}"/>
+        </Style>
+    </UserControl.Styles>
+</UserControl>

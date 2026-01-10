@@ -1,5 +1,6 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="using:App.Converters"
              x:Class="App.App"
              RequestedThemeVariant="Dark">
     <Application.Styles>
@@ -43,6 +44,12 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="avares://App/Styles/AppTheme.axaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <!-- Converters -->
+            <converters:MethodColorConverter x:Key="MethodColorConverter"/>
+            <converters:BoolToLockIconConverter x:Key="BoolToLockIconConverter"/>
+            <converters:BoolToLockTextConverter x:Key="BoolToLockTextConverter"/>
+            <converters:HttpMethodToBrushConverter x:Key="HttpMethodToBrushConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

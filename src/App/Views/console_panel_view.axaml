@@ -1,0 +1,193 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:App.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="250"
+             x:Class="App.Views.console_panel_view"
+             x:DataType="vm:console_panel_view_model">
+
+    <Border Background="{DynamicResource CardBackgroundBrush}"
+            BorderBrush="{DynamicResource BorderBrush}"
+            BorderThickness="0,1,0,0">
+        <Grid RowDefinitions="Auto,*">
+            <!-- Header with filters -->
+            <Border Grid.Row="0"
+                    Background="{DynamicResource PanelHeaderBrush}"
+                    Padding="12,6">
+                <Grid ColumnDefinitions="Auto,Auto,*,Auto">
+                    <TextBlock Grid.Column="0"
+                               Text="Console"
+                               FontSize="12"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextPrimaryBrush}"
+                               VerticalAlignment="Center"/>
+
+                    <!-- Filter Toggles -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" Margin="16,0,0,0">
+                        <ToggleButton Classes="filter-toggle"
+                                      IsChecked="{Binding ShowAll}"
+                                      Content="All"/>
+                        <ToggleButton Classes="filter-toggle info"
+                                      IsChecked="{Binding ShowInfo}"
+                                      Content="Info"/>
+                        <ToggleButton Classes="filter-toggle warning"
+                                      IsChecked="{Binding ShowWarnings}"
+                                      Content="Warn"/>
+                        <ToggleButton Classes="filter-toggle error"
+                                      IsChecked="{Binding ShowErrors}"
+                                      Content="Error"/>
+                        <ToggleButton Classes="filter-toggle network"
+                                      IsChecked="{Binding ShowNetwork}"
+                                      Content="Network"/>
+                    </StackPanel>
+
+                    <!-- Search -->
+                    <TextBox Grid.Column="2"
+                             Text="{Binding SearchFilter}"
+                             Watermark="Filter logs..."
+                             FontSize="11"
+                             Margin="16,0"
+                             Padding="8,4"
+                             CornerRadius="4"/>
+
+                    <!-- Clear Button -->
+                    <Button Grid.Column="3"
+                            Classes="console-btn"
+                            Command="{Binding ClearLogsCommand}"
+                            ToolTip.Tip="Clear console">
+                        <TextBlock Text="Clear" FontSize="11"/>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- Log Entries -->
+            <ScrollViewer Grid.Row="1"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled"
+                          Background="{DynamicResource InputBackgroundBrush}">
+                <ItemsControl ItemsSource="{Binding FilteredEntries}"
+                              Margin="0">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="vm:console_log_entry">
+                            <Border Classes="log-entry"
+                                    Padding="8,4"
+                                    BorderBrush="{DynamicResource BorderBrush}"
+                                    BorderThickness="0,0,0,1">
+                                <Grid ColumnDefinitions="Auto,Auto,Auto,*">
+                                    <!-- Timestamp -->
+                                    <TextBlock Grid.Column="0"
+                                               Text="{Binding Timestamp, StringFormat='{}{0:HH:mm:ss.fff}'}"
+                                               FontFamily="Consolas,Monaco,Menlo,monospace"
+                                               FontSize="10"
+                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                               VerticalAlignment="Top"
+                                               Margin="0,0,8,0"/>
+
+                                    <!-- Log Type Badge -->
+                                    <Border Grid.Column="1"
+                                            CornerRadius="3"
+                                            Padding="4,1"
+                                            Margin="0,0,8,0"
+                                            VerticalAlignment="Top">
+                                        <Border.Styles>
+                                            <Style Selector="Border">
+                                                <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                            </Style>
+                                        </Border.Styles>
+                                        <TextBlock Text="{Binding LogType}"
+                                                   FontSize="9"
+                                                   FontWeight="Bold"
+                                                   Foreground="White"/>
+                                    </Border>
+
+                                    <!-- Source -->
+                                    <TextBlock Grid.Column="2"
+                                               Text="{Binding Source}"
+                                               FontSize="10"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                               VerticalAlignment="Top"
+                                               Margin="0,0,8,0"
+                                               IsVisible="{Binding Source, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+
+                                    <!-- Message and Details -->
+                                    <StackPanel Grid.Column="3">
+                                        <TextBlock Text="{Binding Message}"
+                                                   FontFamily="Consolas,Monaco,Menlo,monospace"
+                                                   FontSize="11"
+                                                   TextWrapping="Wrap"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
+
+                                        <!-- Expandable Details -->
+                                        <Expander Header="Details"
+                                                  IsVisible="{Binding Details, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                                  Padding="0"
+                                                  Margin="0,4,0,0">
+                                            <Border Background="{DynamicResource CardBackgroundBrush}"
+                                                    CornerRadius="4"
+                                                    Padding="8"
+                                                    Margin="0,4,0,0">
+                                                <TextBlock Text="{Binding Details}"
+                                                           FontFamily="Consolas,Monaco,Menlo,monospace"
+                                                           FontSize="10"
+                                                           TextWrapping="Wrap"
+                                                           Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                            </Border>
+                                        </Expander>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+    </Border>
+
+    <UserControl.Styles>
+        <Style Selector="Button.console-btn">
+            <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+        </Style>
+        <Style Selector="Button.console-btn:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ButtonHoverBrush}"/>
+        </Style>
+
+        <Style Selector="ToggleButton.filter-toggle">
+            <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="Padding" Value="6,2"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+            <Setter Property="FontSize" Value="10"/>
+        </Style>
+        <Style Selector="ToggleButton.filter-toggle:checked /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+        </Style>
+        <Style Selector="ToggleButton.filter-toggle:checked">
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style Selector="ToggleButton.filter-toggle.info:checked /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+        </Style>
+        <Style Selector="ToggleButton.filter-toggle.warning:checked /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource WarningBrush}"/>
+        </Style>
+        <Style Selector="ToggleButton.filter-toggle.error:checked /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ErrorTextBrush}"/>
+        </Style>
+        <Style Selector="ToggleButton.filter-toggle.network:checked /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource SuccessBrush}"/>
+        </Style>
+
+        <Style Selector="Border.log-entry:pointerover">
+            <Setter Property="Background" Value="{DynamicResource ListItemHoverBrush}"/>
+        </Style>
+    </UserControl.Styles>
+</UserControl>

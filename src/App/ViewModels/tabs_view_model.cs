@@ -6,6 +6,21 @@ using System.Collections.ObjectModel;
 namespace App.ViewModels;
 
 /// <summary>
+/// Event args for close confirmation request.
+/// </summary>
+public class CloseConfirmationEventArgs : EventArgs
+{
+    public tab_state Tab { get; }
+    public bool AllowClose { get; set; } = true;
+    public TaskCompletionSource<bool> Confirmation { get; } = new();
+
+    public CloseConfirmationEventArgs(tab_state tab)
+    {
+        Tab = tab;
+    }
+}
+
+/// <summary>
 /// ViewModel for managing multiple request tabs.
 /// </summary>
 public partial class tabs_view_model : ObservableObject
@@ -19,6 +34,7 @@ public partial class tabs_view_model : ObservableObject
     public event EventHandler<tab_state>? tab_activated;
     public event EventHandler<tab_state>? tab_closed;
     public event EventHandler<tab_state>? tab_state_changed;
+    public event EventHandler<CloseConfirmationEventArgs>? close_confirmation_requested;
 
     public tabs_view_model()
     {
@@ -32,7 +48,7 @@ public partial class tabs_view_model : ObservableObject
     /// <summary>
     /// Opens a request in a new tab or activates existing tab if already open.
     /// </summary>
-    public tab_state open_request(http_request_model request, string? sourceTabId = null, string? collectionId = null, string? collectionItemId = null)
+    public tab_state open_request(http_request_model request, string? sourceTabId = null, string? collectionId = null, string? collectionItemId = null, string? collectionName = null)
     {
         Console.WriteLine($"[TABS] open_request called: sourceTabId={sourceTabId ?? "null"}, collectionId={collectionId ?? "null"}, collectionItemId={collectionItemId ?? "null"}, url={request.url}");
 
@@ -74,8 +90,8 @@ public partial class tabs_view_model : ObservableObject
         }
 
         // Check if we can reuse the current empty/new tab
-        if (ActiveTab != null && 
-            string.IsNullOrEmpty(ActiveTab.Url) && 
+        if (ActiveTab != null &&
+            string.IsNullOrEmpty(ActiveTab.Url) &&
             !ActiveTab.HasUnsavedChanges &&
             string.IsNullOrEmpty(ActiveTab.CollectionId))
         {
@@ -90,16 +106,17 @@ public partial class tabs_view_model : ObservableObject
             ActiveTab.QueryParams = request.query_params?.ToList() ?? new List<key_value_pair_model>();
             ActiveTab.CollectionId = collectionId;
             ActiveTab.CollectionItemId = collectionItemId;
+            ActiveTab.CollectionName = collectionName;
             ActiveTab.save_original_state();
-            
+
             return ActiveTab;
         }
 
         // Create new tab
-        var newTab = tab_state.from_request(request, collectionId, collectionItemId);
+        var newTab = tab_state.from_request(request, collectionId, collectionItemId, collectionName);
         Tabs.Add(newTab);
         ActivateTab(newTab);
-        
+
         return newTab;
     }
 
@@ -110,6 +127,52 @@ public partial class tabs_view_model : ObservableObject
     public void CreateNewTab()
     {
         var newTab = tab_state.create_new();
+        Tabs.Add(newTab);
+        ActivateTab(newTab);
+    }
+
+    /// <summary>
+    /// Opens an environment in a new tab or activates existing tab if already open.
+    /// </summary>
+    public tab_state open_environment(environment_model environment)
+    {
+        // Check if environment is already open
+        var existingTab = Tabs.FirstOrDefault(t =>
+            t.ContentType == TabContentType.Environment &&
+            t.EnvironmentId == environment.id);
+
+        if (existingTab != null)
+        {
+            ActivateTab(existingTab);
+            return existingTab;
+        }
+
+        // Create new environment tab
+        var newTab = tab_state.from_environment(environment);
+        Tabs.Add(newTab);
+        ActivateTab(newTab);
+
+        return newTab;
+    }
+
+    /// <summary>
+    /// Creates a new environment tab.
+    /// </summary>
+    [RelayCommand]
+    public void CreateNewEnvironmentTab()
+    {
+        var newTab = tab_state.create_new_environment();
+        Tabs.Add(newTab);
+        ActivateTab(newTab);
+    }
+
+    /// <summary>
+    /// Creates a new vault secret tab.
+    /// </summary>
+    [RelayCommand]
+    public void CreateNewVaultSecretTab()
+    {
+        var newTab = tab_state.create_vault_secret();
         Tabs.Add(newTab);
         ActivateTab(newTab);
     }
@@ -136,15 +199,26 @@ public partial class tabs_view_model : ObservableObject
     }
 
     /// <summary>
-    /// Closes the specified tab.
+    /// Closes the specified tab with confirmation if unsaved.
     /// </summary>
     [RelayCommand]
-    public void CloseTab(tab_state tab)
+    public async Task CloseTab(tab_state tab)
     {
         if (tab == null) return;
 
         var index = Tabs.IndexOf(tab);
         if (index < 0) return;
+
+        // Check for unsaved changes and request confirmation
+        if (tab.HasUnsavedChanges)
+        {
+            var args = new CloseConfirmationEventArgs(tab);
+            close_confirmation_requested?.Invoke(this, args);
+
+            // Wait for the UI to respond with confirmation
+            var confirmed = await args.Confirmation.Task;
+            if (!confirmed) return;
+        }
 
         Tabs.Remove(tab);
         tab_closed?.Invoke(this, tab);
@@ -159,6 +233,30 @@ public partial class tabs_view_model : ObservableObject
         else if (Tabs.Count == 0)
         {
             // Create a new empty tab if all tabs are closed
+            CreateNewTab();
+        }
+    }
+
+    /// <summary>
+    /// Force closes a tab without confirmation (used after user confirms).
+    /// </summary>
+    public void ForceCloseTab(tab_state tab)
+    {
+        if (tab == null) return;
+
+        var index = Tabs.IndexOf(tab);
+        if (index < 0) return;
+
+        Tabs.Remove(tab);
+        tab_closed?.Invoke(this, tab);
+
+        if (tab.IsActive && Tabs.Count > 0)
+        {
+            var newIndex = Math.Min(index, Tabs.Count - 1);
+            ActivateTab(Tabs[newIndex]);
+        }
+        else if (Tabs.Count == 0)
+        {
             CreateNewTab();
         }
     }

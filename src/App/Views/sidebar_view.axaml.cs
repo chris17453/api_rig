@@ -12,6 +12,14 @@ public partial class sidebar_view : UserControl
         InitializeComponent();
     }
 
+    private void OnNewCollectionClick(object? sender, PointerPressedEventArgs e)
+    {
+        if (DataContext is sidebar_view_model viewModel)
+        {
+            viewModel.CreateCollectionCommand.Execute(null);
+        }
+    }
+
     private void OnNameDoubleTapped(object? sender, TappedEventArgs e)
     {
         if (sender is TextBlock textBlock && textBlock.DataContext is collection_tree_item_view_model item)

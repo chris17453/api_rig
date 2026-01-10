@@ -55,132 +55,82 @@
         </Style>
     </Window.Styles>
 
-    <Grid ColumnDefinitions="280,*" Margin="0">
-        <!-- Sidebar -->
-        <Border Grid.Column="0" 
-                IsVisible="{Binding IsSidebarVisible}"
-                Background="{DynamicResource SidebarBackgroundBrush}"
-                BorderBrush="{DynamicResource BorderBrush}" 
-                BorderThickness="0,0,1,0">
-            <Grid RowDefinitions="Auto,Auto,Auto,*,Auto">
-                <!-- Logo and App Title -->
-                <Border Grid.Row="0" 
-                        Background="{DynamicResource PanelBackgroundBrush}"
-                        Padding="16,20,16,16">
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <Border CornerRadius="10" 
-                                ClipToBounds="True"
-                                Width="44" Height="44">
-                            <Image Source="avares://App/Assets/logo.webp"/>
-                        </Border>
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="API Rig" 
-                                       FontSize="18" 
-                                       FontWeight="Bold"
-                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
-                            <TextBlock Text="REST Client"
-                                       FontSize="11"
-                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-                
-                <!-- Import/Export Buttons -->
-                <StackPanel Grid.Row="1" 
-                            Orientation="Horizontal" 
-                            Spacing="8"
-                            Margin="16,0,16,16">
-                    <Button Classes="modern"
-                            Click="ImportButton_Click">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <TextBlock Text="↓" FontSize="12"/>
-                            <TextBlock Text="Import"/>
-                        </StackPanel>
-                    </Button>
-                    <Button Classes="modern"
-                            Click="ExportButton_Click">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <TextBlock Text="↑" FontSize="12"/>
-                            <TextBlock Text="Export"/>
-                        </StackPanel>
-                    </Button>
-                    <Button Classes="modern"
-                            Click="AboutButton_Click">
-                        <TextBlock Text="About"/>
-                    </Button>
-                </StackPanel>
-                
-                <!-- Environment Selector -->
-                <views:environment_selector_view Grid.Row="2" 
-                                                  DataContext="{Binding EnvironmentSelector}"
-                                                  Margin="16,0,16,16"/>
-                
-                <!-- Collections and History -->
-                <views:sidebar_view Grid.Row="3" 
-                                    DataContext="{Binding Sidebar}"/>
-                
-                <!-- Sidebar Footer -->
-                <Border Grid.Row="4"
-                        Background="{DynamicResource PanelBackgroundBrush}"
-                        BorderBrush="{DynamicResource BorderBrush}"
-                        BorderThickness="0,1,0,0"
-                        Padding="16,12">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <TextBlock Grid.Column="0"
-                                   Text="v1.0.0"
-                                   FontSize="11"
-                                   Foreground="{DynamicResource TextSecondaryBrush}"
-                                   VerticalAlignment="Center"/>
-                        <StackPanel Grid.Column="1" 
-                                    Orientation="Horizontal" 
-                                    Spacing="8">
-                            <!-- Theme Toggle Button -->
-                            <Button Classes="modern"
-                                    Command="{Binding ToggleThemeCommand}"
-                                    ToolTip.Tip="Toggle Light/Dark Theme"
-                                    Width="36"
-                                    Height="36"
-                                    Padding="0">
-                                <TextBlock Text="{Binding IsDarkTheme, Converter={StaticResource ThemeIconConverter}}"
-                                           FontSize="16"
-                                           HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"/>
-                            </Button>
-                        </StackPanel>
-                    </Grid>
-                </Border>
-            </Grid>
-        </Border>
-        
+    <!-- New Postman-like Layout -->
+    <Grid RowDefinitions="Auto,*,Auto,Auto">
+        <!-- Top Bar -->
+        <views:top_bar_view Grid.Row="0"
+                            DataContext="{Binding TopBar}"/>
+
         <!-- Main Content Area -->
-        <Border Grid.Column="1" Background="{DynamicResource AppBackgroundBrush}">
-            <Grid RowDefinitions="Auto,*,Auto,*" Margin="0">
-                <!-- Tab Bar -->
-                <views:tab_bar_view Grid.Row="0"
-                                    DataContext="{Binding Tabs}"/>
+        <Grid Grid.Row="1" ColumnDefinitions="Auto,Auto,*">
+            <!-- Icon Bar (vertical nav) -->
+            <views:icon_bar_view Grid.Column="0"
+                                  DataContext="{Binding IconBar}"/>
 
-                <!-- Request Editor (top half) -->
-                <views:request_editor_view Grid.Row="1"
-                                           DataContext="{Binding RequestEditor}"
-                                           Margin="16,12,16,8"/>
+            <!-- Side Panel (context-sensitive) -->
+            <views:side_panel_view Grid.Column="1"
+                                    DataContext="{Binding SidePanel}"
+                                    IsVisible="{Binding $parent[Window].((vm:main_view_model)DataContext).IsSidebarVisible}"/>
 
-                <!-- Splitter -->
-                <GridSplitter Grid.Row="2"
-                              Height="6"
-                              HorizontalAlignment="Stretch"
-                              Background="{DynamicResource BorderBrush}"
-                              Cursor="SizeNorthSouth"/>
+            <!-- Content Area with Tabs -->
+            <Border Grid.Column="2" Background="{DynamicResource AppBackgroundBrush}">
+                <Grid RowDefinitions="Auto,*">
+                    <!-- Tab Bar -->
+                    <views:tab_bar_view Grid.Row="0"
+                                        DataContext="{Binding Tabs}"/>
 
-                <!-- Response Viewer (bottom half) -->
-                <Border Grid.Row="3"
-                        Margin="16,8,16,16"
-                        Background="{DynamicResource CardBackgroundBrush}"
-                        CornerRadius="8"
-                        BorderBrush="{DynamicResource BorderBrush}"
-                        BorderThickness="1">
-                    <views:response_viewer_view DataContext="{Binding ResponseViewer}"/>
-                </Border>
-            </Grid>
-        </Border>
+                    <!-- Tab Content Area - switches based on tab type -->
+                    <Grid Grid.Row="1">
+                        <!-- Request Tab Content -->
+                        <Grid RowDefinitions="*,Auto,*"
+                              IsVisible="{Binding Tabs.ActiveTab.ContentType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:TabContentType.Request}}">
+                            <!-- Request Editor (top half) -->
+                            <views:request_editor_view Grid.Row="0"
+                                                       DataContext="{Binding RequestEditor}"
+                                                       Margin="16,12,16,8"/>
+
+                            <!-- Splitter -->
+                            <GridSplitter Grid.Row="1"
+                                          Height="6"
+                                          HorizontalAlignment="Stretch"
+                                          Background="{DynamicResource BorderBrush}"
+                                          Cursor="SizeNorthSouth"/>
+
+                            <!-- Response Viewer (bottom half) -->
+                            <Border Grid.Row="2"
+                                    Margin="16,8,16,8"
+                                    Background="{DynamicResource CardBackgroundBrush}"
+                                    CornerRadius="8"
+                                    BorderBrush="{DynamicResource BorderBrush}"
+                                    BorderThickness="1">
+                                <views:response_viewer_view DataContext="{Binding ResponseViewer}"/>
+                            </Border>
+                        </Grid>
+
+                        <!-- Environment Tab Content -->
+                        <views:environment_editor_view
+                              IsVisible="{Binding $parent[Window].((vm:main_view_model)DataContext).Tabs.ActiveTab.ContentType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:TabContentType.Environment}}"
+                              DataContext="{Binding EnvironmentEditor}"
+                              Margin="16,12,16,8"/>
+
+                        <!-- Vault Secret Tab Content -->
+                        <views:vault_editor_view
+                              IsVisible="{Binding $parent[Window].((vm:main_view_model)DataContext).Tabs.ActiveTab.ContentType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:TabContentType.VaultSecret}}"
+                              DataContext="{Binding VaultEditor}"
+                              Margin="16,12,16,8"/>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Console Panel (app-level bottom pane, collapsible) -->
+        <views:console_panel_view Grid.Row="2"
+                                  DataContext="{Binding ConsolePanel}"
+                                  IsVisible="{Binding $parent[Window].((vm:main_view_model)DataContext).BottomBar.IsTerminalVisible}"
+                                  Height="250"/>
+
+        <!-- Bottom Bar -->
+        <views:bottom_bar_view Grid.Row="3"
+                               DataContext="{Binding BottomBar}"/>
     </Grid>
 </Window>

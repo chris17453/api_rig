@@ -15,6 +15,8 @@ public class postman_clone_db_context : DbContext
     public DbSet<collection_item_entity> collection_items => Set<collection_item_entity>();
     public DbSet<environment_entity> environments => Set<environment_entity>();
     public DbSet<environment_variable_entity> environment_variables => Set<environment_variable_entity>();
+    public DbSet<vault_secret_entity> vault_secrets => Set<vault_secret_entity>();
+    public DbSet<workspace_entity> workspaces => Set<workspace_entity>();
 
     protected override void OnModelCreating(ModelBuilder model_builder)
     {
@@ -25,6 +27,8 @@ public class postman_clone_db_context : DbContext
         configure_collection_item(model_builder);
         configure_environment(model_builder);
         configure_environment_variable(model_builder);
+        configure_vault_secret(model_builder);
+        configure_workspace(model_builder);
     }
 
     private static void configure_history_entry(ModelBuilder model_builder)
@@ -229,6 +233,76 @@ public class postman_clone_db_context : DbContext
 
             entity.HasIndex(e => new { e.environment_id, e.key })
                 .IsUnique();
+        });
+    }
+
+    private static void configure_vault_secret(ModelBuilder model_builder)
+    {
+        model_builder.Entity<vault_secret_entity>(entity =>
+        {
+            entity.ToTable("vault_secrets");
+            entity.HasKey(e => e.id);
+
+            entity.Property(e => e.id)
+                .HasMaxLength(50);
+
+            entity.Property(e => e.name)
+                .HasMaxLength(200)
+                .IsRequired();
+
+            entity.Property(e => e.description)
+                .HasColumnType("TEXT");
+
+            entity.Property(e => e.secret_type)
+                .HasConversion<string>()
+                .HasMaxLength(20)
+                .IsRequired();
+
+            entity.Property(e => e.encrypted_value)
+                .HasColumnType("TEXT");
+
+            entity.Property(e => e.metadata_json)
+                .HasColumnType("TEXT");
+
+            entity.Property(e => e.tags_json)
+                .HasColumnType("TEXT");
+
+            entity.Property(e => e.created_at)
+                .IsRequired();
+
+            entity.HasIndex(e => e.name);
+            entity.HasIndex(e => e.secret_type);
+        });
+    }
+
+    private static void configure_workspace(ModelBuilder model_builder)
+    {
+        model_builder.Entity<workspace_entity>(entity =>
+        {
+            entity.ToTable("workspaces");
+            entity.HasKey(e => e.id);
+
+            entity.Property(e => e.id)
+                .HasMaxLength(50);
+
+            entity.Property(e => e.name)
+                .HasMaxLength(200)
+                .IsRequired();
+
+            entity.Property(e => e.description)
+                .HasColumnType("TEXT");
+
+            entity.Property(e => e.icon)
+                .HasMaxLength(50);
+
+            entity.Property(e => e.color)
+                .HasMaxLength(20);
+
+            entity.Property(e => e.created_at)
+                .IsRequired();
+
+            entity.HasIndex(e => e.is_active);
+            entity.HasIndex(e => e.name);
         });
     }
 }

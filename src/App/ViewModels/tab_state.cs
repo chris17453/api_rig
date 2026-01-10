@@ -4,6 +4,17 @@ using Core.Models;
 namespace App.ViewModels;
 
 /// <summary>
+/// Defines the type of content a tab can display.
+/// </summary>
+public enum TabContentType
+{
+    Request,
+    Environment,
+    VaultSecret,
+    Settings
+}
+
+/// <summary>
 /// Represents the state of a single tab containing a request.
 /// </summary>
 public partial class tab_state : ObservableObject
@@ -15,14 +26,44 @@ public partial class tab_state : ObservableObject
     private string _title = "New Request";
 
     [ObservableProperty]
+    private TabContentType _contentType = TabContentType.Request;
+
+    [ObservableProperty]
     private bool _hasUnsavedChanges;
 
     [ObservableProperty]
     private bool _isActive;
 
+    /// <summary>
+    /// Gets the icon to display for this tab based on content type.
+    /// </summary>
+    public string TabIcon => ContentType switch
+    {
+        TabContentType.Request => "⚡",
+        TabContentType.Environment => "🌍",
+        TabContentType.VaultSecret => "🔐",
+        TabContentType.Settings => "⚙",
+        _ => "●"
+    };
+
+    /// <summary>
+    /// Gets the icon color for this tab based on content type.
+    /// </summary>
+    public string TabIconColor => ContentType switch
+    {
+        TabContentType.Request => "#F97316",      // Orange for requests
+        TabContentType.Environment => "#22C55E",  // Green for environments
+        TabContentType.VaultSecret => "#EAB308",  // Yellow for vault secrets
+        TabContentType.Settings => "#6B7280",     // Gray for settings
+        _ => "#9CA3AF"
+    };
+
     // Request identification
     [ObservableProperty]
     private string? _collectionId;
+
+    [ObservableProperty]
+    private string? _collectionName;
 
     [ObservableProperty]
     private string? _collectionItemId;
@@ -56,6 +97,17 @@ public partial class tab_state : ObservableObject
     [ObservableProperty]
     private http_response_model? _lastResponse;
 
+    // Environment-specific state (for Environment tabs)
+    [ObservableProperty]
+    private string? _environmentId;
+
+    [ObservableProperty]
+    private environment_model? _environment;
+
+    // Vault-specific state (for VaultSecret tabs)
+    [ObservableProperty]
+    private string? _vaultSecretId;
+
     // Original state for change detection
     private string _originalRequestName = string.Empty;
     private string _originalUrl = string.Empty;
@@ -68,13 +120,14 @@ public partial class tab_state : ObservableObject
     /// <summary>
     /// Creates a new tab from an http_request_model.
     /// </summary>
-    public static tab_state from_request(http_request_model request, string? collectionId = null, string? collectionItemId = null)
+    public static tab_state from_request(http_request_model request, string? collectionId = null, string? collectionItemId = null, string? collectionName = null)
     {
         var tab = new tab_state
         {
             Title = request.name,
             CollectionId = collectionId,
             CollectionItemId = collectionItemId,
+            CollectionName = collectionName,
             RequestName = request.name,
             Url = request.url,
             SelectedMethod = request.method,
@@ -97,6 +150,7 @@ public partial class tab_state : ObservableObject
         var tab = new tab_state
         {
             Title = "New Request",
+            ContentType = TabContentType.Request,
             RequestName = "New Request",
             Url = string.Empty,
             SelectedMethod = http_method.get,
@@ -104,6 +158,56 @@ public partial class tab_state : ObservableObject
         };
 
         tab.save_original_state();
+        return tab;
+    }
+
+    /// <summary>
+    /// Creates a tab for editing an environment.
+    /// </summary>
+    public static tab_state from_environment(environment_model environment)
+    {
+        var tab = new tab_state
+        {
+            Title = environment.name,
+            ContentType = TabContentType.Environment,
+            EnvironmentId = environment.id,
+            Environment = environment
+        };
+
+        return tab;
+    }
+
+    /// <summary>
+    /// Creates a tab for editing a new environment.
+    /// </summary>
+    public static tab_state create_new_environment()
+    {
+        var tab = new tab_state
+        {
+            Title = "New Environment",
+            ContentType = TabContentType.Environment,
+            Environment = new environment_model
+            {
+                id = Guid.NewGuid().ToString(),
+                name = "New Environment",
+                variables = new Dictionary<string, string>()
+            }
+        };
+
+        return tab;
+    }
+
+    /// <summary>
+    /// Creates a tab for editing a vault secret.
+    /// </summary>
+    public static tab_state create_vault_secret()
+    {
+        var tab = new tab_state
+        {
+            Title = "New Secret",
+            ContentType = TabContentType.VaultSecret
+        };
+
         return tab;
     }
 
@@ -133,7 +237,7 @@ public partial class tab_state : ObservableObject
     /// </summary>
     public void check_for_changes()
     {
-        bool hasChanges = 
+        bool hasChanges =
             RequestName != _originalRequestName ||
             Url != _originalUrl ||
             SelectedMethod != _originalMethod ||
@@ -143,7 +247,8 @@ public partial class tab_state : ObservableObject
             !headers_equal(Headers, _originalHeaders);
 
         HasUnsavedChanges = hasChanges;
-        Title = hasChanges ? $"● {RequestName}" : RequestName;
+        // Title is kept clean - the visual indicator (Ellipse) in the tab bar shows unsaved state
+        Title = RequestName;
     }
 
     private static bool headers_equal(List<key_value_pair_model> a, List<key_value_pair_model> b)

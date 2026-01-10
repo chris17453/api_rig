@@ -1,0 +1,75 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="180"
+        x:Class="App.Views.confirm_dialog"
+        Title="Confirm"
+        Width="400" Height="180"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="NoChrome"
+        SystemDecorations="BorderOnly"
+        Background="{DynamicResource PanelBackgroundBrush}">
+
+    <Border Background="{DynamicResource PanelBackgroundBrush}"
+            BorderBrush="{DynamicResource BorderBrush}"
+            BorderThickness="1"
+            CornerRadius="8">
+        <Grid RowDefinitions="Auto,*,Auto">
+            <!-- Title Bar -->
+            <Border Grid.Row="0"
+                    Background="{DynamicResource CardBackgroundBrush}"
+                    CornerRadius="8,8,0,0"
+                    Padding="16,12">
+                <TextBlock x:Name="TitleText"
+                           Text="Confirm"
+                           FontSize="16"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+            </Border>
+
+            <!-- Message -->
+            <StackPanel Grid.Row="1"
+                        Margin="20,16"
+                        VerticalAlignment="Center">
+                <TextBlock x:Name="MessageText"
+                           Text="Are you sure?"
+                           TextWrapping="Wrap"
+                           FontSize="14"
+                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+            </StackPanel>
+
+            <!-- Buttons -->
+            <StackPanel Grid.Row="2"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Margin="16"
+                        Spacing="12">
+                <Button x:Name="CancelButton"
+                        Content="Cancel"
+                        Width="80"
+                        Padding="12,8"
+                        Background="{DynamicResource ButtonBackgroundBrush}"
+                        Foreground="{DynamicResource TextPrimaryBrush}"
+                        Click="OnCancelClick"/>
+                <Button x:Name="DiscardButton"
+                        Content="Discard"
+                        Width="80"
+                        Padding="12,8"
+                        Background="{DynamicResource ErrorTextBrush}"
+                        Foreground="White"
+                        Click="OnDiscardClick"/>
+                <Button x:Name="SaveButton"
+                        Content="Save"
+                        Width="80"
+                        Padding="12,8"
+                        Background="{DynamicResource AccentBrush}"
+                        Foreground="White"
+                        Click="OnSaveClick"
+                        IsVisible="False"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

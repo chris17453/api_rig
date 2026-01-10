@@ -1,0 +1,551 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:App.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="700"
+        x:Class="App.Views.settings_dialog"
+        x:DataType="vm:settings_dialog_view_model"
+        Title="Settings"
+        Width="900" Height="700"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False">
+
+    <Window.Styles>
+        <Style Selector="TextBlock.section-header">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,0,0,16"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+        </Style>
+        <Style Selector="TextBlock.setting-label">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+        </Style>
+        <Style Selector="TextBox.setting-input">
+            <Setter Property="Background" Value="{DynamicResource InputBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+        <Style Selector="ComboBox.setting-combo">
+            <Setter Property="Background" Value="{DynamicResource InputBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+        <Style Selector="NumericUpDown.setting-numeric">
+            <Setter Property="Background" Value="{DynamicResource InputBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+        <Style Selector="Button.nav-item">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+        </Style>
+        <Style Selector="Button.nav-item:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ListItemHoverBrush}"/>
+        </Style>
+        <Style Selector="Button.nav-item.selected">
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style Selector="Button.action-btn">
+            <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+        <Style Selector="Button.action-btn:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ButtonHoverBrush}"/>
+        </Style>
+        <Style Selector="Button.primary-btn">
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style Selector="Button.primary-btn:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource AccentHoverBrush}"/>
+        </Style>
+        <Style Selector="Border.color-swatch">
+            <Setter Property="Width" Value="32"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+    </Window.Styles>
+
+    <Border Background="{DynamicResource AppBackgroundBrush}">
+        <Grid RowDefinitions="*,Auto">
+            <!-- Main Content -->
+            <Grid Grid.Row="0" ColumnDefinitions="200,*">
+                <!-- Left Navigation -->
+                <Border Grid.Column="0"
+                        Background="{DynamicResource PanelBackgroundBrush}"
+                        BorderBrush="{DynamicResource BorderBrush}"
+                        BorderThickness="0,0,1,0">
+                    <StackPanel Margin="8">
+                        <TextBlock Text="Settings"
+                                   FontSize="18"
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                   Margin="12,8,12,16"/>
+
+                        <Button Classes="nav-item"
+                                Click="OnGeneralClick">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="⚙" FontSize="14"/>
+                                <TextBlock Text="General"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Classes="nav-item"
+                                Click="OnAppearanceClick">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="🎨" FontSize="14"/>
+                                <TextBlock Text="Appearance"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Classes="nav-item"
+                                Click="OnRequestsClick">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="⚡" FontSize="14"/>
+                                <TextBlock Text="Requests"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Classes="nav-item"
+                                Click="OnScriptsClick">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="📜" FontSize="14"/>
+                                <TextBlock Text="Scripts"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Classes="nav-item"
+                                Click="OnProxyClick">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="🌐" FontSize="14"/>
+                                <TextBlock Text="Proxy"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Classes="nav-item"
+                                Click="OnEditorClick">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="✏" FontSize="14"/>
+                                <TextBlock Text="Editor"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Border>
+
+                <!-- Right Content Panel -->
+                <ScrollViewer Grid.Column="1"
+                              VerticalScrollBarVisibility="Auto"
+                              Padding="24">
+                    <StackPanel>
+                        <!-- General Settings -->
+                        <StackPanel x:Name="GeneralSection" IsVisible="True">
+                                <TextBlock Text="General Settings" Classes="section-header"/>
+
+                                <StackPanel Margin="0,0,0,16">
+                                    <TextBlock Text="Database Location" Classes="setting-label"/>
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBox Grid.Column="0"
+                                                 Classes="setting-input"
+                                                 Text="{Binding DatabasePath, Mode=TwoWay}"/>
+                                        <Button Grid.Column="1"
+                                                Classes="action-btn"
+                                                Margin="8,0,0,0"
+                                                Command="{Binding BrowseDatabasePathCommand}">
+                                            Browse...
+                                        </Button>
+                                    </Grid>
+                                </StackPanel>
+
+                                <StackPanel Margin="0,0,0,16">
+                                    <TextBlock Text="Workspace Folder" Classes="setting-label"/>
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBox Grid.Column="0"
+                                                 Classes="setting-input"
+                                                 Text="{Binding WorkspacePath, Mode=TwoWay}"
+                                                 Watermark="Default: Application directory"/>
+                                        <Button Grid.Column="1"
+                                                Classes="action-btn"
+                                                Margin="8,0,0,0"
+                                                Command="{Binding BrowseWorkspacePathCommand}">
+                                            Browse...
+                                        </Button>
+                                    </Grid>
+                                </StackPanel>
+
+                                <CheckBox IsChecked="{Binding AutoSaveEnabled}"
+                                          Margin="0,0,0,8">
+                                    <TextBlock Text="Enable auto-save" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                </CheckBox>
+
+                                <StackPanel Margin="0,0,0,16"
+                                            IsVisible="{Binding AutoSaveEnabled}">
+                                    <TextBlock Text="Auto-save interval (seconds)" Classes="setting-label"/>
+                                    <NumericUpDown Classes="setting-numeric"
+                                                   Value="{Binding AutoSaveIntervalSeconds}"
+                                                   Minimum="5"
+                                                   Maximum="300"
+                                                   Width="120"
+                                                   HorizontalAlignment="Left"/>
+                                </StackPanel>
+
+                                <StackPanel Margin="0,0,0,16">
+                                    <TextBlock Text="Maximum history entries" Classes="setting-label"/>
+                                    <NumericUpDown Classes="setting-numeric"
+                                                   Value="{Binding HistoryMaxEntries}"
+                                                   Minimum="10"
+                                                   Maximum="1000"
+                                                   Width="120"
+                                                   HorizontalAlignment="Left"/>
+                                </StackPanel>
+
+                                <CheckBox IsChecked="{Binding ConfirmOnClose}"
+                                          Margin="0,0,0,8">
+                                    <TextBlock Text="Confirm before closing with unsaved changes" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                </CheckBox>
+
+                                <CheckBox IsChecked="{Binding ShowConsoleOnStartup}">
+                                    <TextBlock Text="Show console panel on startup" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                </CheckBox>
+                        </StackPanel>
+
+                        <!-- Appearance Settings -->
+                        <StackPanel x:Name="AppearanceSection" IsVisible="False">
+                            <TextBlock Text="Appearance" Classes="section-header"/>
+
+                            <StackPanel Margin="0,0,0,16">
+                                <TextBlock Text="Theme" Classes="setting-label"/>
+                                <Grid ColumnDefinitions="*,Auto,Auto">
+                                    <ComboBox Grid.Column="0"
+                                              Classes="setting-combo"
+                                              ItemsSource="{Binding AvailableThemes}"
+                                              SelectedItem="{Binding SelectedTheme}"
+                                              Width="250"
+                                              HorizontalAlignment="Left"/>
+                                    <Button Grid.Column="1"
+                                            Classes="action-btn"
+                                            Margin="8,0,0,0"
+                                            Command="{Binding CreateNewThemeCommand}">
+                                        + New Theme
+                                    </Button>
+                                    <Button Grid.Column="2"
+                                            Classes="action-btn"
+                                            Margin="8,0,0,0"
+                                            Command="{Binding DeleteSelectedThemeCommand}"
+                                            IsEnabled="{Binding SelectedTheme.IsCustom}">
+                                        Delete
+                                    </Button>
+                                </Grid>
+                            </StackPanel>
+
+                            <CheckBox IsChecked="{Binding IsDarkMode}"
+                                      Margin="0,0,0,16">
+                                <TextBlock Text="Dark mode" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            </CheckBox>
+
+                            <TextBlock Text="Theme Colors" Classes="setting-label" Margin="0,8,0,12"/>
+
+                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" Margin="0,0,0,16">
+                                <!-- Row 0 -->
+                                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,16,12">
+                                    <TextBlock Text="Accent Color" Classes="setting-label"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Border Classes="color-swatch" Background="{Binding AccentColor}"/>
+                                        <TextBox Classes="setting-input" Text="{Binding AccentColor, Mode=TwoWay}" Width="100"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,0,12">
+                                    <TextBlock Text="Success Color" Classes="setting-label"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Border Classes="color-swatch" Background="{Binding SuccessColor}"/>
+                                        <TextBox Classes="setting-input" Text="{Binding SuccessColor, Mode=TwoWay}" Width="100"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <!-- Row 1 -->
+                                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,16,12">
+                                    <TextBlock Text="Warning Color" Classes="setting-label"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Border Classes="color-swatch" Background="{Binding WarningColor}"/>
+                                        <TextBox Classes="setting-input" Text="{Binding WarningColor, Mode=TwoWay}" Width="100"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,0,12">
+                                    <TextBlock Text="Error Color" Classes="setting-label"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Border Classes="color-swatch" Background="{Binding ErrorColor}"/>
+                                        <TextBox Classes="setting-input" Text="{Binding ErrorColor, Mode=TwoWay}" Width="100"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <!-- Row 2 -->
+                                <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,16,12">
+                                    <TextBlock Text="App Background" Classes="setting-label"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Border Classes="color-swatch" Background="{Binding AppBackgroundColor}"/>
+                                        <TextBox Classes="setting-input" Text="{Binding AppBackgroundColor, Mode=TwoWay}" Width="100"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,0,0,12">
+                                    <TextBlock Text="Panel Background" Classes="setting-label"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Border Classes="color-swatch" Background="{Binding PanelBackgroundColor}"/>
+                                        <TextBox Classes="setting-input" Text="{Binding PanelBackgroundColor, Mode=TwoWay}" Width="100"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <!-- Row 3 -->
+                                <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,16,12">
+                                    <TextBlock Text="Card Background" Classes="setting-label"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Border Classes="color-swatch" Background="{Binding CardBackgroundColor}"/>
+                                        <TextBox Classes="setting-input" Text="{Binding CardBackgroundColor, Mode=TwoWay}" Width="100"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="3" Grid.Column="1" Margin="0,0,0,12">
+                                    <TextBlock Text="Input Background" Classes="setting-label"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Border Classes="color-swatch" Background="{Binding InputBackgroundColor}"/>
+                                        <TextBox Classes="setting-input" Text="{Binding InputBackgroundColor, Mode=TwoWay}" Width="100"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <!-- Row 4 -->
+                                <StackPanel Grid.Row="4" Grid.Column="0" Margin="0,0,16,12">
+                                    <TextBlock Text="Primary Text" Classes="setting-label"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Border Classes="color-swatch" Background="{Binding TextPrimaryColor}"/>
+                                        <TextBox Classes="setting-input" Text="{Binding TextPrimaryColor, Mode=TwoWay}" Width="100"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="4" Grid.Column="1" Margin="0,0,0,12">
+                                    <TextBlock Text="Secondary Text" Classes="setting-label"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Border Classes="color-swatch" Background="{Binding TextSecondaryColor}"/>
+                                        <TextBox Classes="setting-input" Text="{Binding TextSecondaryColor, Mode=TwoWay}" Width="100"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <!-- Row 5 -->
+                                <StackPanel Grid.Row="5" Grid.Column="0" Margin="0,0,16,12">
+                                    <TextBlock Text="Border Color" Classes="setting-label"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Border Classes="color-swatch" Background="{Binding BorderColor}"/>
+                                        <TextBox Classes="setting-input" Text="{Binding BorderColor, Mode=TwoWay}" Width="100"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Requests Settings -->
+                        <StackPanel x:Name="RequestsSection" IsVisible="False">
+                            <TextBlock Text="Request Settings" Classes="section-header"/>
+
+                            <StackPanel Margin="0,0,0,16">
+                                <TextBlock Text="Request timeout (seconds)" Classes="setting-label"/>
+                                <NumericUpDown Classes="setting-numeric"
+                                               Value="{Binding RequestTimeoutSeconds}"
+                                               Minimum="1"
+                                               Maximum="300"
+                                               Width="120"
+                                               HorizontalAlignment="Left"/>
+                            </StackPanel>
+
+                            <CheckBox IsChecked="{Binding FollowRedirects}"
+                                      Margin="0,0,0,8">
+                                <TextBlock Text="Follow redirects automatically" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            </CheckBox>
+
+                            <StackPanel Margin="0,0,0,16"
+                                        IsVisible="{Binding FollowRedirects}">
+                                <TextBlock Text="Maximum redirects" Classes="setting-label"/>
+                                <NumericUpDown Classes="setting-numeric"
+                                               Value="{Binding MaxRedirects}"
+                                               Minimum="1"
+                                               Maximum="50"
+                                               Width="120"
+                                               HorizontalAlignment="Left"/>
+                            </StackPanel>
+
+                            <CheckBox IsChecked="{Binding ValidateSslCertificates}">
+                                <TextBlock Text="Validate SSL certificates" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            </CheckBox>
+                        </StackPanel>
+
+                        <!-- Scripts Settings -->
+                        <StackPanel x:Name="ScriptsSection" IsVisible="False">
+                            <TextBlock Text="Script Settings" Classes="section-header"/>
+
+                            <StackPanel Margin="0,0,0,16">
+                                <TextBlock Text="Script timeout (milliseconds)" Classes="setting-label"/>
+                                <NumericUpDown Classes="setting-numeric"
+                                               Value="{Binding ScriptTimeoutMs}"
+                                               Minimum="100"
+                                               Maximum="60000"
+                                               Width="150"
+                                               HorizontalAlignment="Left"/>
+                            </StackPanel>
+
+                            <CheckBox IsChecked="{Binding EnableScriptConsoleLog}">
+                                <TextBlock Text="Enable console.log() output in scripts" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            </CheckBox>
+                        </StackPanel>
+
+                        <!-- Proxy Settings -->
+                        <StackPanel x:Name="ProxySection" IsVisible="False">
+                            <TextBlock Text="Proxy Settings" Classes="section-header"/>
+
+                            <CheckBox IsChecked="{Binding UseProxy}"
+                                      Margin="0,0,0,16">
+                                <TextBlock Text="Use proxy server" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            </CheckBox>
+
+                            <StackPanel IsVisible="{Binding UseProxy}">
+                                <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,16">
+                                    <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                                        <TextBlock Text="Proxy Host" Classes="setting-label"/>
+                                        <TextBox Classes="setting-input"
+                                                 Text="{Binding ProxyHost, Mode=TwoWay}"
+                                                 Watermark="proxy.example.com"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Width="100">
+                                        <TextBlock Text="Port" Classes="setting-label"/>
+                                        <NumericUpDown Classes="setting-numeric"
+                                                       Value="{Binding ProxyPort}"
+                                                       Minimum="1"
+                                                       Maximum="65535"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <StackPanel Margin="0,0,0,16">
+                                    <TextBlock Text="Proxy Username (optional)" Classes="setting-label"/>
+                                    <TextBox Classes="setting-input"
+                                             Text="{Binding ProxyUsername, Mode=TwoWay}"
+                                             Width="250"
+                                             HorizontalAlignment="Left"/>
+                                </StackPanel>
+
+                                <StackPanel Margin="0,0,0,16">
+                                    <TextBlock Text="Proxy Password (optional)" Classes="setting-label"/>
+                                    <TextBox Classes="setting-input"
+                                             Text="{Binding ProxyPassword, Mode=TwoWay}"
+                                             PasswordChar="•"
+                                             Width="250"
+                                             HorizontalAlignment="Left"/>
+                                </StackPanel>
+
+                                <CheckBox IsChecked="{Binding ProxyBypassLocal}">
+                                    <TextBlock Text="Bypass proxy for local addresses" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                </CheckBox>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Editor Settings -->
+                        <StackPanel x:Name="EditorSection" IsVisible="False">
+                            <TextBlock Text="Editor Settings" Classes="section-header"/>
+
+                            <StackPanel Margin="0,0,0,16">
+                                <TextBlock Text="Font Family" Classes="setting-label"/>
+                                <ComboBox Classes="setting-combo"
+                                          ItemsSource="{Binding AvailableFonts}"
+                                          SelectedItem="{Binding FontFamily}"
+                                          Width="200"
+                                          HorizontalAlignment="Left"/>
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,16">
+                                <TextBlock Text="Font Size" Classes="setting-label"/>
+                                <NumericUpDown Classes="setting-numeric"
+                                               Value="{Binding FontSize}"
+                                               Minimum="8"
+                                               Maximum="24"
+                                               Width="100"
+                                               HorizontalAlignment="Left"/>
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,16">
+                                <TextBlock Text="Tab Size" Classes="setting-label"/>
+                                <NumericUpDown Classes="setting-numeric"
+                                               Value="{Binding TabSize}"
+                                               Minimum="1"
+                                               Maximum="8"
+                                               Width="100"
+                                               HorizontalAlignment="Left"/>
+                            </StackPanel>
+
+                            <CheckBox IsChecked="{Binding WordWrap}"
+                                      Margin="0,0,0,8">
+                                <TextBlock Text="Word wrap" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            </CheckBox>
+
+                            <CheckBox IsChecked="{Binding ShowLineNumbers}">
+                                <TextBlock Text="Show line numbers" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            </CheckBox>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+
+            <!-- Bottom Action Bar -->
+            <Border Grid.Row="1"
+                    Background="{DynamicResource PanelBackgroundBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="0,1,0,0"
+                    Padding="16,12">
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <Button Grid.Column="0"
+                            Classes="action-btn"
+                            Command="{Binding ResetToDefaultsCommand}">
+                        Reset to Defaults
+                    </Button>
+
+                    <StackPanel Grid.Column="2"
+                                Orientation="Horizontal"
+                                Spacing="8">
+                        <Button Classes="action-btn"
+                                Command="{Binding CancelCommand}">
+                            Cancel
+                        </Button>
+                        <Button Classes="primary-btn"
+                                Command="{Binding SaveCommand}">
+                            Save Settings
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</Window>
