@@ -1,0 +1,169 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:App.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="400"
+             x:Class="App.Views.script_editor_view"
+             x:DataType="vm:script_editor_view_model">
+
+    <Grid RowDefinitions="Auto,*,Auto,120">
+        <!-- Script Type Tabs -->
+        <TabControl Grid.Row="0" Grid.RowSpan="2" Background="Transparent" Padding="12,8">
+            <TabControl.Styles>
+                <Style Selector="TabItem">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                    <Setter Property="Padding" Value="16,10"/>
+                    <Setter Property="FontSize" Value="13"/>
+                    <Setter Property="Margin" Value="0,0,4,0"/>
+                </Style>
+                <Style Selector="TabItem:selected">
+                    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                    <Setter Property="FontWeight" Value="SemiBold"/>
+                </Style>
+            </TabControl.Styles>
+            
+            <!-- Pre-request Script Tab -->
+            <TabItem Header="Pre-request Script">
+                <Grid RowDefinitions="Auto,*" Margin="0,8,0,0">
+                    <Border Grid.Row="0" 
+                            Background="{DynamicResource ButtonBackgroundBrush}" 
+                            CornerRadius="6" 
+                            Padding="12,8"
+                            Margin="0,0,0,12"
+                            HorizontalAlignment="Left">
+                        <TextBlock Text="Runs before the request is sent"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"/>
+                    </Border>
+                    
+                    <TextBox Grid.Row="1"
+                             Text="{Binding PreRequestScript, Mode=TwoWay}"
+                             AcceptsReturn="True"
+                             AcceptsTab="True"
+                             TextWrapping="NoWrap"
+                             FontFamily="JetBrains Mono, Consolas, monospace"
+                             FontSize="12"
+                             Background="{DynamicResource InputBackgroundBrush}"
+                             Foreground="{DynamicResource ButtonTextBrush}"
+                             BorderBrush="{DynamicResource BorderLightBrush}"
+                             BorderThickness="1"
+                             CornerRadius="8"
+                             Padding="12"/>
+                </Grid>
+            </TabItem>
+            
+            <!-- Post-response Script Tab -->
+            <TabItem Header="Post-response Script">
+                <Grid RowDefinitions="Auto,*" Margin="0,8,0,0">
+                    <Border Grid.Row="0" 
+                            Background="{DynamicResource ButtonBackgroundBrush}" 
+                            CornerRadius="6" 
+                            Padding="12,8"
+                            Margin="0,0,0,12"
+                            HorizontalAlignment="Left">
+                        <TextBlock Text="Runs after receiving the response • Use pm.test() for assertions"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"/>
+                    </Border>
+                    
+                    <TextBox Grid.Row="1"
+                             Text="{Binding PostResponseScript, Mode=TwoWay}"
+                             AcceptsReturn="True"
+                             AcceptsTab="True"
+                             TextWrapping="NoWrap"
+                             FontFamily="JetBrains Mono, Consolas, monospace"
+                             FontSize="12"
+                             Background="{DynamicResource InputBackgroundBrush}"
+                             Foreground="{DynamicResource ButtonTextBrush}"
+                             BorderBrush="{DynamicResource BorderLightBrush}"
+                             BorderThickness="1"
+                             CornerRadius="8"
+                             Padding="12"/>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <!-- Console Header -->
+        <Border Grid.Row="2" 
+                Background="{DynamicResource ButtonBackgroundBrush}" 
+                CornerRadius="8,8,0,0"
+                Padding="12,10"
+                Margin="12,0,12,0">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="⌘" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="14"/>
+                    <TextBlock Text="Console Output" 
+                               FontWeight="SemiBold"
+                               FontSize="13"
+                               Foreground="{DynamicResource TextPrimaryBrush}"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+                
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                    <Button Command="{Binding RunScriptCommand}"
+                            IsEnabled="{Binding !IsRunning}">
+                        <Button.Styles>
+                            <Style Selector="Button">
+                                <Setter Property="Background" Value="{DynamicResource SuccessBrush}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="CornerRadius" Value="6"/>
+                                <Setter Property="Padding" Value="14,6"/>
+                                <Setter Property="FontSize" Value="12"/>
+                            </Style>
+                            <Style Selector="Button:pointerover /template/ ContentPresenter">
+                                <Setter Property="Background" Value="{DynamicResource SuccessHoverBrush}"/>
+                            </Style>
+                            <Style Selector="Button:disabled /template/ ContentPresenter">
+                                <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Style>
+                        </Button.Styles>
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="▶" FontSize="10" IsVisible="{Binding !IsRunning}"/>
+                            <TextBlock Text="Run Script" IsVisible="{Binding !IsRunning}" FontWeight="SemiBold"/>
+                            <TextBlock Text="Running..." IsVisible="{Binding IsRunning}"/>
+                        </StackPanel>
+                    </Button>
+                    
+                    <Button Command="{Binding ClearConsoleCommand}">
+                        <Button.Styles>
+                            <Style Selector="Button">
+                                <Setter Property="Background" Value="{DynamicResource BorderLightBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
+                                <Setter Property="CornerRadius" Value="6"/>
+                                <Setter Property="Padding" Value="12,6"/>
+                                <Setter Property="FontSize" Value="12"/>
+                            </Style>
+                            <Style Selector="Button:pointerover /template/ ContentPresenter">
+                                <Setter Property="Background" Value="{DynamicResource TextTertiaryBrush}"/>
+                            </Style>
+                        </Button.Styles>
+                        <TextBlock Text="Clear"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Console Output -->
+        <Border Grid.Row="3" 
+                Background="{DynamicResource PanelBackgroundBrush}" 
+                BorderBrush="{DynamicResource BorderLightBrush}" 
+                BorderThickness="1,0,1,1"
+                CornerRadius="0,0,8,8"
+                Margin="12,0,12,12">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                <TextBox Text="{Binding ConsoleOutput}"
+                         IsReadOnly="True"
+                         TextWrapping="NoWrap"
+                         FontFamily="JetBrains Mono, Consolas, monospace"
+                         FontSize="11"
+                         Background="Transparent"
+                         Foreground="{DynamicResource SuccessTextBrush}"
+                         BorderThickness="0"
+                         Padding="12,8"/>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</UserControl>

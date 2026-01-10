@@ -1,0 +1,184 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:App.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="300"
+             x:Class="App.Views.test_results_view"
+             x:DataType="vm:test_results_view_model">
+
+    <Grid RowDefinitions="Auto,Auto,*" Background="{DynamicResource CardBackgroundBrush}">
+        <!-- Header with Summary -->
+        <Border Grid.Row="0" 
+                Background="{DynamicResource PanelBackgroundBrush}" 
+                Padding="16,14"
+                BorderBrush="{DynamicResource ButtonBackgroundBrush}"
+                BorderThickness="0,0,0,1">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12">
+                    <TextBlock Text="🧪" FontSize="16"/>
+                    <TextBlock Text="Test Results" 
+                               FontWeight="SemiBold" 
+                               FontSize="14"
+                               Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    
+                    <TextBlock Text="{Binding Summary}"
+                               Foreground="{Binding SummaryColor}"
+                               VerticalAlignment="Center"
+                               FontSize="12"/>
+                </StackPanel>
+                
+                <Button Grid.Column="1" 
+                        Command="{Binding ClearResultsCommand}">
+                    <Button.Styles>
+                        <Style Selector="Button">
+                            <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                            <Setter Property="CornerRadius" Value="6"/>
+                            <Setter Property="Padding" Value="10,5"/>
+                            <Setter Property="FontSize" Value="11"/>
+                        </Style>
+                        <Style Selector="Button:pointerover /template/ ContentPresenter">
+                            <Setter Property="Background" Value="{DynamicResource BorderLightBrush}"/>
+                        </Style>
+                    </Button.Styles>
+                    <TextBlock Text="Clear"/>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- Stats Bar -->
+        <Border Grid.Row="1" 
+                Background="{DynamicResource ButtonBackgroundBrush}" 
+                Padding="16,10" 
+                IsVisible="{Binding HasResults}">
+            <StackPanel Orientation="Horizontal" Spacing="16">
+                <Border Background="{DynamicResource PanelBackgroundBrush}" CornerRadius="6" Padding="10,5">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="Total" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"/>
+                        <TextBlock Text="{Binding TotalTests}" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="Bold" FontSize="12"/>
+                    </StackPanel>
+                </Border>
+                
+                <Border Background="{DynamicResource SuccessBrush}" CornerRadius="6" Padding="10,5" Opacity="0.9">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="✓" Foreground="White" FontWeight="Bold"/>
+                        <TextBlock Text="{Binding PassedTests}" Foreground="White" FontWeight="Bold" FontSize="12"/>
+                    </StackPanel>
+                </Border>
+                
+                <Border Background="{DynamicResource ErrorTextBrush}" CornerRadius="6" Padding="10,5" Opacity="0.9">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="✗" Foreground="White" FontWeight="Bold"/>
+                        <TextBlock Text="{Binding FailedTests}" Foreground="White" FontWeight="Bold" FontSize="12"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+
+        <!-- Test Results List -->
+        <ScrollViewer Grid.Row="2" Background="{DynamicResource CardBackgroundBrush}">
+            <ItemsControl ItemsSource="{Binding TestResults}" Margin="12,8">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:test_result_view_model">
+                        <Border Padding="14,12" 
+                                CornerRadius="8"
+                                Background="{DynamicResource PanelBackgroundBrush}"
+                                BorderBrush="{DynamicResource ButtonBackgroundBrush}"
+                                BorderThickness="1"
+                                Margin="0,0,0,8">
+                            <Grid ColumnDefinitions="Auto,*,Auto">
+                                <!-- Status Icon - Passed -->
+                                <Border Grid.Column="0"
+                                        Width="28" Height="28"
+                                        CornerRadius="14"
+                                        Background="{DynamicResource SuccessBrush}"
+                                        Margin="0,0,12,0"
+                                        VerticalAlignment="Center"
+                                        IsVisible="{Binding Passed}">
+                                    <TextBlock Text="✓"
+                                               Foreground="White"
+                                               FontWeight="Bold"
+                                               FontSize="12"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                </Border>
+                                <!-- Status Icon - Failed -->
+                                <Border Grid.Column="0"
+                                        Width="28" Height="28"
+                                        CornerRadius="14"
+                                        Background="{DynamicResource ErrorTextBrush}"
+                                        Margin="0,0,12,0"
+                                        VerticalAlignment="Center"
+                                        IsVisible="{Binding !Passed}">
+                                    <TextBlock Text="✗"
+                                               Foreground="White"
+                                               FontWeight="Bold"
+                                               FontSize="12"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                </Border>
+                                
+                                <!-- Test Name and Error -->
+                                <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding TestName}"
+                                               Foreground="{DynamicResource ButtonTextBrush}"
+                                               FontSize="13"
+                                               FontWeight="SemiBold"/>
+                                    
+                                    <TextBlock Text="{Binding ErrorMessage}"
+                                               Foreground="{DynamicResource ErrorTextBrush}"
+                                               FontSize="11"
+                                               TextWrapping="Wrap"
+                                               IsVisible="{Binding !Passed}"/>
+                                </StackPanel>
+                                
+                                <!-- Duration -->
+                                <Border Grid.Column="2"
+                                        Background="{DynamicResource ButtonBackgroundBrush}"
+                                        CornerRadius="4"
+                                        Padding="8,4"
+                                        VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Duration.TotalMilliseconds, StringFormat={}{0:F0}ms}"
+                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                               FontSize="10"
+                                               FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                </Border>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <!-- Empty State -->
+        <Border Grid.Row="2" 
+                Background="{DynamicResource CardBackgroundBrush}" 
+                IsVisible="{Binding !HasResults}">
+            <StackPanel HorizontalAlignment="Center" 
+                        VerticalAlignment="Center" 
+                        Spacing="16">
+                <Border Background="{DynamicResource ButtonBackgroundBrush}" 
+                        CornerRadius="50" 
+                        Width="64" Height="64"
+                        HorizontalAlignment="Center">
+                    <TextBlock Text="🧪" 
+                               FontSize="24" 
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Border>
+                <TextBlock Text="No test results yet"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           FontSize="14"
+                           FontWeight="SemiBold"
+                           HorizontalAlignment="Center"/>
+                <TextBlock Text="Run a request with pm.test() scripts to see results"
+                           Foreground="{DynamicResource TextTertiaryBrush}"
+                           FontSize="12"
+                           HorizontalAlignment="Center"
+                           TextWrapping="Wrap"
+                           MaxWidth="200"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

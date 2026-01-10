@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/PostmanClone.slnx",
+                "${workspaceFolder}/API_RIG.slnx",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary;ForceNoAlign"
             ],
@@ -23,7 +23,7 @@
             "type": "process",
             "args": [
                 "clean",
-                "${workspaceFolder}/PostmanClone.slnx"
+                "${workspaceFolder}/API_RIG.slnx"
             ],
             "problemMatcher": "$msCompile"
         },
@@ -33,7 +33,7 @@
             "type": "process",
             "args": [
                 "restore",
-                "${workspaceFolder}/PostmanClone.slnx"
+                "${workspaceFolder}/API_RIG.slnx"
             ],
             "problemMatcher": "$msCompile"
         },
@@ -43,7 +43,7 @@
             "type": "process",
             "args": [
                 "test",
-                "${workspaceFolder}/PostmanClone.slnx"
+                "${workspaceFolder}/API_RIG.slnx"
             ],
             "problemMatcher": "$msCompile",
             "group": {

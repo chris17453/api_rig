@@ -1,0 +1,311 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:App.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="250" d:DesignHeight="400"
+             x:Class="App.Views.environment_selector_view"
+             x:DataType="vm:environment_selector_view_model">
+
+    <StackPanel Spacing="8">
+        <!-- Environment Header with Add Button -->
+        <Grid ColumnDefinitions="*,Auto">
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="🌍" FontSize="14"/>
+                <TextBlock Text="Environment" 
+                           FontWeight="SemiBold" 
+                           FontSize="13"
+                           Foreground="{DynamicResource TextPrimaryBrush}"
+                           VerticalAlignment="Center"/>
+            </StackPanel>
+            <Button Grid.Column="1"
+                    Command="{Binding StartCreateEnvironmentCommand}"
+                    ToolTip.Tip="Create new environment">
+                <Button.Styles>
+                    <Style Selector="Button">
+                        <Setter Property="Background" Value="{DynamicResource SuccessBrush}"/>
+                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="CornerRadius" Value="6"/>
+                        <Setter Property="Padding" Value="10,4"/>
+                        <Setter Property="FontSize" Value="12"/>
+                    </Style>
+                    <Style Selector="Button:pointerover /template/ ContentPresenter">
+                        <Setter Property="Background" Value="{DynamicResource SuccessHoverBrush}"/>
+                    </Style>
+                </Button.Styles>
+                <TextBlock Text="+" FontWeight="Bold"/>
+            </Button>
+        </Grid>
+
+        <!-- Create Environment Panel -->
+        <Border IsVisible="{Binding IsCreatingEnvironment}"
+                Background="{DynamicResource ButtonBackgroundBrush}"
+                CornerRadius="8"
+                Padding="12"
+                BorderBrush="{DynamicResource BorderLightBrush}"
+                BorderThickness="1">
+            <StackPanel Spacing="10">
+                <TextBlock Text="New Environment" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold"/>
+                <TextBox Text="{Binding NewEnvironmentName}"
+                         Watermark="Environment name"
+                         Background="{DynamicResource InputBackgroundBrush}"
+                         Foreground="{DynamicResource ButtonTextBrush}"
+                         BorderBrush="{DynamicResource BorderLightBrush}"
+                         CornerRadius="6"
+                         Padding="10,8"
+                         FontSize="12"/>
+                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                    <Button Command="{Binding CancelCreateEnvironmentCommand}">
+                        <Button.Styles>
+                            <Style Selector="Button">
+                                <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
+                                <Setter Property="CornerRadius" Value="6"/>
+                                <Setter Property="Padding" Value="12,6"/>
+                                <Setter Property="FontSize" Value="11"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource BorderLightBrush}"/>
+                                <Setter Property="BorderThickness" Value="1"/>
+                            </Style>
+                        </Button.Styles>
+                        <TextBlock Text="Cancel"/>
+                    </Button>
+                    <Button Command="{Binding CreateEnvironmentCommand}">
+                        <Button.Styles>
+                            <Style Selector="Button">
+                                <Setter Property="Background" Value="{DynamicResource SuccessBrush}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="CornerRadius" Value="6"/>
+                                <Setter Property="Padding" Value="12,6"/>
+                                <Setter Property="FontSize" Value="11"/>
+                            </Style>
+                        </Button.Styles>
+                        <TextBlock Text="Create" FontWeight="SemiBold"/>
+                    </Button>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+        
+        <!-- Environment Selector -->
+        <ComboBox ItemsSource="{Binding Environments}"
+                  SelectedItem="{Binding SelectedEnvironment}"
+                  HorizontalAlignment="Stretch"
+                  Background="{DynamicResource ButtonBackgroundBrush}"
+                  Foreground="{DynamicResource ButtonTextBrush}"
+                  BorderBrush="{DynamicResource BorderLightBrush}"
+                  CornerRadius="6"
+                  Padding="4">
+            <ComboBox.ItemTemplate>
+                <DataTemplate x:DataType="vm:environment_item_view_model">
+                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="4">
+                        <TextBlock Text="{Binding Name}" Foreground="{DynamicResource ButtonTextBrush}" FontSize="12"/>
+                        <Border Background="{DynamicResource BorderLightBrush}" 
+                                CornerRadius="4" 
+                                Padding="6,2"
+                                IsVisible="{Binding VariableCount}">
+                            <TextBlock Text="{Binding VariableCount, StringFormat={}{0} vars}"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       FontSize="10"/>
+                        </Border>
+                    </StackPanel>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+
+        <!-- Environment Actions (Rename/Delete) -->
+        <StackPanel Orientation="Horizontal" 
+                    Spacing="8" 
+                    IsVisible="{Binding SelectedEnvironment.Id, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+            <Button Command="{Binding StartRenameEnvironmentCommand}">
+                <Button.Styles>
+                    <Style Selector="Button">
+                        <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
+                        <Setter Property="Foreground" Value="{DynamicResource AccentHoverBrush}"/>
+                        <Setter Property="CornerRadius" Value="6"/>
+                        <Setter Property="Padding" Value="10,5"/>
+                        <Setter Property="FontSize" Value="11"/>
+                        <Setter Property="BorderBrush" Value="{DynamicResource BorderLightBrush}"/>
+                        <Setter Property="BorderThickness" Value="1"/>
+                    </Style>
+                </Button.Styles>
+                <TextBlock Text="Rename"/>
+            </Button>
+            <Button Command="{Binding DeleteEnvironmentCommand}">
+                <Button.Styles>
+                    <Style Selector="Button">
+                        <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
+                        <Setter Property="Foreground" Value="{DynamicResource ErrorTextBrush}"/>
+                        <Setter Property="CornerRadius" Value="6"/>
+                        <Setter Property="Padding" Value="10,5"/>
+                        <Setter Property="FontSize" Value="11"/>
+                        <Setter Property="BorderBrush" Value="{DynamicResource BorderLightBrush}"/>
+                        <Setter Property="BorderThickness" Value="1"/>
+                    </Style>
+                </Button.Styles>
+                <TextBlock Text="Delete"/>
+            </Button>
+        </StackPanel>
+
+        <!-- Rename Environment Panel -->
+        <Border IsVisible="{Binding IsEditingName}"
+                Background="{DynamicResource ButtonBackgroundBrush}"
+                CornerRadius="8"
+                Padding="12"
+                BorderBrush="{DynamicResource BorderLightBrush}"
+                BorderThickness="1">
+            <StackPanel Spacing="10">
+                <TextBlock Text="Rename Environment" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold"/>
+                <TextBox Text="{Binding EditingEnvironmentName}"
+                         Background="{DynamicResource InputBackgroundBrush}"
+                         Foreground="{DynamicResource ButtonTextBrush}"
+                         BorderBrush="{DynamicResource BorderLightBrush}"
+                         CornerRadius="6"
+                         Padding="10,8"
+                         FontSize="12"/>
+                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                    <Button Command="{Binding CancelRenameEnvironmentCommand}">
+                        <Button.Styles>
+                            <Style Selector="Button">
+                                <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
+                                <Setter Property="CornerRadius" Value="6"/>
+                                <Setter Property="Padding" Value="12,6"/>
+                                <Setter Property="FontSize" Value="11"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource BorderLightBrush}"/>
+                                <Setter Property="BorderThickness" Value="1"/>
+                            </Style>
+                        </Button.Styles>
+                        <TextBlock Text="Cancel"/>
+                    </Button>
+                    <Button Command="{Binding RenameEnvironmentCommand}">
+                        <Button.Styles>
+                            <Style Selector="Button">
+                                <Setter Property="Background" Value="{DynamicResource SuccessBrush}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="CornerRadius" Value="6"/>
+                                <Setter Property="Padding" Value="12,6"/>
+                                <Setter Property="FontSize" Value="11"/>
+                            </Style>
+                        </Button.Styles>
+                        <TextBlock Text="Save" FontWeight="SemiBold"/>
+                    </Button>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Variables Toggle Button -->
+        <Button Command="{Binding ToggleVariablesCommand}"
+                HorizontalAlignment="Stretch"
+                IsVisible="{Binding SelectedEnvironment.Id, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+            <Button.Styles>
+                <Style Selector="Button">
+                    <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
+                    <Setter Property="CornerRadius" Value="6"/>
+                    <Setter Property="Padding" Value="10,8"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource BorderLightBrush}"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                </Style>
+                <Style Selector="Button:pointerover /template/ ContentPresenter">
+                    <Setter Property="Background" Value="{DynamicResource BorderLightBrush}"/>
+                </Style>
+            </Button.Styles>
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="▼" FontSize="10" IsVisible="{Binding IsVariablesExpanded}" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                <TextBlock Text="▶" FontSize="10" IsVisible="{Binding !IsVariablesExpanded}" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                <TextBlock Text="Variables" FontSize="12"/>
+                <Border Background="{DynamicResource BorderLightBrush}" CornerRadius="4" Padding="6,2">
+                    <TextBlock Text="{Binding Variables.Count}" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                </Border>
+            </StackPanel>
+        </Button>
+
+        <!-- Variables Panel (Expandable) -->
+        <Border IsVisible="{Binding IsVariablesExpanded}"
+                Background="{DynamicResource PanelBackgroundBrush}"
+                CornerRadius="8"
+                Padding="12"
+                BorderBrush="{DynamicResource ButtonBackgroundBrush}"
+                BorderThickness="1"
+                MaxHeight="280">
+            <Grid RowDefinitions="Auto,*,Auto">
+                <!-- Variables Header -->
+                <Grid Grid.Row="0" ColumnDefinitions="*,*,Auto" Margin="0,0,0,8">
+                    <TextBlock Grid.Column="0" Text="NAME" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}" FontWeight="Bold"/>
+                    <TextBlock Grid.Column="1" Text="VALUE" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}" FontWeight="Bold" Margin="8,0,0,0"/>
+                </Grid>
+                
+                <!-- Variables List -->
+                <ScrollViewer Grid.Row="1" MaxHeight="160">
+                    <ItemsControl ItemsSource="{Binding Variables}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:environment_variable_view_model">
+                                <Border Background="{DynamicResource CardBackgroundBrush}" 
+                                        CornerRadius="6" 
+                                        Padding="8"
+                                        Margin="0,0,0,6">
+                                    <Grid ColumnDefinitions="*,*,Auto">
+                                        <TextBox Grid.Column="0"
+                                                 Text="{Binding Key}"
+                                                 Watermark="variable_name"
+                                                 Background="{DynamicResource ButtonBackgroundBrush}"
+                                                 Foreground="{DynamicResource ButtonTextBrush}"
+                                                 BorderBrush="{DynamicResource BorderLightBrush}"
+                                                 CornerRadius="4"
+                                                 FontSize="11"
+                                                 Padding="8,6"
+                                                 Margin="0,0,6,0"/>
+                                        <TextBox Grid.Column="1"
+                                                 Text="{Binding Value}"
+                                                 Watermark="value"
+                                                 Background="{DynamicResource ButtonBackgroundBrush}"
+                                                 Foreground="{DynamicResource ButtonTextBrush}"
+                                                 BorderBrush="{DynamicResource BorderLightBrush}"
+                                                 CornerRadius="4"
+                                                 FontSize="11"
+                                                 Padding="8,6"
+                                                 Margin="0,0,6,0"/>
+                                        <Button Grid.Column="2"
+                                                Command="{Binding $parent[ItemsControl].((vm:environment_selector_view_model)DataContext).RemoveVariableCommand}"
+                                                CommandParameter="{Binding}">
+                                            <Button.Styles>
+                                                <Style Selector="Button">
+                                                    <Setter Property="Background" Value="Transparent"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource TextTertiaryBrush}"/>
+                                                    <Setter Property="Padding" Value="6,4"/>
+                                                </Style>
+                                                <Style Selector="Button:pointerover /template/ ContentPresenter">
+                                                    <Setter Property="Foreground" Value="{DynamicResource ErrorTextBrush}"/>
+                                                </Style>
+                                            </Button.Styles>
+                                            <TextBlock Text="✕" FontSize="12"/>
+                                        </Button>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <!-- Save Button -->
+                <Button Grid.Row="2"
+                        Command="{Binding SaveVariablesCommand}"
+                        HorizontalAlignment="Stretch"
+                        Margin="0,10,0,0">
+                    <Button.Styles>
+                        <Style Selector="Button">
+                            <Setter Property="Background" Value="{DynamicResource SuccessBrush}"/>
+                            <Setter Property="Foreground" Value="White"/>
+                            <Setter Property="CornerRadius" Value="6"/>
+                            <Setter Property="Padding" Value="12,8"/>
+                            <Setter Property="FontSize" Value="12"/>
+                        </Style>
+                        <Style Selector="Button:pointerover /template/ ContentPresenter">
+                            <Setter Property="Background" Value="{DynamicResource SuccessHoverBrush}"/>
+                        </Style>
+                    </Button.Styles>
+                    <TextBlock Text="Save Variables" FontWeight="SemiBold"/>
+                </Button>
+            </Grid>
+        </Border>
+    </StackPanel>
+</UserControl>

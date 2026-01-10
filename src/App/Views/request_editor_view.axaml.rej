@@ -1,0 +1,105 @@
+--- src/App/Views/request_editor_view.axaml
++++ src/App/Views/request_editor_view.axaml
+@@ -3,10 +3,16 @@
+              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+              xmlns:vm="using:App.ViewModels"
++             xmlns:AvaloniaEdit="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
++             xmlns:converters="using:App.Converters"
+              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="200"
+              x:Class="App.Views.request_editor_view"
+              x:DataType="vm:request_editor_view_model">
+ 
++    <UserControl.Resources>
++        <converters:JsonValidityToBrushConverter x:Key="JsonValidityToBrushConverter"/>
++    </UserControl.Resources>
++
+     <UserControl.Styles>
+         <Style Selector="TextBox.url-input">
+             <Setter Property="Background" Value="#0D1117"/>
+@@ -187,32 +193,60 @@
+             
+             <!-- Body Tab -->
+             <TabItem Header="Body">
+-                <Grid RowDefinitions="Auto,*" Margin="12">
+-                    <Border Grid.Row="0" 
+-                            Background="#21262D" 
+-                            CornerRadius="6" 
+-                            Padding="10,6"
+-                            Margin="0,0,0,12"
+-                            HorizontalAlignment="Left">
+-                        <TextBlock Text="application/json" 
+-                                   FontSize="11" 
+-                                   Foreground="#8B949E"
+-                                   FontFamily="JetBrains Mono, Consolas, monospace"/>
+-                    </Border>
++                <Grid RowDefinitions="Auto,*,Auto" Margin="12">
++                    <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,12">
++                        <Border Grid.Column="0" 
++                                Background="#21262D" 
++                                CornerRadius="6" 
++                                Padding="10,6"
++                                HorizontalAlignment="Left">
++                            <TextBlock Text="application/json" 
++                                       FontSize="11" 
++                                       Foreground="#8B949E"
++                                       FontFamily="JetBrains Mono, Consolas, monospace"/>
++                        </Border>
++
++                        <Button Grid.Column="2"
++                                Command="{Binding FormatJsonCommand}"
++                                Content="Format JSON"
++                                FontSize="11"
++                                Padding="8,4"
++                                Background="#21262D"
++                                Foreground="#C9D1D9"
++                                BorderBrush="#30363D"
++                                BorderThickness="1">
++                            <Button.Styles>
++                                <Style Selector="Button:pointerover /template/ ContentPresenter">
++                                    <Setter Property="Background" Value="#30363D"/>
++                                </Style>
++                            </Button.Styles>
++                        </Button>
++                    </Grid>
+                     
+-                    <TextBox Grid.Row="1" 
+-                             Text="{Binding RequestBody, Mode=TwoWay}"
+-                             AcceptsReturn="True"
+-                             AcceptsTab="True"
+-                             TextWrapping="NoWrap"
+-                             FontFamily="JetBrains Mono, Consolas, monospace"
+-                             FontSize="13"
+-                             Watermark="Enter JSON body..."
+-                             Background="#0D1117"
+-                             Foreground="#C9D1D9"
+-                             BorderBrush="#30363D"
+-                             CornerRadius="8"
+-                             Padding="12"/>
++                    <Border Grid.Row="1" 
++                            Background="#0D1117"
++                            BorderBrush="{Binding IsJsonValid, Converter={StaticResource JsonValidityToBrushConverter}}"
++                            BorderThickness="1"
++                            CornerRadius="8"
++                            Padding="1">
++                        <AvaloniaEdit:TextEditor Name="BodyEditor"
++                                                 FontFamily="JetBrains Mono, Consolas, monospace"
++                                                 FontSize="13"
++                                                 Background="Transparent"
++                                                 Foreground="#C9D1D9"
++                                                 ShowLineNumbers="True"
++                                                 HorizontalScrollBarVisibility="Auto"
++                                                 VerticalScrollBarVisibility="Visible"/>
++                    </Border>
++
++                    <TextBlock Grid.Row="2"
++                               Text="{Binding JsonValidationError}"
++                               IsVisible="{Binding !IsJsonValid}"
++                               Foreground="#FF7B72"
++                               FontSize="11"
++                               Margin="0,8,0,0"
++                               TextWrapping="Wrap"
++                               FontFamily="JetBrains Mono, Consolas, monospace"/>
+                 </Grid>
+             </TabItem>
+         </TabControl>

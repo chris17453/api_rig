@@ -1,11 +1,4 @@
 {
-    "files.exclude": {
-        "**/bin": true,
-        "**/obj": true
-    },
-    "omnisharp.enableRoslynAnalyzers": true,
-    "omnisharp.enableEditorConfigSupport": true,
-    "dotnet.defaultSolution": "API_RIG.slnx",
     "flort.profiles": {
         "Cherry Pick": {
             "patterns": [
@@ -151,10 +144,22 @@
                 "h"
             ],
             "excludePatterns": [
+                "*.o",
+                "*.obj",
+                "*.exe"
             ],
             "excludeExtensions": [
+                "o",
+                "obj",
+                "exe",
+                "dll",
+                "so"
             ],
             "ignoreDirs": [
+                "build",
+                "Debug",
+                "Release",
+                ".vs"
             ],
             "manualFiles": [],
             "debug": false,
