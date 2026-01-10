@@ -32,17 +32,45 @@ public partial class tabs_view_model : ObservableObject
     /// <summary>
     /// Opens a request in a new tab or activates existing tab if already open.
     /// </summary>
-    public tab_state open_request(http_request_model request, string? collectionId = null, string? collectionItemId = null)
+    public tab_state open_request(http_request_model request, string? sourceTabId = null, string? collectionId = null, string? collectionItemId = null)
     {
-        // Check if this request is already open in a tab (only for collection items)
+        Console.WriteLine($"[TABS] open_request called: sourceTabId={sourceTabId ?? "null"}, collectionId={collectionId ?? "null"}, collectionItemId={collectionItemId ?? "null"}, url={request.url}");
+
+        // First priority: Check if the source tab still exists (for history items)
+        if (!string.IsNullOrEmpty(sourceTabId))
+        {
+            Console.WriteLine($"[TABS] Looking for tab by ID: {sourceTabId}");
+            var tabById = find_tab_by_id(sourceTabId);
+            if (tabById != null)
+            {
+                Console.WriteLine($"[TABS] Found tab by ID! Activating.");
+                ActivateTab(tabById);
+                return tabById;
+            }
+            Console.WriteLine($"[TABS] Tab with ID {sourceTabId} not found.");
+        }
+
+        // Second priority: Check if this request is already open in a tab (for collection items)
         if (!string.IsNullOrEmpty(collectionId) && !string.IsNullOrEmpty(collectionItemId))
         {
+            Console.WriteLine($"[TABS] Searching for existing tab with collectionId={collectionId}, collectionItemId={collectionItemId}");
             var existingTab = find_tab_by_request(collectionId, collectionItemId);
             if (existingTab != null)
             {
+                Console.WriteLine($"[TABS] Found existing tab by collection! Activating.");
                 ActivateTab(existingTab);
                 return existingTab;
             }
+            Console.WriteLine($"[TABS] No existing tab found by collection.");
+        }
+
+        // Third priority: Find any tab with the same URL and method (prevents duplicate tabs)
+        var matchingTab = find_tab_by_url_and_method(request.url, request.method);
+        if (matchingTab != null)
+        {
+            Console.WriteLine($"[TABS] Found existing tab by URL+method! Activating tab {matchingTab.Id}");
+            ActivateTab(matchingTab);
+            return matchingTab;
         }
 
         // Check if we can reuse the current empty/new tab
@@ -136,6 +164,17 @@ public partial class tabs_view_model : ObservableObject
     }
 
     /// <summary>
+    /// Finds a tab by its unique ID.
+    /// </summary>
+    public tab_state? find_tab_by_id(string? tabId)
+    {
+        if (string.IsNullOrEmpty(tabId))
+            return null;
+
+        return Tabs.FirstOrDefault(t => t.Id == tabId);
+    }
+
+    /// <summary>
     /// Finds a tab by its collection and item IDs.
     /// </summary>
     public tab_state? find_tab_by_request(string? collectionId, string? collectionItemId)
@@ -143,9 +182,22 @@ public partial class tabs_view_model : ObservableObject
         if (string.IsNullOrEmpty(collectionId) || string.IsNullOrEmpty(collectionItemId))
             return null;
 
-        return Tabs.FirstOrDefault(t => 
-            t.CollectionId == collectionId && 
+        return Tabs.FirstOrDefault(t =>
+            t.CollectionId == collectionId &&
             t.CollectionItemId == collectionItemId);
+    }
+
+    /// <summary>
+    /// Finds a tab by URL and HTTP method (fallback matching for history items).
+    /// </summary>
+    public tab_state? find_tab_by_url_and_method(string? url, http_method method)
+    {
+        if (string.IsNullOrEmpty(url))
+            return null;
+
+        return Tabs.FirstOrDefault(t =>
+            t.Url == url &&
+            t.SelectedMethod == method);
     }
 
     /// <summary>

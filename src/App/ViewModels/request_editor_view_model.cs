@@ -61,6 +61,15 @@ public partial class request_editor_view_model : ObservableObject, IDisposable
     private string? _currentCollectionId;
 
     [ObservableProperty]
+    private string? _currentTabId;
+
+    [ObservableProperty]
+    private ObservableCollection<collection_picker_item> _availableCollections = new();
+
+    [ObservableProperty]
+    private collection_picker_item? _selectedCollection;
+
+    [ObservableProperty]
     private ObservableCollection<key_value_pair_view_model> _headers = new();
 
     [ObservableProperty]
@@ -73,7 +82,43 @@ public partial class request_editor_view_model : ObservableObject, IDisposable
     [ObservableProperty]
     private string _postResponseScript = string.Empty;
 
+    // Authorization
+    [ObservableProperty]
+    private auth_type _selectedAuthType = auth_type.none;
+
+    [ObservableProperty]
+    private string _basicAuthUsername = string.Empty;
+
+    [ObservableProperty]
+    private string _basicAuthPassword = string.Empty;
+
+    [ObservableProperty]
+    private string _bearerToken = string.Empty;
+
+    [ObservableProperty]
+    private string _apiKeyName = string.Empty;
+
+    [ObservableProperty]
+    private string _apiKeyValue = string.Empty;
+
+    [ObservableProperty]
+    private api_key_location _apiKeyLocation = api_key_location.header;
+
+    [ObservableProperty]
+    private string _oauth2TokenUrl = string.Empty;
+
+    [ObservableProperty]
+    private string _oauth2ClientId = string.Empty;
+
+    [ObservableProperty]
+    private string _oauth2ClientSecret = string.Empty;
+
+    [ObservableProperty]
+    private string _oauth2Scope = string.Empty;
+
     public IReadOnlyList<http_method> available_methods { get; } = Enum.GetValues<http_method>();
+    public IReadOnlyList<auth_type> available_auth_types { get; } = Enum.GetValues<auth_type>();
+    public IReadOnlyList<api_key_location> available_api_key_locations { get; } = Enum.GetValues<api_key_location>();
 
     public request_editor_view_model(
         request_orchestrator request_orchestrator,
@@ -127,6 +172,7 @@ public partial class request_editor_view_model : ObservableObject, IDisposable
                     body_type = request_body_type.json,
                     raw_content = RequestBody
                 },
+                auth = CreateAuthConfig(),
                 pre_request_script = PreRequestScript,
                 post_response_script = PostResponseScript
             };
@@ -135,7 +181,8 @@ public partial class request_editor_view_model : ObservableObject, IDisposable
 
             if (result.response != null)
             {
-                // Add to history
+                // Add to history with collection context and tab ID for tab reuse
+                Console.WriteLine($"[HISTORY] Creating entry: CurrentTabId={CurrentTabId ?? "null"}, CurrentCollectionId={CurrentCollectionId ?? "null"}, CurrentRequestId={CurrentRequestId ?? "null"}");
                 var history_entry = new history_entry_model
                 {
                     request_name = request.name,
@@ -145,6 +192,9 @@ public partial class request_editor_view_model : ObservableObject, IDisposable
                     status_description = result.response.status_description,
                     elapsed_ms = result.response.elapsed_ms,
                     response_size_bytes = result.response.size_bytes,
+                    collection_id = CurrentCollectionId,
+                    collection_item_id = CurrentRequestId,
+                    source_tab_id = CurrentTabId,
                     executed_at = DateTime.UtcNow,
                     error_message = result.response.error_message,
                     request_snapshot = request,
@@ -211,18 +261,113 @@ public partial class request_editor_view_model : ObservableObject, IDisposable
                 body_type = request_body_type.raw,
                 raw_content = RequestBody
             },
+            auth = CreateAuthConfig(),
             pre_request_script = PreRequestScript,
             post_response_script = PostResponseScript
         };
     }
 
+    private auth_config_model? CreateAuthConfig()
+    {
+        return SelectedAuthType switch
+        {
+            auth_type.none => null,
+            auth_type.basic => new auth_config_model
+            {
+                type = auth_type.basic,
+                basic = new basic_auth_model
+                {
+                    username = BasicAuthUsername,
+                    password = BasicAuthPassword
+                }
+            },
+            auth_type.bearer => new auth_config_model
+            {
+                type = auth_type.bearer,
+                bearer = new bearer_auth_model
+                {
+                    token = BearerToken
+                }
+            },
+            auth_type.api_key => new auth_config_model
+            {
+                type = auth_type.api_key,
+                api_key = new api_key_auth_model
+                {
+                    key = ApiKeyName,
+                    value = ApiKeyValue,
+                    location = ApiKeyLocation
+                }
+            },
+            auth_type.oauth2_client_credentials => new auth_config_model
+            {
+                type = auth_type.oauth2_client_credentials,
+                oauth2_client_credentials = new oauth2_client_credentials_model
+                {
+                    token_url = Oauth2TokenUrl,
+                    client_id = Oauth2ClientId,
+                    client_secret = Oauth2ClientSecret,
+                    scope = string.IsNullOrWhiteSpace(Oauth2Scope) ? null : Oauth2Scope
+                }
+            },
+            _ => null
+        };
+    }
+
+    private void LoadAuthConfig(auth_config_model? auth)
+    {
+        // Reset all auth fields
+        SelectedAuthType = auth_type.none;
+        BasicAuthUsername = string.Empty;
+        BasicAuthPassword = string.Empty;
+        BearerToken = string.Empty;
+        ApiKeyName = string.Empty;
+        ApiKeyValue = string.Empty;
+        ApiKeyLocation = api_key_location.header;
+        Oauth2TokenUrl = string.Empty;
+        Oauth2ClientId = string.Empty;
+        Oauth2ClientSecret = string.Empty;
+        Oauth2Scope = string.Empty;
+
+        if (auth == null)
+            return;
+
+        SelectedAuthType = auth.type;
+
+        switch (auth.type)
+        {
+            case auth_type.basic when auth.basic != null:
+                BasicAuthUsername = auth.basic.username;
+                BasicAuthPassword = auth.basic.password;
+                break;
+            case auth_type.bearer when auth.bearer != null:
+                BearerToken = auth.bearer.token;
+                break;
+            case auth_type.api_key when auth.api_key != null:
+                ApiKeyName = auth.api_key.key;
+                ApiKeyValue = auth.api_key.value;
+                ApiKeyLocation = auth.api_key.location;
+                break;
+            case auth_type.oauth2_client_credentials when auth.oauth2_client_credentials != null:
+                Oauth2TokenUrl = auth.oauth2_client_credentials.token_url;
+                Oauth2ClientId = auth.oauth2_client_credentials.client_id;
+                Oauth2ClientSecret = auth.oauth2_client_credentials.client_secret;
+                Oauth2Scope = auth.oauth2_client_credentials.scope ?? string.Empty;
+                break;
+        }
+    }
+
     private async Task<string> GetTargetCollectionIdAsync(CancellationToken cancellation_token)
     {
-        var targetCollectionId = CurrentCollectionId;
+        // First priority: use the selected collection from the picker
+        if (SelectedCollection != null)
+            return SelectedCollection.Id;
 
-        if (!string.IsNullOrWhiteSpace(targetCollectionId))
-            return targetCollectionId;
+        // Second priority: use the current collection ID (if request came from a collection)
+        if (!string.IsNullOrWhiteSpace(CurrentCollectionId))
+            return CurrentCollectionId;
 
+        // Last resort: create a default collection
         var collections = await _collection_repository.list_all_async(cancellation_token);
         var defaultCollection = collections.FirstOrDefault();
 
@@ -406,27 +551,37 @@ public partial class request_editor_view_model : ObservableObject, IDisposable
         }
     }
 
-    public void load_request(http_request_model request, string? collectionId = null, string? collectionItemId = null)
+    public void load_request(http_request_model request, string? collectionId = null, string? collectionItemId = null, string? tabId = null)
     {
         _isSyncingParamsFromUrl = true;
         try
         {
-            _logger.LogInformation("Loading request '{RequestName}' with CollectionId='{CollectionId}', CollectionItemId='{CollectionItemId}'", 
-                request.name, collectionId ?? "null", collectionItemId ?? "null");
-            
+            _logger.LogInformation("Loading request '{RequestName}' with TabId='{TabId}', CollectionId='{CollectionId}', CollectionItemId='{CollectionItemId}'",
+                request.name, tabId ?? "null", collectionId ?? "null", collectionItemId ?? "null");
+
             RequestName = request.name;
             // Use the collection item ID for tracking, not the request ID
             CurrentRequestId = collectionItemId ?? request.id;
             CurrentCollectionId = collectionId;
-            
-            _logger.LogInformation("Set CurrentCollectionId to '{CurrentCollectionId}'", CurrentCollectionId ?? "null");
+            CurrentTabId = tabId;
+
+            // Update the collection picker to match
+            if (!string.IsNullOrEmpty(collectionId))
+            {
+                SelectedCollection = AvailableCollections.FirstOrDefault(c => c.Id == collectionId);
+            }
+
+            _logger.LogInformation("Set CurrentTabId='{CurrentTabId}', CurrentCollectionId='{CurrentCollectionId}'", CurrentTabId ?? "null", CurrentCollectionId ?? "null");
             
             Url = request.url;
             SelectedMethod = request.method;
             RequestBody = request.body?.raw_content ?? string.Empty;
             PreRequestScript = request.pre_request_script ?? string.Empty;
             PostResponseScript = request.post_response_script ?? string.Empty;
-            
+
+            // Load auth settings
+            LoadAuthConfig(request.auth);
+
             Headers.Clear();
             foreach (var h in request.headers)
             {
@@ -576,4 +731,35 @@ public partial class request_editor_view_model : ObservableObject, IDisposable
             _isSyncingUrlFromParams = false;
         }
     }
+
+    [RelayCommand]
+    public async Task LoadCollectionsAsync(CancellationToken cancellation_token = default)
+    {
+        var collections = await _collection_repository.list_all_async(cancellation_token);
+
+        AvailableCollections.Clear();
+        foreach (var col in collections)
+        {
+            AvailableCollections.Add(new collection_picker_item { Id = col.id, Name = col.name });
+        }
+
+        // If we have a current collection, select it
+        if (!string.IsNullOrEmpty(CurrentCollectionId))
+        {
+            SelectedCollection = AvailableCollections.FirstOrDefault(c => c.Id == CurrentCollectionId);
+        }
+        // Otherwise select the first one if available
+        else if (AvailableCollections.Count > 0 && SelectedCollection == null)
+        {
+            SelectedCollection = AvailableCollections.First();
+        }
+    }
+}
+
+public class collection_picker_item
+{
+    public string Id { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+
+    public override string ToString() => Name;
 }

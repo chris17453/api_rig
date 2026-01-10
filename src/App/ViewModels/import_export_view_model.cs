@@ -106,11 +106,11 @@ public partial class import_export_view_model : ObservableObject
         {
             // Use real collection exporter
             var exporter = new collection_exporter();
-            exporter.export_to_file(SelectedCollectionForExport, ExportFilePath);
-            
+            await Task.Run(() => exporter.export_to_file(SelectedCollectionForExport, ExportFilePath));
+
             StatusMessage = $"Successfully exported '{SelectedCollectionForExport.name}' to {ExportFilePath}";
             HasError = false;
-            
+
             export_completed?.Invoke(this, EventArgs.Empty);
         }
         catch (Exception ex)

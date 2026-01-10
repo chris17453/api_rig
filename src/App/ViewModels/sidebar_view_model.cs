@@ -86,7 +86,14 @@ public partial class sidebar_view_model : ObservableObject
         _history_repository = history_repository;
     }
 
-    public event EventHandler<http_request_model>? request_selected;
+    /// <summary>
+    /// Event fired when a history item is selected. Includes tab ID and optional collection context.
+    /// </summary>
+    public event EventHandler<(http_request_model request, string? sourceTabId, string? collectionId, string? collectionItemId)>? request_selected;
+
+    /// <summary>
+    /// Event fired when a collection item (request) is selected.
+    /// </summary>
     public event EventHandler<(http_request_model request, string collectionId, string collectionItemId)>? request_with_collection_selected;
     public event EventHandler? collection_changed;
 
@@ -124,6 +131,9 @@ public partial class sidebar_view_model : ObservableObject
                     Url = entry.url,
                     StatusCode = entry.status_code,
                     ExecutedAt = entry.executed_at,
+                    CollectionId = entry.collection_id,
+                    CollectionItemId = entry.collection_item_id,
+                    SourceTabId = entry.source_tab_id,
                     request_snapshot = entry.request_snapshot
                 });
             }
@@ -176,7 +186,9 @@ public partial class sidebar_view_model : ObservableObject
     {
         if (value?.request_snapshot != null)
         {
-            request_selected?.Invoke(this, value.request_snapshot);
+            Console.WriteLine($"[SIDEBAR] History item selected: SourceTabId={value.SourceTabId ?? "null"}, CollectionId={value.CollectionId ?? "null"}, CollectionItemId={value.CollectionItemId ?? "null"}");
+            // Pass tab ID and collection context - allows reusing existing tabs
+            request_selected?.Invoke(this, (value.request_snapshot, value.SourceTabId, value.CollectionId, value.CollectionItemId));
         }
     }
 
@@ -267,6 +279,44 @@ public partial class sidebar_view_model : ObservableObject
         return parent.Children.Any(child => child == target || contains_item(child, target));
     }
 
+    /// <summary>
+    /// Selects an item in the tree by its collection item ID. Expands parent if needed.
+    /// </summary>
+    public void SelectItemById(string? collectionId, string? collectionItemId)
+    {
+        if (string.IsNullOrEmpty(collectionItemId))
+        {
+            SelectedCollectionItem = null;
+            return;
+        }
+
+        // Find the collection first
+        var collection = Collections.FirstOrDefault(c => c.Id == collectionId);
+        if (collection == null) return;
+
+        // Find the item within the collection
+        var item = FindItemById(collection, collectionItemId);
+        if (item != null)
+        {
+            // Expand the parent collection so the item is visible
+            collection.IsExpanded = true;
+            SelectedCollectionItem = item;
+        }
+    }
+
+    private collection_tree_item_view_model? FindItemById(collection_tree_item_view_model parent, string itemId)
+    {
+        if (parent.Id == itemId) return parent;
+
+        foreach (var child in parent.Children)
+        {
+            var found = FindItemById(child, itemId);
+            if (found != null) return found;
+        }
+
+        return null;
+    }
+
     private HashSet<string> GetAllExpandedIds(IEnumerable<collection_tree_item_view_model> items)
     {
         var expandedIds = new HashSet<string>();
@@ -316,6 +366,9 @@ public partial class sidebar_view_model : ObservableObject
                 Url = entry.url,
                 StatusCode = entry.status_code,
                 ExecutedAt = entry.executed_at,
+                CollectionId = entry.collection_id,
+                CollectionItemId = entry.collection_item_id,
+                SourceTabId = entry.source_tab_id,
                 request_snapshot = entry.request_snapshot
             });
         }
@@ -474,5 +527,21 @@ public partial class history_item_view_model : ObservableObject
     [ObservableProperty]
     private DateTime _executedAt;
 
+    // Collection context - tracks where this request came from
+    [ObservableProperty]
+    private string? _collectionId;
+
+    [ObservableProperty]
+    private string? _collectionItemId;
+
+    // Tab tracking - the tab this request was executed from
+    [ObservableProperty]
+    private string? _sourceTabId;
+
     public http_request_model? request_snapshot { get; set; }
+
+    /// <summary>
+    /// Returns true if this history item has a known collection context
+    /// </summary>
+    public bool HasCollectionContext => !string.IsNullOrEmpty(CollectionId) && !string.IsNullOrEmpty(CollectionItemId);
 }

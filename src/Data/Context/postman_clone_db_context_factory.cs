@@ -8,7 +8,7 @@ public class postman_clone_db_context_factory : IDesignTimeDbContextFactory<post
     public postman_clone_db_context create_db_context(string[] args)
     {
         var options = new DbContextOptionsBuilder<postman_clone_db_context>()
-            .UseSqlite("Data Source=postman_clone.db")
+            .UseSqlite("Data Source=api_rig.db")
             .Options;
 
         return new postman_clone_db_context(options);

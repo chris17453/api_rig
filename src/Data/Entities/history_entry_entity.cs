@@ -15,7 +15,9 @@ public class history_entry_entity
     public string? environment_id { get; set; }
     public string? environment_name { get; set; }
     public string? collection_id { get; set; }
+    public string? collection_item_id { get; set; }
     public string? collection_name { get; set; }
+    public string? source_tab_id { get; set; }
     public DateTime executed_at { get; set; } = DateTime.UtcNow;
     public string? error_message { get; set; }
     

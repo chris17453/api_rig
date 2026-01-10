@@ -178,6 +178,7 @@ public partial class environment_selector_view_model : ObservableObject
         {
             Variables.Add(new environment_variable_view_model { Key = "", Value = "" });
         }
+        await Task.CompletedTask;
     }
 
     [RelayCommand]

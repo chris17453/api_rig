@@ -15,7 +15,7 @@ var services = new ServiceCollection();
 
 // SQLite database for quick testing
 services.AddDbContext<postman_clone_db_context>(options =>
-    options.UseSqlite("Data Source=playground.db"));
+    options.UseSqlite("Data Source=api_rig_playground.db"));
 
 // Register Core services
 services.AddHttpClient();
