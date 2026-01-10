@@ -11,53 +11,37 @@
             BorderBrush="{DynamicResource BorderBrush}"
             BorderThickness="0,1,0,0"
             Height="28">
-        <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto,Auto,Auto">
-            <!-- Terminal Toggle -->
+        <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto">
+            <!-- Terminal Console Toggle -->
             <Button Grid.Column="0"
                     Classes="statusbar-btn"
                     Command="{Binding ToggleTerminalCommand}"
-                    ToolTip.Tip="Toggle Terminal">
+                    ToolTip.Tip="Toggle Terminal Console">
                 <StackPanel Orientation="Horizontal" Spacing="4">
                     <TextBlock Text="▶" FontSize="10"
                                RenderTransform="{Binding TerminalToggleRotation}"/>
-                    <TextBlock Text="Terminal" FontSize="11"/>
-                </StackPanel>
-            </Button>
-
-            <Separator Grid.Column="1"
-                       Width="1"
-                       Background="{DynamicResource BorderBrush}"
-                       Margin="4,6"/>
-
-            <!-- Console/Output Toggle -->
-            <Button Grid.Column="2"
-                    Classes="statusbar-btn"
-                    Command="{Binding ToggleConsoleCommand}"
-                    ToolTip.Tip="Toggle Console Output">
-                <StackPanel Orientation="Horizontal" Spacing="4">
-                    <TextBlock Text="📋" FontSize="10"/>
-                    <TextBlock Text="Console" FontSize="11"/>
+                    <TextBlock Text="Terminal Console" FontSize="11"/>
                 </StackPanel>
             </Button>
 
             <!-- Spacer -->
-            <Panel Grid.Column="3"/>
+            <Panel Grid.Column="1"/>
 
             <!-- Status Message -->
-            <TextBlock Grid.Column="4"
+            <TextBlock Grid.Column="2"
                        Text="{Binding StatusMessage}"
                        FontSize="11"
                        Foreground="{DynamicResource TextSecondaryBrush}"
                        VerticalAlignment="Center"
                        Margin="8,0"/>
 
-            <Separator Grid.Column="5"
+            <Separator Grid.Column="3"
                        Width="1"
                        Background="{DynamicResource BorderBrush}"
                        Margin="4,6"/>
 
             <!-- Version -->
-            <TextBlock Grid.Column="6"
+            <TextBlock Grid.Column="4"
                        Text="v1.0.0"
                        FontSize="11"
                        Foreground="{DynamicResource TextSecondaryBrush}"

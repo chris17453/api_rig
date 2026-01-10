@@ -204,11 +204,11 @@
                             </Grid>
                         </Border>
 
-                        <!-- Create Secret Button -->
+                        <!-- Create Secret Button (only visible when unlocked) -->
                         <Button Classes="panel-action-btn"
                                 Command="{Binding VaultPanel.CreateSecretCommand}"
                                 HorizontalAlignment="Stretch"
-                                IsEnabled="{Binding VaultPanel.IsUnlocked}">
+                                IsVisible="{Binding VaultPanel.IsUnlocked}">
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <TextBlock Text="+" FontSize="14"/>
                                 <TextBlock Text="New Secret" FontSize="11"/>

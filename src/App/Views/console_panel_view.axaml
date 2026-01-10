@@ -17,7 +17,7 @@
                     Padding="12,6">
                 <Grid ColumnDefinitions="Auto,Auto,*,Auto">
                     <TextBlock Grid.Column="0"
-                               Text="Console"
+                               Text="Terminal Console"
                                FontSize="12"
                                FontWeight="SemiBold"
                                Foreground="{DynamicResource TextPrimaryBrush}"
