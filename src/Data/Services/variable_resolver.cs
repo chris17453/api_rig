@@ -133,10 +133,45 @@ public partial class variable_resolver : i_variable_resolver
             headers = resolve_key_value_pairs(request.headers, variables, policy).ToList(),
             query_params = resolve_key_value_pairs(request.query_params, variables, policy).ToList(),
             body = request.body is not null ? resolve_body(request.body, variables, policy) : null,
-            auth = request.auth,
+            auth = request.auth is not null ? resolve_auth(request.auth, variables, policy) : null,
             timeout_ms = request.timeout_ms,
             pre_request_script = request.pre_request_script,
             post_response_script = request.post_response_script
+        };
+    }
+
+    private auth_config_model resolve_auth(
+        auth_config_model auth,
+        IReadOnlyDictionary<string, string> variables,
+        variable_resolution_policy policy)
+    {
+        return new auth_config_model
+        {
+            type = auth.type,
+            basic = auth.basic is not null ? new basic_auth_model
+            {
+                username = resolve(auth.basic.username, variables, policy),
+                password = resolve(auth.basic.password, variables, policy)
+            } : null,
+            bearer = auth.bearer is not null ? new bearer_auth_model
+            {
+                token = resolve(auth.bearer.token, variables, policy)
+            } : null,
+            api_key = auth.api_key is not null ? new api_key_auth_model
+            {
+                key = resolve(auth.api_key.key, variables, policy),
+                value = resolve(auth.api_key.value, variables, policy),
+                location = auth.api_key.location
+            } : null,
+            oauth2_client_credentials = auth.oauth2_client_credentials is not null ? new oauth2_client_credentials_model
+            {
+                token_url = resolve(auth.oauth2_client_credentials.token_url, variables, policy),
+                client_id = resolve(auth.oauth2_client_credentials.client_id, variables, policy),
+                client_secret = resolve(auth.oauth2_client_credentials.client_secret, variables, policy),
+                scope = auth.oauth2_client_credentials.scope is not null
+                    ? resolve(auth.oauth2_client_credentials.scope, variables, policy)
+                    : null
+            } : null
         };
     }
 
@@ -157,10 +192,48 @@ public partial class variable_resolver : i_variable_resolver
             body = request.body is not null
                 ? await resolve_body_async(request.body, context, policy, cancellation_token)
                 : null,
-            auth = request.auth,
+            auth = request.auth is not null
+                ? await resolve_auth_async(request.auth, context, policy, cancellation_token)
+                : null,
             timeout_ms = request.timeout_ms,
             pre_request_script = request.pre_request_script,
             post_response_script = request.post_response_script
+        };
+    }
+
+    private async Task<auth_config_model> resolve_auth_async(
+        auth_config_model auth,
+        variable_resolution_context context,
+        variable_resolution_policy policy,
+        CancellationToken cancellation_token)
+    {
+        return new auth_config_model
+        {
+            type = auth.type,
+            basic = auth.basic is not null ? new basic_auth_model
+            {
+                username = await resolve_async(auth.basic.username, context, policy, cancellation_token),
+                password = await resolve_async(auth.basic.password, context, policy, cancellation_token)
+            } : null,
+            bearer = auth.bearer is not null ? new bearer_auth_model
+            {
+                token = await resolve_async(auth.bearer.token, context, policy, cancellation_token)
+            } : null,
+            api_key = auth.api_key is not null ? new api_key_auth_model
+            {
+                key = await resolve_async(auth.api_key.key, context, policy, cancellation_token),
+                value = await resolve_async(auth.api_key.value, context, policy, cancellation_token),
+                location = auth.api_key.location
+            } : null,
+            oauth2_client_credentials = auth.oauth2_client_credentials is not null ? new oauth2_client_credentials_model
+            {
+                token_url = await resolve_async(auth.oauth2_client_credentials.token_url, context, policy, cancellation_token),
+                client_id = await resolve_async(auth.oauth2_client_credentials.client_id, context, policy, cancellation_token),
+                client_secret = await resolve_async(auth.oauth2_client_credentials.client_secret, context, policy, cancellation_token),
+                scope = auth.oauth2_client_credentials.scope is not null
+                    ? await resolve_async(auth.oauth2_client_credentials.scope, context, policy, cancellation_token)
+                    : null
+            } : null
         };
     }
 
