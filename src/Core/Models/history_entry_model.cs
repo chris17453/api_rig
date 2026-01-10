@@ -13,7 +13,9 @@ public record history_entry_model
     public string? environment_id { get; init; }
     public string? environment_name { get; init; }
     public string? collection_id { get; init; }
+    public string? collection_item_id { get; init; }
     public string? collection_name { get; init; }
+    public string? source_tab_id { get; init; }
     public DateTime executed_at { get; init; } = DateTime.UtcNow;
     public string? error_message { get; init; }
     public http_request_model? request_snapshot { get; init; }

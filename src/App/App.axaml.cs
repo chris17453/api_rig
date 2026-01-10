@@ -55,7 +55,7 @@ public partial class App : Application
     {
         // Core Infrastructure
         services.AddDbContext<postman_clone_db_context>(options =>
-            options.UseSqlite("Data Source=postman_clone.db"));
+            options.UseSqlite("Data Source=api_rig.db"));
         
         services.AddHttpClient();
 

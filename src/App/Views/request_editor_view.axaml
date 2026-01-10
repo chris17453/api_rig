@@ -6,12 +6,15 @@
              xmlns:vm="using:App.ViewModels"
              xmlns:AvaloniaEdit="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
              xmlns:converters="using:App.Converters"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="200"
+             xmlns:Core="using:Core.Models"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="500"
              x:Class="App.Views.request_editor_view"
              x:DataType="vm:request_editor_view_model">
 
     <UserControl.Resources>
         <converters:JsonValidityToBrushConverter x:Key="JsonValidityToBrushConverter"/>
+        <converters:HttpMethodToBrushConverter x:Key="HttpMethodToBrushConverter"/>
+        <converters:HttpMethodToUpperConverter x:Key="HttpMethodToUpperConverter"/>
     </UserControl.Resources>
 
     <UserControl.Styles>
@@ -37,156 +40,217 @@
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="FontSize" Value="12"/>
         </Style>
+        <!-- Request Tabs Style -->
+        <Style Selector="TabItem.request-tab">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+            <Setter Property="Padding" Value="16,10"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Margin" Value="0"/>
+        </Style>
+        <Style Selector="TabItem.request-tab:selected">
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
     </UserControl.Styles>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <Grid RowDefinitions="Auto,Auto,Auto,Auto,*">
-        <!-- Request Name and Save Button -->
-        <Border Grid.Row="0" 
-                Background="{DynamicResource CardBackgroundBrush}" 
-                CornerRadius="12" 
-                Padding="16"
-                BorderBrush="{DynamicResource ButtonBackgroundBrush}"
-                BorderThickness="1"
-                Margin="0,0,0,12">
-            <Grid ColumnDefinitions="Auto,*,Auto">
-                <TextBlock Grid.Column="0" 
-                           Text="Name:" 
-                           VerticalAlignment="Center"
-                           Margin="0,0,12,0"
-                           Foreground="{DynamicResource TextSecondaryBrush}"
-                           FontSize="13"/>
-                <TextBox Grid.Column="1" 
-                         Classes="url-input"
-                         Text="{Binding RequestName, Mode=TwoWay}"
-                         Watermark="Enter request name"
-                         Margin="0,0,12,0"/>
-                <Button Grid.Column="2"
-                        Command="{Binding SaveRequestCommand}"
-                        MinWidth="100"
-                        HorizontalContentAlignment="Center">
-                    <Button.Content>
-                        <Panel>
-                            <TextBlock Text="💾 Save" IsVisible="{Binding !IsSaving}"/>
-                            <TextBlock Text="Saving..." IsVisible="{Binding IsSaving}"/>
-                        </Panel>
-                    </Button.Content>
-                    <Button.Styles>
-                        <Style Selector="Button">
-                            <Setter Property="Background" Value="{DynamicResource SuccessBrush}"/>
-                            <Setter Property="Foreground" Value="White"/>
-                            <Setter Property="CornerRadius" Value="6"/>
-                            <Setter Property="Padding" Value="12,8"/>
-                            <Setter Property="FontWeight" Value="SemiBold"/>
-                        </Style>
-                        <Style Selector="Button:pointerover /template/ ContentPresenter">
-                            <Setter Property="Background" Value="{DynamicResource SuccessHoverBrush}"/>
-                        </Style>
-                        <Style Selector="Button:disabled">
-                            <Setter Property="Opacity" Value="0.5"/>
-                        </Style>
-                    </Button.Styles>
-                </Button>
-            </Grid>
-        </Border>
-        
-        <!-- Status Message -->
-        <TextBlock Grid.Row="1" 
-                   Text="{Binding StatusMessage}"
-                   IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
-                   Margin="0,0,0,12"
-                   FontSize="12"
-                   Foreground="{DynamicResource TextSecondaryBrush}"/>
-        
-        <!-- URL Bar -->
-        <Border Grid.Row="2" 
-                Background="{DynamicResource CardBackgroundBrush}" 
-                CornerRadius="12" 
-                Padding="16"
-                BorderBrush="{DynamicResource ButtonBackgroundBrush}"
-                BorderThickness="1"
-                Margin="0,0,0,12">
-            <Grid ColumnDefinitions="Auto,*,Auto">
-                <!-- Method Selector -->
-                <ComboBox Grid.Column="0" 
-                          Classes="method-selector"
-                          ItemsSource="{Binding available_methods}"
-                          SelectedItem="{Binding SelectedMethod}"
-                          MinWidth="110"
-                          Margin="0,0,12,0">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding}" 
-                                       FontWeight="Bold"
-                                       Foreground="{DynamicResource SuccessTextBrush}"/>
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
-                
-                <!-- URL Input -->
-                <TextBox Grid.Column="1" 
-                         Classes="url-input"
-                         Text="{Binding Url, Mode=TwoWay}"
-                         Watermark="Enter request URL (e.g., https://api.example.com/users)"
-                         Margin="0,0,12,0"/>
-                
-                <!-- Send Button -->
-                <Button Grid.Column="2" 
-                        Command="{Binding SendRequestCommand}"
-                        MinWidth="100"
-                        HorizontalContentAlignment="Center">
-                    <Button.Content>
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Text="🚀" IsVisible="{Binding !IsSending}"/>
-                            <TextBlock Text="Send" IsVisible="{Binding !IsSending}"/>
-                            <TextBlock Text="⏳ Sending..." IsVisible="{Binding IsSending}"/>
-                        </StackPanel>
-                    </Button.Content>
-                    <Button.Styles>
-                        <Style Selector="Button">
-                            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
-                            <Setter Property="Foreground" Value="White"/>
-                            <Setter Property="CornerRadius" Value="6"/>
-                            <Setter Property="Padding" Value="12,8"/>
-                            <Setter Property="FontWeight" Value="SemiBold"/>
-                        </Style>
-                        <Style Selector="Button:pointerover /template/ ContentPresenter">
-                            <Setter Property="Background" Value="{DynamicResource AccentHoverBrush}"/>
-                        </Style>
-                    </Button.Styles>
-                </Button>
-            </Grid>
-        </Border>
+    <Grid RowDefinitions="Auto,Auto,*">
+        <!-- Row 0: Request Name, Collection Picker, and Save Button -->
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto,Auto" Margin="0,0,0,8">
+            <TextBlock Grid.Column="0"
+                       Text="Name:"
+                       VerticalAlignment="Center"
+                       Margin="0,0,12,0"
+                       Foreground="{DynamicResource TextSecondaryBrush}"
+                       FontSize="13"/>
+            <TextBox Grid.Column="1"
+                     Classes="url-input"
+                     Text="{Binding RequestName, Mode=TwoWay}"
+                     Watermark="Enter request name"
+                     Margin="0,0,12,0"/>
+            <ComboBox Grid.Column="2"
+                      ItemsSource="{Binding AvailableCollections}"
+                      SelectedItem="{Binding SelectedCollection}"
+                      MinWidth="150"
+                      Margin="0,0,8,0"
+                      ToolTip.Tip="Save to collection">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Name}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <Button Grid.Column="3"
+                    Command="{Binding SaveRequestCommand}"
+                    MinWidth="80"
+                    HorizontalContentAlignment="Center">
+                <Button.Content>
+                    <Panel>
+                        <TextBlock Text="Save" IsVisible="{Binding !IsSaving}"/>
+                        <TextBlock Text="..." IsVisible="{Binding IsSaving}"/>
+                    </Panel>
+                </Button.Content>
+                <Button.Styles>
+                    <Style Selector="Button">
+                        <Setter Property="Background" Value="{DynamicResource SuccessBrush}"/>
+                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="CornerRadius" Value="6"/>
+                        <Setter Property="Padding" Value="12,8"/>
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                    </Style>
+                    <Style Selector="Button:pointerover /template/ ContentPresenter">
+                        <Setter Property="Background" Value="{DynamicResource SuccessHoverBrush}"/>
+                    </Style>
+                    <Style Selector="Button:disabled">
+                        <Setter Property="Opacity" Value="0.5"/>
+                    </Style>
+                </Button.Styles>
+            </Button>
+        </Grid>
 
-        <!-- Request Details (Headers, Params, Body) -->
-        <Expander Grid.Row="3" Grid.RowSpan="2" 
-                  Header="Request Details (Headers, Params, Body)" 
-                  Classes="modern-card"
-                  IsExpanded="True"
-                  Margin="0,0,0,12">
-            <TabControl x:Name="EditorTabs" MinHeight="150">
-                <!-- Headers Tab -->
-                <TabItem Header="Headers">
-                    <Grid RowDefinitions="Auto,*" Margin="0,4,0,0">
-                        <Button Grid.Row="0" 
-                                Command="{Binding AddHeaderCommand}"
-                                Content="+ Add Header"
+        <!-- Row 1: URL Bar -->
+        <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,12">
+            <!-- Method Selector -->
+            <ComboBox Grid.Column="0"
+                      Classes="method-selector"
+                      ItemsSource="{Binding available_methods}"
+                      SelectedItem="{Binding SelectedMethod}"
+                      MinWidth="120"
+                      Margin="0,0,8,0">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Converter={StaticResource HttpMethodToUpperConverter}}"
+                                   FontWeight="Bold"
+                                   Foreground="{Binding Converter={StaticResource HttpMethodToBrushConverter}}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+
+            <!-- URL Input -->
+            <TextBox Grid.Column="1"
+                     Classes="url-input"
+                     Text="{Binding Url, Mode=TwoWay}"
+                     Watermark="Enter request URL"
+                     Margin="0,0,8,0"/>
+
+            <!-- Send Button -->
+            <Button Grid.Column="2"
+                    Command="{Binding SendRequestCommand}"
+                    MinWidth="100"
+                    HorizontalContentAlignment="Center">
+                <Button.Content>
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="Send" IsVisible="{Binding !IsSending}"/>
+                        <TextBlock Text="Sending..." IsVisible="{Binding IsSending}"/>
+                    </StackPanel>
+                </Button.Content>
+                <Button.Styles>
+                    <Style Selector="Button">
+                        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="CornerRadius" Value="6"/>
+                        <Setter Property="Padding" Value="14,8"/>
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                    </Style>
+                    <Style Selector="Button:pointerover /template/ ContentPresenter">
+                        <Setter Property="Background" Value="{DynamicResource AccentHoverBrush}"/>
+                    </Style>
+                </Button.Styles>
+            </Button>
+        </Grid>
+
+        <!-- Row 2: Tabs for Params, Headers, Body -->
+        <Border Grid.Row="2"
+                Background="{DynamicResource CardBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1"
+                CornerRadius="8">
+            <TabControl x:Name="EditorTabs" Background="Transparent" Padding="0" TabStripPlacement="Top">
+                <TabControl.Styles>
+                    <!-- Tab strip container -->
+                    <Style Selector="TabControl">
+                        <Setter Property="Background" Value="Transparent"/>
+                    </Style>
+                    <!-- Individual tab items - Postman style -->
+                    <Style Selector="TabItem">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                        <Setter Property="Padding" Value="16,10"/>
+                        <Setter Property="FontSize" Value="13"/>
+                        <Setter Property="Margin" Value="0"/>
+                        <Setter Property="MinHeight" Value="40"/>
+                    </Style>
+                    <Style Selector="TabItem:pointerover">
+                        <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
+                    </Style>
+                    <Style Selector="TabItem:selected">
+                        <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                    </Style>
+                </TabControl.Styles>
+
+                <!-- Params Tab -->
+                <TabItem Header="Params">
+                    <Grid RowDefinitions="Auto,*" Margin="12">
+                        <Button Grid.Row="0"
+                                Command="{Binding AddParamCommand}"
+                                Content="+ Add Param"
                                 HorizontalAlignment="Left"
-                                Margin="0,5"/>
-                        
-                        <ScrollViewer Grid.Row="1" Margin="0,5">
-                            <ItemsControl ItemsSource="{Binding Headers}">
+                                Margin="0,0,0,8"/>
+
+                        <ScrollViewer Grid.Row="1">
+                            <ItemsControl ItemsSource="{Binding QueryParams}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate x:DataType="vm:key_value_pair_view_model">
-                                        <Grid ColumnDefinitions="Auto,*,*,Auto" Margin="0,2">
-                                            <CheckBox Grid.Column="0" 
+                                        <Grid ColumnDefinitions="Auto,*,*,Auto" Margin="0,4">
+                                            <CheckBox Grid.Column="0"
                                                       IsChecked="{Binding IsEnabled}"
                                                       Margin="0,0,10,0"/>
-                                            <TextBox Grid.Column="1" 
+                                            <TextBox Grid.Column="1"
                                                      Text="{Binding Key, Mode=TwoWay}"
                                                      Watermark="Key"
                                                      Margin="0,0,5,0"/>
-                                            <TextBox Grid.Column="2" 
+                                            <TextBox Grid.Column="2"
+                                                     Text="{Binding Value, Mode=TwoWay}"
+                                                     Watermark="Value"
+                                                     Margin="5,0,5,0"/>
+                                            <Button Grid.Column="3"
+                                                    x:CompileBindings="False"
+                                                    Command="{Binding DataContext.RemoveParamCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding .}"
+                                                    Content="✕"
+                                                    Margin="5,0,0,0"
+                                                    Padding="6,2"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                </TabItem>
+
+                <!-- Headers Tab -->
+                <TabItem Header="Headers">
+                    <Grid RowDefinitions="Auto,*" Margin="12">
+                        <Button Grid.Row="0"
+                                Command="{Binding AddHeaderCommand}"
+                                Content="+ Add Header"
+                                HorizontalAlignment="Left"
+                                Margin="0,0,0,8"/>
+
+                        <ScrollViewer Grid.Row="1">
+                            <ItemsControl ItemsSource="{Binding Headers}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:key_value_pair_view_model">
+                                        <Grid ColumnDefinitions="Auto,*,*,Auto" Margin="0,4">
+                                            <CheckBox Grid.Column="0"
+                                                      IsChecked="{Binding IsEnabled}"
+                                                      Margin="0,0,10,0"/>
+                                            <TextBox Grid.Column="1"
+                                                     Text="{Binding Key, Mode=TwoWay}"
+                                                     Watermark="Key"
+                                                     Margin="0,0,5,0"/>
+                                            <TextBox Grid.Column="2"
                                                      Text="{Binding Value, Mode=TwoWay}"
                                                      Watermark="Value"
                                                      Margin="5,0,0,0"/>
@@ -205,57 +269,17 @@
                     </Grid>
                 </TabItem>
 
-                <!-- Params Tab -->
-                <TabItem Header="Params">
-                    <Grid RowDefinitions="Auto,*" Margin="0,4,0,0">
-                        <Button Grid.Row="0" 
-                                Command="{Binding AddParamCommand}"
-                                Content="+ Add Param"
-                                HorizontalAlignment="Left"
-                                Margin="0,5"/>
-                        
-                        <ScrollViewer Grid.Row="1" Margin="0,5">
-                            <ItemsControl ItemsSource="{Binding QueryParams}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="vm:key_value_pair_view_model">
-                                        <Grid ColumnDefinitions="Auto,*,*,Auto" Margin="0,2">
-                                            <CheckBox Grid.Column="0" 
-                                                      IsChecked="{Binding IsEnabled}"
-                                                      Margin="0,0,10,0"/>
-                                            <TextBox Grid.Column="1" 
-                                                     Text="{Binding Key, Mode=TwoWay}"
-                                                     Watermark="Key"
-                                                     Margin="0,0,5,0"/>
-                                            <TextBox Grid.Column="2" 
-                                                     Text="{Binding Value, Mode=TwoWay}"
-                                                     Watermark="Value"
-                                                     Margin="5,0,5,0"/>
-                                            <Button Grid.Column="3"
-                                                    x:CompileBindings="False"
-                                                    Command="{Binding DataContext.RemoveParamCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                    CommandParameter="{Binding .}"
-                                                    Content="✕"
-                                                    Margin="5,0,0,0"
-                                                    Padding="6,2"/>
-                                        </Grid>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
-                    </Grid>
-                </TabItem>
-                
                 <!-- Body Tab -->
                 <TabItem Header="Body">
                     <Grid RowDefinitions="Auto,*,Auto" Margin="12">
-                        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,12">
-                            <Border Grid.Column="0" 
-                                    Background="{DynamicResource ButtonBackgroundBrush}" 
-                                    CornerRadius="6" 
+                        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,8">
+                            <Border Grid.Column="0"
+                                    Background="{DynamicResource ButtonBackgroundBrush}"
+                                    CornerRadius="6"
                                     Padding="10,6"
                                     HorizontalAlignment="Left">
-                                <TextBlock Text="application/json" 
-                                           FontSize="11" 
+                                <TextBlock Text="application/json"
+                                           FontSize="11"
                                            Foreground="{DynamicResource TextSecondaryBrush}"
                                            FontFamily="JetBrains Mono, Consolas, monospace"/>
                             </Border>
@@ -276,13 +300,14 @@
                                 </Button.Styles>
                             </Button>
                         </Grid>
-                        
-                        <Border Grid.Row="1" 
+
+                        <Border Grid.Row="1"
                                 Background="{DynamicResource InputBackgroundBrush}"
                                 BorderBrush="{Binding IsJsonValid, Converter={StaticResource JsonValidityToBrushConverter}}"
                                 BorderThickness="1"
                                 CornerRadius="8"
-                                Padding="1">
+                                Padding="1"
+                                MinHeight="150">
                             <AvaloniaEdit:TextEditor Name="BodyEditor"
                                                      FontFamily="JetBrains Mono, Consolas, monospace"
                                                      FontSize="13"
@@ -290,7 +315,7 @@
                                                      Foreground="{DynamicResource ButtonTextBrush}"
                                                      ShowLineNumbers="True"
                                                      HorizontalScrollBarVisibility="Auto"
-                                                     VerticalScrollBarVisibility="Visible"/>
+                                                     VerticalScrollBarVisibility="Auto"/>
                         </Border>
 
                         <TextBlock Grid.Row="2"
@@ -303,8 +328,274 @@
                                    FontFamily="JetBrains Mono, Consolas, monospace"/>
                     </Grid>
                 </TabItem>
+
+                <!-- Authorization Tab -->
+                <TabItem Header="Auth">
+                    <ScrollViewer Margin="12">
+                        <StackPanel Spacing="16">
+                            <!-- Auth Type Selector -->
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="TYPE"
+                                           FontWeight="Bold"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                <ComboBox ItemsSource="{Binding available_auth_types}"
+                                          SelectedItem="{Binding SelectedAuthType}"
+                                          MinWidth="200"
+                                          Padding="12,8">
+                                    <ComboBox.Styles>
+                                        <Style Selector="ComboBox">
+                                            <Setter Property="Background" Value="{DynamicResource InputBackgroundBrush}"/>
+                                            <Setter Property="BorderBrush" Value="{DynamicResource BorderLightBrush}"/>
+                                            <Setter Property="CornerRadius" Value="6"/>
+                                        </Style>
+                                    </ComboBox.Styles>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <!-- No Auth Message -->
+                            <Border IsVisible="{Binding SelectedAuthType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static Core:auth_type.none}}"
+                                    Background="{DynamicResource CardBackgroundBrush}"
+                                    CornerRadius="8"
+                                    Padding="16"
+                                    BorderBrush="{DynamicResource BorderBrush}"
+                                    BorderThickness="1">
+                                <TextBlock Text="This request does not use any authorization."
+                                           Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            </Border>
+
+                            <!-- Basic Auth -->
+                            <Border IsVisible="{Binding SelectedAuthType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static Core:auth_type.basic}}"
+                                    Background="{DynamicResource CardBackgroundBrush}"
+                                    CornerRadius="8"
+                                    Padding="16"
+                                    BorderBrush="{DynamicResource BorderBrush}"
+                                    BorderThickness="1">
+                                <StackPanel Spacing="12">
+                                    <TextBlock Text="BASIC AUTHENTICATION"
+                                               FontWeight="Bold"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                    <StackPanel Spacing="12">
+                                        <Grid ColumnDefinitions="100,*">
+                                            <TextBlock Grid.Column="0" Text="Username:" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                            <TextBox Grid.Column="1"
+                                                     Text="{Binding BasicAuthUsername, Mode=TwoWay}"
+                                                     Watermark="Enter username"
+                                                     Background="{DynamicResource InputBackgroundBrush}"
+                                                     BorderBrush="{DynamicResource BorderLightBrush}"
+                                                     CornerRadius="6"
+                                                     Padding="12,8"/>
+                                        </Grid>
+                                        <Grid ColumnDefinitions="100,*">
+                                            <TextBlock Grid.Column="0" Text="Password:" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                            <TextBox Grid.Column="1"
+                                                     Text="{Binding BasicAuthPassword, Mode=TwoWay}"
+                                                     PasswordChar="*"
+                                                     Watermark="Enter password"
+                                                     Background="{DynamicResource InputBackgroundBrush}"
+                                                     BorderBrush="{DynamicResource BorderLightBrush}"
+                                                     CornerRadius="6"
+                                                     Padding="12,8"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Bearer Token -->
+                            <Border IsVisible="{Binding SelectedAuthType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static Core:auth_type.bearer}}"
+                                    Background="{DynamicResource CardBackgroundBrush}"
+                                    CornerRadius="8"
+                                    Padding="16"
+                                    BorderBrush="{DynamicResource BorderBrush}"
+                                    BorderThickness="1">
+                                <StackPanel Spacing="12">
+                                    <TextBlock Text="BEARER TOKEN"
+                                               FontWeight="Bold"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                    <Grid ColumnDefinitions="100,*">
+                                        <TextBlock Grid.Column="0" Text="Token:" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                        <TextBox Grid.Column="1"
+                                                 Text="{Binding BearerToken, Mode=TwoWay}"
+                                                 Watermark="Enter bearer token"
+                                                 Background="{DynamicResource InputBackgroundBrush}"
+                                                 BorderBrush="{DynamicResource BorderLightBrush}"
+                                                 CornerRadius="6"
+                                                 Padding="12,8"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- API Key -->
+                            <Border IsVisible="{Binding SelectedAuthType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static Core:auth_type.api_key}}"
+                                    Background="{DynamicResource CardBackgroundBrush}"
+                                    CornerRadius="8"
+                                    Padding="16"
+                                    BorderBrush="{DynamicResource BorderBrush}"
+                                    BorderThickness="1">
+                                <StackPanel Spacing="12">
+                                    <TextBlock Text="API KEY"
+                                               FontWeight="Bold"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                    <StackPanel Spacing="12">
+                                        <Grid ColumnDefinitions="100,*">
+                                            <TextBlock Grid.Column="0" Text="Key:" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                            <TextBox Grid.Column="1"
+                                                     Text="{Binding ApiKeyName, Mode=TwoWay}"
+                                                     Watermark="Header or query param name (e.g., X-API-Key)"
+                                                     Background="{DynamicResource InputBackgroundBrush}"
+                                                     BorderBrush="{DynamicResource BorderLightBrush}"
+                                                     CornerRadius="6"
+                                                     Padding="12,8"/>
+                                        </Grid>
+                                        <Grid ColumnDefinitions="100,*">
+                                            <TextBlock Grid.Column="0" Text="Value:" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                            <TextBox Grid.Column="1"
+                                                     Text="{Binding ApiKeyValue, Mode=TwoWay}"
+                                                     Watermark="Enter API key value"
+                                                     Background="{DynamicResource InputBackgroundBrush}"
+                                                     BorderBrush="{DynamicResource BorderLightBrush}"
+                                                     CornerRadius="6"
+                                                     Padding="12,8"/>
+                                        </Grid>
+                                        <Grid ColumnDefinitions="100,*">
+                                            <TextBlock Grid.Column="0" Text="Add to:" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                            <ComboBox Grid.Column="1"
+                                                      ItemsSource="{Binding available_api_key_locations}"
+                                                      SelectedItem="{Binding ApiKeyLocation}"
+                                                      MinWidth="150"
+                                                      Background="{DynamicResource InputBackgroundBrush}"
+                                                      BorderBrush="{DynamicResource BorderLightBrush}"
+                                                      CornerRadius="6"
+                                                      Padding="12,8"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- OAuth 2.0 Client Credentials -->
+                            <Border IsVisible="{Binding SelectedAuthType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static Core:auth_type.oauth2_client_credentials}}"
+                                    Background="{DynamicResource CardBackgroundBrush}"
+                                    CornerRadius="8"
+                                    Padding="16"
+                                    BorderBrush="{DynamicResource BorderBrush}"
+                                    BorderThickness="1">
+                                <StackPanel Spacing="12">
+                                    <TextBlock Text="OAUTH 2.0 CLIENT CREDENTIALS"
+                                               FontWeight="Bold"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                    <StackPanel Spacing="12">
+                                        <Grid ColumnDefinitions="120,*">
+                                            <TextBlock Grid.Column="0" Text="Token URL:" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                            <TextBox Grid.Column="1"
+                                                     Text="{Binding Oauth2TokenUrl, Mode=TwoWay}"
+                                                     Watermark="https://auth.example.com/oauth/token"
+                                                     Background="{DynamicResource InputBackgroundBrush}"
+                                                     BorderBrush="{DynamicResource BorderLightBrush}"
+                                                     CornerRadius="6"
+                                                     Padding="12,8"/>
+                                        </Grid>
+                                        <Grid ColumnDefinitions="120,*">
+                                            <TextBlock Grid.Column="0" Text="Client ID:" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                            <TextBox Grid.Column="1"
+                                                     Text="{Binding Oauth2ClientId, Mode=TwoWay}"
+                                                     Watermark="Enter client ID"
+                                                     Background="{DynamicResource InputBackgroundBrush}"
+                                                     BorderBrush="{DynamicResource BorderLightBrush}"
+                                                     CornerRadius="6"
+                                                     Padding="12,8"/>
+                                        </Grid>
+                                        <Grid ColumnDefinitions="120,*">
+                                            <TextBlock Grid.Column="0" Text="Client Secret:" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                            <TextBox Grid.Column="1"
+                                                     Text="{Binding Oauth2ClientSecret, Mode=TwoWay}"
+                                                     PasswordChar="*"
+                                                     Watermark="Enter client secret"
+                                                     Background="{DynamicResource InputBackgroundBrush}"
+                                                     BorderBrush="{DynamicResource BorderLightBrush}"
+                                                     CornerRadius="6"
+                                                     Padding="12,8"/>
+                                        </Grid>
+                                        <Grid ColumnDefinitions="120,*">
+                                            <TextBlock Grid.Column="0" Text="Scope:" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                            <TextBox Grid.Column="1"
+                                                     Text="{Binding Oauth2Scope, Mode=TwoWay}"
+                                                     Watermark="Optional: read write (space-separated)"
+                                                     Background="{DynamicResource InputBackgroundBrush}"
+                                                     BorderBrush="{DynamicResource BorderLightBrush}"
+                                                     CornerRadius="6"
+                                                     Padding="12,8"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+
+                <!-- Pre-request Script Tab -->
+                <TabItem Header="Pre-request">
+                    <Grid RowDefinitions="Auto,*" Margin="12">
+                        <Border Grid.Row="0"
+                                Background="{DynamicResource ButtonBackgroundBrush}"
+                                CornerRadius="6"
+                                Padding="12,8"
+                                Margin="0,0,0,12"
+                                HorizontalAlignment="Left">
+                            <TextBlock Text="Runs before the request is sent"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        </Border>
+
+                        <TextBox Grid.Row="1"
+                                 Text="{Binding PreRequestScript, Mode=TwoWay}"
+                                 AcceptsReturn="True"
+                                 AcceptsTab="True"
+                                 TextWrapping="NoWrap"
+                                 FontFamily="JetBrains Mono, Consolas, monospace"
+                                 FontSize="12"
+                                 Background="{DynamicResource InputBackgroundBrush}"
+                                 Foreground="{DynamicResource ButtonTextBrush}"
+                                 BorderBrush="{DynamicResource BorderLightBrush}"
+                                 BorderThickness="1"
+                                 CornerRadius="8"
+                                 Padding="12"/>
+                    </Grid>
+                </TabItem>
+
+                <!-- Post-response Script Tab -->
+                <TabItem Header="Tests">
+                    <Grid RowDefinitions="Auto,*" Margin="12">
+                        <Border Grid.Row="0"
+                                Background="{DynamicResource ButtonBackgroundBrush}"
+                                CornerRadius="6"
+                                Padding="12,8"
+                                Margin="0,0,0,12"
+                                HorizontalAlignment="Left">
+                            <TextBlock Text="Runs after receiving the response - use pm.test() for assertions"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        </Border>
+
+                        <TextBox Grid.Row="1"
+                                 Text="{Binding PostResponseScript, Mode=TwoWay}"
+                                 AcceptsReturn="True"
+                                 AcceptsTab="True"
+                                 TextWrapping="NoWrap"
+                                 FontFamily="JetBrains Mono, Consolas, monospace"
+                                 FontSize="12"
+                                 Background="{DynamicResource InputBackgroundBrush}"
+                                 Foreground="{DynamicResource ButtonTextBrush}"
+                                 BorderBrush="{DynamicResource BorderLightBrush}"
+                                 BorderThickness="1"
+                                 CornerRadius="8"
+                                 Padding="12"/>
+                    </Grid>
+                </TabItem>
             </TabControl>
-        </Expander>
-        </Grid>
-    </ScrollViewer>
+        </Border>
+    </Grid>
 </UserControl>

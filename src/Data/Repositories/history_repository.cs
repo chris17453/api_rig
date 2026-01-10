@@ -92,7 +92,9 @@ public class history_repository : i_history_repository
             environment_id = model.environment_id,
             environment_name = model.environment_name,
             collection_id = model.collection_id,
+            collection_item_id = model.collection_item_id,
             collection_name = model.collection_name,
+            source_tab_id = model.source_tab_id,
             executed_at = model.executed_at,
             error_message = model.error_message,
             request_snapshot_json = model.request_snapshot is null 
@@ -119,7 +121,9 @@ public class history_repository : i_history_repository
             environment_id = entity.environment_id,
             environment_name = entity.environment_name,
             collection_id = entity.collection_id,
+            collection_item_id = entity.collection_item_id,
             collection_name = entity.collection_name,
+            source_tab_id = entity.source_tab_id,
             executed_at = entity.executed_at,
             error_message = entity.error_message,
             request_snapshot = string.IsNullOrEmpty(entity.request_snapshot_json) 

@@ -74,9 +74,9 @@
             BorderThickness="0,0,0,1"
             Padding="8,8,8,0">
         <Grid ColumnDefinitions="*,Auto">
-            <!-- Tabs ScrollViewer -->
-            <ScrollViewer Grid.Column="0" 
-                          HorizontalScrollBarVisibility="Auto"
+            <!-- Tabs Container - hidden scrollbar, scroll with mouse wheel -->
+            <ScrollViewer Grid.Column="0"
+                          HorizontalScrollBarVisibility="Hidden"
                           VerticalScrollBarVisibility="Disabled">
                 <ItemsControl ItemsSource="{Binding Tabs}">
                     <ItemsControl.ItemsPanel>

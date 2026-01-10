@@ -3,98 +3,76 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:App.ViewModels"
+             xmlns:views="using:App.Views"
+             xmlns:html="clr-namespace:TheArtOfDev.HtmlRenderer.Avalonia;assembly=Avalonia.HtmlRenderer"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="400"
              x:Class="App.Views.response_viewer_view"
              x:DataType="vm:response_viewer_view_model">
 
-    <Grid RowDefinitions="Auto,*">
-        <!-- Status Bar -->
-        <Border Grid.Row="0" 
-                Padding="16,12"
-                Background="{DynamicResource ButtonBackgroundBrush}"
-                CornerRadius="8,8,0,0"
-                Margin="12,12,12,0"
-                IsVisible="{Binding HasResponse}">
-            <StackPanel Orientation="Horizontal" Spacing="16">
-                <!-- Status Badge -->
-                <Border Background="{DynamicResource SuccessBrush}" 
-                        CornerRadius="6" 
-                        Padding="12,6">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock Text="{Binding StatusCode}"
-                                   FontWeight="Bold"
-                                   FontSize="14"
-                                   Foreground="White"/>
-                        <TextBlock Text="{Binding StatusDescription}" 
-                                   Foreground="White"
-                                   Opacity="0.8"
-                                   FontSize="12"/>
-                    </StackPanel>
-                </Border>
-                
-                <!-- Time -->
-                <Border Background="{DynamicResource InputBackgroundBrush}" 
-                        CornerRadius="6" 
-                        Padding="12,6,16,6">
-                    <StackPanel Orientation="Horizontal" Spacing="6">
-                        <TextBlock Text="⏱" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                        <TextBlock Text="{Binding ElapsedMs, StringFormat={}{0} ms}"
-                                   Foreground="{DynamicResource ButtonTextBrush}"
-                                   FontSize="12"
-                                   FontWeight="SemiBold"
-                                   TextWrapping="NoWrap"
-                                   TextTrimming="None"
-                                   ClipToBounds="False"
-                                   MaxWidth="Infinity"/>
-                    </StackPanel>
-                </Border>
-                
-                <!-- Size -->
-                <Border Background="{DynamicResource InputBackgroundBrush}" 
-                        CornerRadius="6" 
-                        Padding="12,6,16,6">
-                    <StackPanel Orientation="Horizontal" Spacing="6">
-                        <TextBlock Text="📦" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                        <TextBlock Text="{Binding SizeBytes, StringFormat={}{0} B}"
-                                   Foreground="{DynamicResource ButtonTextBrush}"
-                                   FontSize="12"
-                                   FontWeight="SemiBold"
-                                   TextWrapping="NoWrap"
-                                   TextTrimming="None"
-                                   ClipToBounds="False"
-                                   MaxWidth="Infinity"/>
-                    </StackPanel>
-                </Border>
-            </StackPanel>
-        </Border>
+    <UserControl.Styles>
+        <!-- View mode button style -->
+        <Style Selector="RadioButton.view-mode">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+        <Style Selector="RadioButton.view-mode:checked">
+            <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style Selector="RadioButton.view-mode:pointerover">
+            <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
+        </Style>
+        <!-- Table header style -->
+        <Style Selector="TextBlock.table-header">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+            <Setter Property="Padding" Value="12,8"/>
+        </Style>
+        <!-- Table cell style -->
+        <Style Selector="TextBlock.table-cell">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+        </Style>
+        <Style Selector="SelectableTextBlock.table-cell">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
+            <Setter Property="Padding" Value="12,8"/>
+        </Style>
+    </UserControl.Styles>
 
-        <!-- Error Message -->
-        <Border Grid.Row="0" 
-                Padding="16,12"
+    <Grid RowDefinitions="Auto,*">
+        <!-- Row 0: Error Message (only shown on errors) -->
+        <Border Grid.Row="0"
+                Padding="12,10"
                 Background="{DynamicResource CardBackgroundBrush}"
                 CornerRadius="8"
-                Margin="12"
                 BorderBrush="{DynamicResource ErrorTextBrush}"
                 BorderThickness="1"
                 IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-            <StackPanel Orientation="Horizontal" Spacing="10">
-                <TextBlock Text="⚠" FontSize="16" Foreground="{DynamicResource ErrorTextBrush}"/>
-                <TextBlock Text="{Binding ErrorMessage}" 
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="!" FontSize="14" Foreground="{DynamicResource ErrorTextBrush}" FontWeight="Bold"/>
+                <TextBlock Text="{Binding ErrorMessage}"
                            Foreground="{DynamicResource ErrorTextBrush}"
                            TextWrapping="Wrap"
                            VerticalAlignment="Center"/>
             </StackPanel>
         </Border>
 
-        <!-- Response Content -->
-        <Border Grid.Row="1" 
+        <!-- Row 1: Main Tabs -->
+        <Border Grid.Row="1"
                 IsVisible="{Binding HasResponse}"
                 Background="{DynamicResource PanelBackgroundBrush}"
-                CornerRadius="0,0,8,8"
                 BorderBrush="{DynamicResource BorderLightBrush}"
-                BorderThickness="1,0,1,1"
-                Margin="12,0,12,12">
-            <TabControl Background="Transparent" Padding="8">
+                BorderThickness="0,1,0,0">
+            <TabControl Background="Transparent" Padding="0">
                 <TabControl.Styles>
                     <Style Selector="TabItem">
                         <Setter Property="Background" Value="Transparent"/>
@@ -103,69 +81,369 @@
                         <Setter Property="FontSize" Value="13"/>
                     </Style>
                     <Style Selector="TabItem:selected">
-                        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                        <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
                         <Setter Property="FontWeight" Value="SemiBold"/>
                     </Style>
                 </TabControl.Styles>
-                
+
                 <!-- Body Tab -->
                 <TabItem Header="Body">
-                    <ScrollViewer Margin="8">
-                        <TextBox Text="{Binding FormattedBody, Mode=OneWay}"
-                                 IsReadOnly="True"
-                                 FontFamily="JetBrains Mono, Consolas, monospace"
-                                 FontSize="12"
-                                 TextWrapping="NoWrap"
-                                 AcceptsReturn="True"
-                                 Background="Transparent"
-                                 Foreground="{DynamicResource ButtonTextBrush}"
-                                 BorderThickness="0"
-                                 Padding="8"/>
-                    </ScrollViewer>
+                    <Grid RowDefinitions="Auto,*">
+                        <!-- Body View Options Bar -->
+                        <Border Grid.Row="0"
+                                Background="{DynamicResource ButtonBackgroundBrush}"
+                                Padding="8,6">
+                            <Grid ColumnDefinitions="Auto,*,Auto">
+                                <!-- View Mode Buttons -->
+                                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="2">
+                                    <RadioButton Classes="view-mode"
+                                                 Content="Pretty"
+                                                 GroupName="ViewMode"
+                                                 IsChecked="{Binding SelectedViewMode, Mode=OneWay, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:BodyViewMode.Pretty}}"
+                                                 Command="{Binding SetViewModeCommand}"
+                                                 CommandParameter="Pretty"/>
+                                    <RadioButton Classes="view-mode"
+                                                 Content="Raw"
+                                                 GroupName="ViewMode"
+                                                 IsChecked="{Binding SelectedViewMode, Mode=OneWay, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:BodyViewMode.Raw}}"
+                                                 Command="{Binding SetViewModeCommand}"
+                                                 CommandParameter="Raw"/>
+                                    <RadioButton Classes="view-mode"
+                                                 Content="Preview"
+                                                 GroupName="ViewMode"
+                                                 IsChecked="{Binding SelectedViewMode, Mode=OneWay, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:BodyViewMode.Preview}}"
+                                                 Command="{Binding SetViewModeCommand}"
+                                                 CommandParameter="Preview"
+                                                 IsEnabled="{Binding CanPreview}"/>
+                                </StackPanel>
+
+                                <!-- Format Selector and Copy -->
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="Format:"
+                                               VerticalAlignment="Center"
+                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                               FontSize="11"/>
+                                    <ComboBox ItemsSource="{Binding Formats}"
+                                              SelectedItem="{Binding SelectedFormat}"
+                                              MinWidth="80"
+                                              Padding="8,4"
+                                              FontSize="11">
+                                        <ComboBox.Styles>
+                                            <Style Selector="ComboBox">
+                                                <Setter Property="Background" Value="{DynamicResource InputBackgroundBrush}"/>
+                                                <Setter Property="BorderBrush" Value="{DynamicResource BorderLightBrush}"/>
+                                                <Setter Property="CornerRadius" Value="4"/>
+                                            </Style>
+                                        </ComboBox.Styles>
+                                    </ComboBox>
+                                    <Button Command="{Binding CopyBodyCommand}"
+                                            Padding="8,4"
+                                            Background="{DynamicResource InputBackgroundBrush}"
+                                            BorderBrush="{DynamicResource BorderLightBrush}"
+                                            CornerRadius="4">
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <TextBlock Text="📋" FontSize="12"/>
+                                            <TextBlock Text="Copy" FontSize="11"/>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- Body Content - Text View -->
+                        <ScrollViewer Grid.Row="1" IsVisible="{Binding !IsPreviewMode}">
+                            <TextBox Text="{Binding DisplayBody, Mode=OneWay}"
+                                     IsReadOnly="True"
+                                     FontFamily="JetBrains Mono, Consolas, monospace"
+                                     FontSize="12"
+                                     TextWrapping="NoWrap"
+                                     AcceptsReturn="True"
+                                     Background="Transparent"
+                                     Foreground="{DynamicResource ButtonTextBrush}"
+                                     BorderThickness="0"
+                                     Padding="12"/>
+                        </ScrollViewer>
+
+                        <!-- Body Content - Preview (HTML) -->
+                        <Border Grid.Row="1"
+                                IsVisible="{Binding IsPreviewMode}"
+                                Background="White"
+                                Margin="8"
+                                CornerRadius="4">
+                            <html:HtmlPanel Text="{Binding Body}"
+                                            Background="White"/>
+                        </Border>
+                    </Grid>
+                </TabItem>
+
+                <!-- Cookies Tab -->
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="Cookies"/>
+                            <Border Background="{DynamicResource AccentBrush}"
+                                    CornerRadius="8"
+                                    Padding="6,2"
+                                    IsVisible="{Binding HasCookies}">
+                                <TextBlock Text="{Binding CookieCount}"
+                                           FontSize="10"
+                                           Foreground="White"/>
+                            </Border>
+                        </StackPanel>
+                    </TabItem.Header>
+                    <Grid RowDefinitions="Auto,*">
+                        <!-- Toolbar -->
+                        <Border Grid.Row="0" Background="{DynamicResource ButtonBackgroundBrush}" Padding="8,6"
+                                IsVisible="{Binding HasCookies}">
+                            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                                <Button Command="{Binding CopyAllCookiesCommand}"
+                                        Padding="8,4"
+                                        Background="{DynamicResource InputBackgroundBrush}"
+                                        BorderBrush="{DynamicResource BorderLightBrush}"
+                                        CornerRadius="4">
+                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                        <TextBlock Text="📋" FontSize="12"/>
+                                        <TextBlock Text="Copy All" FontSize="11"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Cookies Table -->
+                        <ScrollViewer Grid.Row="1" IsVisible="{Binding HasCookies}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Table Header -->
+                                <Border Grid.Row="0" Background="{DynamicResource ButtonBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
+                                    <Grid ColumnDefinitions="120,*,90,70,50,50,40">
+                                        <TextBlock Grid.Column="0" Classes="table-header" Text="NAME"/>
+                                        <TextBlock Grid.Column="1" Classes="table-header" Text="VALUE"/>
+                                        <TextBlock Grid.Column="2" Classes="table-header" Text="DOMAIN"/>
+                                        <TextBlock Grid.Column="3" Classes="table-header" Text="PATH"/>
+                                        <TextBlock Grid.Column="4" Classes="table-header" Text="HTTP"/>
+                                        <TextBlock Grid.Column="5" Classes="table-header" Text="SEC"/>
+                                        <TextBlock Grid.Column="6" Classes="table-header" Text=""/>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Table Body -->
+                                <ItemsControl Grid.Row="1" ItemsSource="{Binding CookiesList}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:ResponseCookieViewModel">
+                                            <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
+                                                <Grid ColumnDefinitions="120,*,90,70,50,50,40">
+                                                    <SelectableTextBlock Grid.Column="0" Classes="table-cell" Text="{Binding Name}" FontWeight="SemiBold"/>
+                                                    <SelectableTextBlock Grid.Column="1" Classes="table-cell" Text="{Binding Value}"/>
+                                                    <SelectableTextBlock Grid.Column="2" Classes="table-cell" Text="{Binding Domain}"/>
+                                                    <SelectableTextBlock Grid.Column="3" Classes="table-cell" Text="{Binding Path}"/>
+                                                    <TextBlock Grid.Column="4" Classes="table-cell" Text="{Binding HttpOnly}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="10"/>
+                                                    <TextBlock Grid.Column="5" Classes="table-cell" Text="{Binding Secure}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="10"/>
+                                                    <Button Grid.Column="6"
+                                                            Command="{Binding CopyCookieCommand}"
+                                                            Background="Transparent"
+                                                            BorderThickness="0"
+                                                            Padding="8,4"
+                                                            VerticalAlignment="Center"
+                                                            ToolTip.Tip="Copy cookie">
+                                                        <TextBlock Text="📋" FontSize="12" Opacity="0.6"/>
+                                                    </Button>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Grid>
+                        </ScrollViewer>
+
+                        <!-- No Cookies Message -->
+                        <TextBlock Grid.Row="1"
+                                   IsVisible="{Binding !HasCookies}"
+                                   Text="No cookies in response"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                    </Grid>
                 </TabItem>
 
                 <!-- Headers Tab -->
-                <TabItem Header="Headers">
-                    <ScrollViewer Margin="8">
-                        <TextBox Text="{Binding HeadersText, Mode=OneWay}"
-                                 IsReadOnly="True"
-                                 FontFamily="JetBrains Mono, Consolas, monospace"
-                                 FontSize="12"
-                                 TextWrapping="NoWrap"
-                                 AcceptsReturn="True"
-                                 Background="Transparent"
-                                 Foreground="{DynamicResource ButtonTextBrush}"
-                                 BorderThickness="0"
-                                 Padding="8"/>
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="Headers"/>
+                            <Border Background="{DynamicResource AccentBrush}"
+                                    CornerRadius="8"
+                                    Padding="6,2">
+                                <TextBlock Text="{Binding HeadersList.Count}"
+                                           FontSize="10"
+                                           Foreground="White"/>
+                            </Border>
+                        </StackPanel>
+                    </TabItem.Header>
+                    <Grid RowDefinitions="Auto,*">
+                        <!-- Toolbar -->
+                        <Border Grid.Row="0" Background="{DynamicResource ButtonBackgroundBrush}" Padding="8,6">
+                            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                                <Button Command="{Binding CopyAllHeadersCommand}"
+                                        Padding="8,4"
+                                        Background="{DynamicResource InputBackgroundBrush}"
+                                        BorderBrush="{DynamicResource BorderLightBrush}"
+                                        CornerRadius="4">
+                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                        <TextBlock Text="📋" FontSize="12"/>
+                                        <TextBlock Text="Copy All" FontSize="11"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Border>
+                        <ScrollViewer Grid.Row="1">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Table Header -->
+                                <Border Grid.Row="0" Background="{DynamicResource ButtonBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
+                                    <Grid ColumnDefinitions="180,*,40">
+                                        <TextBlock Grid.Column="0" Classes="table-header" Text="KEY"/>
+                                        <TextBlock Grid.Column="1" Classes="table-header" Text="VALUE"/>
+                                        <TextBlock Grid.Column="2" Classes="table-header" Text=""/>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Table Body -->
+                                <ItemsControl Grid.Row="1" ItemsSource="{Binding HeadersList}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:ResponseHeaderViewModel">
+                                            <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
+                                                <Grid ColumnDefinitions="180,*,40">
+                                                    <SelectableTextBlock Grid.Column="0"
+                                                                         Classes="table-cell"
+                                                                         Text="{Binding Key}"
+                                                                         FontWeight="SemiBold"/>
+                                                    <SelectableTextBlock Grid.Column="1"
+                                                                         Classes="table-cell"
+                                                                         Text="{Binding Value}"/>
+                                                    <Button Grid.Column="2"
+                                                            Command="{Binding CopyPairCommand}"
+                                                            Background="Transparent"
+                                                            BorderThickness="0"
+                                                            Padding="8,4"
+                                                            VerticalAlignment="Center"
+                                                            ToolTip.Tip="Copy header">
+                                                        <TextBlock Text="📋" FontSize="12" Opacity="0.6"/>
+                                                    </Button>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Grid>
+                        </ScrollViewer>
+                    </Grid>
+                </TabItem>
+
+                <!-- Info Tab - Response Details -->
+                <TabItem Header="Info">
+                    <ScrollViewer Margin="12">
+                        <StackPanel Spacing="16">
+                            <!-- General Info -->
+                            <Border Background="{DynamicResource CardBackgroundBrush}"
+                                    CornerRadius="8"
+                                    Padding="16"
+                                    BorderBrush="{DynamicResource BorderBrush}"
+                                    BorderThickness="1">
+                                <StackPanel Spacing="12">
+                                    <TextBlock Text="GENERAL"
+                                               FontWeight="Bold"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource TextSecondaryBrush}"/>
+
+                                    <Grid ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Status:" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                            <TextBlock Text="{Binding StatusCode}" FontWeight="Bold" Foreground="{DynamicResource SuccessTextBrush}"/>
+                                            <TextBlock Text="{Binding StatusDescription}" Foreground="{DynamicResource ButtonTextBrush}"/>
+                                        </StackPanel>
+
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Time:" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,8,0,0"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ElapsedMs, StringFormat={}{0} ms}" Foreground="{DynamicResource ButtonTextBrush}" Margin="0,8,0,0"/>
+
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Size:" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,8,0,0"/>
+                                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SizeBytes, StringFormat={}{0} bytes}" Foreground="{DynamicResource ButtonTextBrush}" Margin="0,8,0,0"/>
+
+                                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Content-Type:" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,8,0,0"/>
+                                        <SelectableTextBlock Grid.Row="3" Grid.Column="1" Text="{Binding ContentType}" Foreground="{DynamicResource ButtonTextBrush}" Margin="0,8,0,0"/>
+
+                                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Detected Format:" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,8,0,0"/>
+                                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding DetectedFormat}" Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Statistics -->
+                            <Border Background="{DynamicResource CardBackgroundBrush}"
+                                    CornerRadius="8"
+                                    Padding="16"
+                                    BorderBrush="{DynamicResource BorderBrush}"
+                                    BorderThickness="1">
+                                <StackPanel Spacing="12">
+                                    <TextBlock Text="STATISTICS"
+                                               FontWeight="Bold"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource TextSecondaryBrush}"/>
+
+                                    <Grid ColumnDefinitions="140,*" RowDefinitions="Auto,Auto">
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Headers Count:" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding HeadersList.Count}" Foreground="{DynamicResource ButtonTextBrush}"/>
+
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Cookies Count:" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,8,0,0"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding CookieCount}" Foreground="{DynamicResource ButtonTextBrush}" Margin="0,8,0,0"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
                     </ScrollViewer>
+                </TabItem>
+
+                <!-- Test Results Tab -->
+                <TabItem Header="Test Results">
+                    <views:test_results_view x:CompileBindings="False"
+                                              DataContext="{Binding $parent[Window].DataContext.TestResults, FallbackValue={x:Null}}"/>
                 </TabItem>
             </TabControl>
         </Border>
 
         <!-- No Response Placeholder -->
-        <Border Grid.Row="1" 
+        <Border Grid.Row="1"
                 IsVisible="{Binding !HasResponse}"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Margin="12">
-            <StackPanel HorizontalAlignment="Center" Spacing="16">
-                <Border Background="{DynamicResource ButtonBackgroundBrush}" 
-                        CornerRadius="50" 
-                        Width="80" Height="80"
+            <StackPanel HorizontalAlignment="Center" Spacing="12">
+                <Border Background="{DynamicResource ButtonBackgroundBrush}"
+                        CornerRadius="40"
+                        Width="64" Height="64"
                         HorizontalAlignment="Center">
-                    <TextBlock Text="📡" 
-                               FontSize="32" 
+                    <TextBlock Text="&lt;/&gt;"
+                               FontSize="20"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
                                HorizontalAlignment="Center"
                                VerticalAlignment="Center"/>
                 </Border>
-                <TextBlock Text="No Response Yet" 
-                           FontSize="18" 
+                <TextBlock Text="No Response Yet"
+                           FontSize="16"
                            FontWeight="SemiBold"
                            Foreground="{DynamicResource TextSecondaryBrush}"
                            HorizontalAlignment="Center"/>
-                <TextBlock Text="Send a request to see the response here" 
+                <TextBlock Text="Send a request to see the response"
                            Foreground="{DynamicResource TextTertiaryBrush}"
-                           FontSize="13"
+                           FontSize="12"
                            HorizontalAlignment="Center"/>
             </StackPanel>
         </Border>

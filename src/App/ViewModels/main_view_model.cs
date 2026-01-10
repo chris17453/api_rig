@@ -75,7 +75,7 @@ public partial class main_view_model : ObservableObject
         _requestEditor.execution_started += (_, _) => on_execution_started();
         _requestEditor.execution_completed += async (_, result) => await on_execution_completed(result);
         _requestEditor.request_saved += async (_, _) => await on_request_saved_async();
-        _sidebar.request_selected += (_, request) => on_request_selected(request);
+        _sidebar.request_selected += (_, data) => on_request_selected(data);
         
         // Sync scripts from ScriptEditor to RequestEditor when they change
         _scriptEditor.PropertyChanged += (_, e) =>
@@ -92,13 +92,22 @@ public partial class main_view_model : ObservableObject
             }
         };
         _sidebar.request_with_collection_selected += (_, data) => on_request_with_collection_selected(data);
-        
+        _sidebar.collection_changed += async (_, _) => await _requestEditor.LoadCollectionsAsync();
+
         // Wire up tab events
         _tabs.tab_activated += (_, tab) => on_tab_activated(tab);
         _tabs.tab_closed += (_, tab) => on_tab_closed(tab);
-        
+
         // Wire up request editor property changes to track unsaved changes
         _requestEditor.PropertyChanged += (_, e) => on_request_editor_property_changed(e);
+
+        // IMPORTANT: Load the initial tab immediately so CurrentTabId is set BEFORE any user action
+        // This must happen synchronously in the constructor, not in async initialization
+        if (_tabs.ActiveTab != null)
+        {
+            Console.WriteLine($"[MAIN] Constructor: Loading initial tab {_tabs.ActiveTab.Id}");
+            load_tab_into_editor(_tabs.ActiveTab);
+        }
     }
 
     [RelayCommand]
@@ -106,6 +115,7 @@ public partial class main_view_model : ObservableObject
     {
         await Sidebar.load_data_async(cancellation_token);
         await EnvironmentSelector.load_environments_async(cancellation_token);
+        await RequestEditor.LoadCollectionsAsync(cancellation_token);
     }
 
     [RelayCommand]
@@ -131,12 +141,14 @@ public partial class main_view_model : ObservableObject
     private async Task OpenImportDialog()
     {
         // Dialog will be shown from the view
+        await Task.CompletedTask;
     }
 
     [RelayCommand]
     private async Task OpenExportDialog()
     {
         // Dialog will be shown from the view
+        await Task.CompletedTask;
     }
 
     private void on_execution_started()
@@ -263,25 +275,29 @@ public partial class main_view_model : ObservableObject
         ScriptEditor.AppendConsoleOutput(heavy_separator);
     }
 
-    private void on_request_selected(http_request_model request)
+    private void on_request_selected((http_request_model request, string? sourceTabId, string? collectionId, string? collectionItemId) data)
     {
-        // Open in a new tab (history items don't have collection info)
-        var tab = Tabs.open_request(request, null, null);
+        // Open in a new tab or activate existing tab - prioritize sourceTabId for history items
+        Console.WriteLine($"[MAIN] on_request_selected: sourceTabId={data.sourceTabId ?? "null"}, collectionId={data.collectionId ?? "null"}, collectionItemId={data.collectionItemId ?? "null"}");
+        var tab = Tabs.open_request(data.request, data.sourceTabId, data.collectionId, data.collectionItemId);
         load_tab_into_editor(tab);
     }
 
     private void on_request_with_collection_selected((http_request_model request, string collectionId, string collectionItemId) data)
     {
-        // Open in a new tab or activate existing tab
-        var tab = Tabs.open_request(data.request, data.collectionId, data.collectionItemId);
+        // Open in a new tab or activate existing tab - no sourceTabId since this comes from collections
+        var tab = Tabs.open_request(data.request, null, data.collectionId, data.collectionItemId);
         load_tab_into_editor(tab);
     }
 
     private async Task on_request_saved_async()
     {
-        // Mark the active tab as saved
+        // Mark the active tab as saved with collection info
         Tabs.mark_active_tab_saved(RequestEditor.CurrentCollectionId, RequestEditor.CurrentRequestId);
         await Sidebar.load_data_async(CancellationToken.None);
+
+        // Sync sidebar selection to highlight the saved item
+        Sidebar.SelectItemById(RequestEditor.CurrentCollectionId, RequestEditor.CurrentRequestId);
     }
     
     private void on_tab_activated(tab_state tab)
@@ -334,10 +350,15 @@ public partial class main_view_model : ObservableObject
     
     private void load_tab_into_editor(tab_state tab)
     {
+        Console.WriteLine($"[MAIN] load_tab_into_editor: tab.Id={tab.Id}, CollectionId={tab.CollectionId ?? "null"}, CollectionItemId={tab.CollectionItemId ?? "null"}");
         var request = tab.to_request_model();
-        RequestEditor.load_request(request, tab.CollectionId, tab.CollectionItemId);
+        // Pass the tab ID so history entries can reference back to this tab
+        RequestEditor.load_request(request, tab.CollectionId, tab.CollectionItemId, tab.Id);
         ScriptEditor.LoadScriptsFromRequest(request);
-        
+
+        // Sync sidebar selection to highlight the correct collection item
+        Sidebar.SelectItemById(tab.CollectionId, tab.CollectionItemId);
+
         // Load response if available
         if (tab.LastResponse != null)
         {
@@ -347,7 +368,7 @@ public partial class main_view_model : ObservableObject
         {
             ResponseViewer.clear();
         }
-        
+
         TestResults.ClearResultsCommand.Execute(null);
     }
 

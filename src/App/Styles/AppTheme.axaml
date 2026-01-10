@@ -36,6 +36,15 @@
             <Color x:Key="SuccessTextColor">#3FB950</Color>
             <Color x:Key="ErrorTextColor">#F85149</Color>
             <Color x:Key="WarningTextColor">#D29922</Color>
+
+            <!-- HTTP Method Colors -->
+            <Color x:Key="HttpGetColor">#3FB950</Color>
+            <Color x:Key="HttpPostColor">#D29922</Color>
+            <Color x:Key="HttpPutColor">#1F6FEB</Color>
+            <Color x:Key="HttpPatchColor">#A371F7</Color>
+            <Color x:Key="HttpDeleteColor">#F85149</Color>
+            <Color x:Key="HttpHeadColor">#3FB950</Color>
+            <Color x:Key="HttpOptionsColor">#F778BA</Color>
         </ResourceDictionary>
         
         <!-- Light Theme Colors -->
@@ -72,6 +81,15 @@
             <Color x:Key="SuccessTextColor">#1A7F37</Color>
             <Color x:Key="ErrorTextColor">#CF222E</Color>
             <Color x:Key="WarningTextColor">#9A6700</Color>
+
+            <!-- HTTP Method Colors -->
+            <Color x:Key="HttpGetColor">#1A7F37</Color>
+            <Color x:Key="HttpPostColor">#9A6700</Color>
+            <Color x:Key="HttpPutColor">#0969DA</Color>
+            <Color x:Key="HttpPatchColor">#8250DF</Color>
+            <Color x:Key="HttpDeleteColor">#CF222E</Color>
+            <Color x:Key="HttpHeadColor">#1A7F37</Color>
+            <Color x:Key="HttpOptionsColor">#BF3989</Color>
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
     
@@ -102,5 +120,14 @@
     <SolidColorBrush x:Key="SuccessTextBrush" Color="{DynamicResource SuccessTextColor}"/>
     <SolidColorBrush x:Key="ErrorTextBrush" Color="{DynamicResource ErrorTextColor}"/>
     <SolidColorBrush x:Key="WarningTextBrush" Color="{DynamicResource WarningTextColor}"/>
-    
+
+    <!-- HTTP Method Brushes -->
+    <SolidColorBrush x:Key="HttpGetBrush" Color="{DynamicResource HttpGetColor}"/>
+    <SolidColorBrush x:Key="HttpPostBrush" Color="{DynamicResource HttpPostColor}"/>
+    <SolidColorBrush x:Key="HttpPutBrush" Color="{DynamicResource HttpPutColor}"/>
+    <SolidColorBrush x:Key="HttpPatchBrush" Color="{DynamicResource HttpPatchColor}"/>
+    <SolidColorBrush x:Key="HttpDeleteBrush" Color="{DynamicResource HttpDeleteColor}"/>
+    <SolidColorBrush x:Key="HttpHeadBrush" Color="{DynamicResource HttpHeadColor}"/>
+    <SolidColorBrush x:Key="HttpOptionsBrush" Color="{DynamicResource HttpOptionsColor}"/>
+
 </ResourceDictionary>
