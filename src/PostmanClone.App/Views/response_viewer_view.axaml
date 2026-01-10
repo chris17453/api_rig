@@ -35,26 +35,34 @@
                 <!-- Time -->
                 <Border Background="{DynamicResource InputBackgroundBrush}" 
                         CornerRadius="6" 
-                        Padding="10,6">
+                        Padding="12,6,16,6">
                     <StackPanel Orientation="Horizontal" Spacing="6">
                         <TextBlock Text="⏱" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
                         <TextBlock Text="{Binding ElapsedMs, StringFormat={}{0} ms}"
                                    Foreground="{DynamicResource ButtonTextBrush}"
                                    FontSize="12"
-                                   FontWeight="SemiBold"/>
+                                   FontWeight="SemiBold"
+                                   TextWrapping="NoWrap"
+                                   TextTrimming="None"
+                                   ClipToBounds="False"
+                                   MaxWidth="Infinity"/>
                     </StackPanel>
                 </Border>
                 
                 <!-- Size -->
                 <Border Background="{DynamicResource InputBackgroundBrush}" 
                         CornerRadius="6" 
-                        Padding="10,6">
+                        Padding="12,6,16,6">
                     <StackPanel Orientation="Horizontal" Spacing="6">
                         <TextBlock Text="📦" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
                         <TextBlock Text="{Binding SizeBytes, StringFormat={}{0} B}"
                                    Foreground="{DynamicResource ButtonTextBrush}"
                                    FontSize="12"
-                                   FontWeight="SemiBold"/>
+                                   FontWeight="SemiBold"
+                                   TextWrapping="NoWrap"
+                                   TextTrimming="None"
+                                   ClipToBounds="False"
+                                   MaxWidth="Infinity"/>
                     </StackPanel>
                 </Border>
             </StackPanel>
